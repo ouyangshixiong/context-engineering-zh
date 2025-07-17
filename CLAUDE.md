@@ -1,59 +1,59 @@
-### 🔄 Project Awareness & Context
-- **Always read `PLANNING.md`** at the start of a new conversation to understand the project's architecture, goals, style, and constraints.
-- **Check `TASK.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
-- **Use consistent naming conventions, file structure, and architecture patterns** as described in `PLANNING.md`.
-- **Use venv_linux** (the virtual environment) whenever executing Python commands, including for unit tests.
+### 🔄 项目认知与上下文
+- **始终在新对话开始时读取 `PLANNING.md`**，以理解项目的架构、目标、样式和约束。
+- **在开始新任务前检查 `TASK.md`**。如果任务未列出，请添加简短描述和当天日期。
+- **使用一致的命名约定、文件结构和架构模式**，如 `PLANNING.md` 中所述。
+- **执行Python命令时始终使用 venv_linux**（虚拟环境），包括单元测试。
 
-### 🧱 Code Structure & Modularity
-- **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
-- **Organize code into clearly separated modules**, grouped by feature or responsibility.
-  For agents this looks like:
-    - `agent.py` - Main agent definition and execution logic 
-    - `tools.py` - Tool functions used by the agent 
-    - `prompts.py` - System prompts
-- **Use clear, consistent imports** (prefer relative imports within packages).
-- **Use clear, consistent imports** (prefer relative imports within packages).
-- **Use python_dotenv and load_env()** for environment variables.
+### 🧱 代码结构与模块化
+- **绝不创建超过500行代码的文件。** 如果文件接近此限制，请通过拆分为模块或辅助文件进行重构。
+- **将代码组织成清晰分离的模块**，按功能或职责分组。
+  对于代理，结构如下：
+    - `agent.py` - 主要代理定义和执行逻辑
+    - `tools.py` - 代理使用的工具函数
+    - `prompts.py` - 系统提示词
+- **使用清晰、一致的导入**（优先使用包内的相对导入）。
+- **使用清晰、一致的导入**（优先使用包内的相对导入）。
+- **使用 python_dotenv 和 load_env()** 处理环境变量。
 
-### 🧪 Testing & Reliability
-- **Always create Pytest unit tests for new features** (functions, classes, routes, etc).
-- **After updating any logic**, check whether existing unit tests need to be updated. If so, do it.
-- **Tests should live in a `/tests` folder** mirroring the main app structure.
-  - Include at least:
-    - 1 test for expected use
-    - 1 edge case
-    - 1 failure case
+### 🧪 测试与可靠性
+- **始终为新功能创建 Pytest 单元测试**（函数、类、路由等）。
+- **更新任何逻辑后**，检查现有单元测试是否需要更新。如果需要，请进行更新。
+- **测试应位于 `/tests` 文件夹**中，镜像主应用结构。
+  - 至少包括：
+    - 1个预期使用情况的测试
+    - 1个边界情况测试
+    - 1个失败情况测试
 
-### ✅ Task Completion
-- **Mark completed tasks in `TASK.md`** immediately after finishing them.
-- Add new sub-tasks or TODOs discovered during development to `TASK.md` under a “Discovered During Work” section.
+### ✅ 任务完成
+- **完成任务后立即在 `TASK.md` 中标记**。
+- 将在开发过程中发现的新子任务或待办事项添加到 `TASK.md` 的"工作中发现"部分。
 
-### 📎 Style & Conventions
-- **Use Python** as the primary language.
-- **Follow PEP8**, use type hints, and format with `black`.
-- **Use `pydantic` for data validation**.
-- Use `FastAPI` for APIs and `SQLAlchemy` or `SQLModel` for ORM if applicable.
-- Write **docstrings for every function** using the Google style:
+### 📎 样式与约定
+- **使用 Python** 作为主要语言。
+- **遵循 PEP8**，使用类型提示，并用 black 格式化。
+- **使用 `pydantic` 进行数据验证**。
+- 如适用，使用 `FastAPI` 构建 API，使用 `SQLAlchemy` 或 `SQLModel` 作为 ORM。
+- **为每个函数编写文档字符串**，使用 Google 样式：
   ```python
   def example():
       """
-      Brief summary.
+      简要总结。
 
-      Args:
-          param1 (type): Description.
+      参数：
+          param1 (类型): 描述。
 
-      Returns:
-          type: Description.
+      返回：
+          类型: 描述。
       """
   ```
 
-### 📚 Documentation & Explainability
-- **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
-- **Comment non-obvious code** and ensure everything is understandable to a mid-level developer.
-- When writing complex logic, **add an inline `# Reason:` comment** explaining the why, not just the what.
+### 📚 文档与可解释性
+- **添加新功能、依赖变更或设置步骤修改时更新 `README.md`**。
+- **注释不明显的代码**，确保中级开发者能够理解一切。
+- 编写复杂逻辑时，**添加内联 `# 原因：` 注释**解释原因，而不仅仅是内容。
 
-### 🧠 AI Behavior Rules
-- **Never assume missing context. Ask questions if uncertain.**
-- **Never hallucinate libraries or functions** – only use known, verified Python packages.
-- **Always confirm file paths and module names** exist before referencing them in code or tests.
-- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASK.md`.
+### 🧠 AI行为规则
+- **绝不假设缺失的上下文。如有疑问，请提问。**
+- **绝不虚构库或函数** - 仅使用已知、经验证的 Python 包。
+- **始终在代码或测试中引用前确认文件路径和模块名称**存在。
+- **绝不删除或覆盖现有代码**，除非明确指示或作为来自 `TASK.md` 的任务的一部分。

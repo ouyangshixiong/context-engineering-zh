@@ -1,26 +1,26 @@
-## FEATURE:
+## 功能：
 
-- Pydantic AI agent that has another Pydantic AI agent as a tool.
-- Research Agent for the primary agent and then an email draft Agent for the subagent.
-- CLI to interact with the agent.
-- Gmail for the email draft agent, Brave API for the research agent.
+- 一个Pydantic AI代理，将另一个Pydantic AI代理作为工具。
+- 主代理的研究代理，然后是子代理的邮件草稿代理。
+- 用于与代理交互的CLI。
+- 邮件草稿代理使用Gmail，研究代理使用Brave API。
 
-## EXAMPLES:
+## 示例：
 
-In the `examples/` folder, there is a README for you to read to understand what the example is all about and also how to structure your own README when you create documentation for the above feature.
+在 `examples/` 文件夹中，有一个README供你阅读以理解示例的全部内容，以及当你为上述功能创建文档时如何构建你自己的README。
 
-- `examples/cli.py` - use this as a template to create the CLI
-- `examples/agent/` - read through all of the files here to understand best practices for creating Pydantic AI agents that support different providers and LLMs, handling agent dependencies, and adding tools to the agent.
+- `examples/cli.py` - 用作创建CLI的模板
+- `examples/agent/` - 阅读这里的所有文件以理解创建支持不同提供商和LLMs的Pydantic AI代理的最佳实践，处理代理依赖关系，以及向代理添加工具。
 
-Don't copy any of these examples directly, it is for a different project entirely. But use this as inspiration and for best practices.
+不要直接复制任何这些示例，它们是完全不同的项目。但将其作为灵感和最佳实践使用。
 
-## DOCUMENTATION:
+## 文档：
 
-Pydantic AI documentation: https://ai.pydantic.dev/
+Pydantic AI文档：https://ai.pydantic.dev/
 
-## OTHER CONSIDERATIONS:
+## 其他考虑：
 
-- Include a .env.example, README with instructions for setup including how to configure Gmail and Brave.
-- Include the project structure in the README.
-- Virtual environment has already been set up with the necessary dependencies.
-- Use python_dotenv and load_env() for environment variables
+- 包括.env.example，README包含设置说明，包括如何配置Gmail和Brave。
+- 在README中包含项目结构。
+- 虚拟环境已设置必要的依赖项。
+- 使用python_dotenv和load_env()处理环境变量
