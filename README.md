@@ -6,38 +6,51 @@
 
 ## 🚀 快速开始
 
+### Docker部署（推荐）
 ```bash
 # 1. 克隆此模板
 git clone https://github.com/coleam00/Context-Engineering-Intro.git
 cd Context-Engineering-Intro
 
-# 2. 设置项目规则（可选 - 提供模板）
-# 编辑 CLAUDE.md 添加项目特定的指导原则
+# 2. 快速启动Docker环境
+./docker-setup.sh
 
-# 3. 添加示例（强烈推荐）
-# 将相关代码示例放入 examples/ 文件夹中
+# 3. 访问机器学习框架
+# 打开浏览器访问: http://localhost:8888
 
-# 4. 创建初始功能需求
-# 编辑 INITIAL.md 填写功能需求
+# 4. 运行示例
+./docker-run-examples.sh
 
-# 5. 生成综合性PRP（产品需求提示词）
-# 在 Claude Code 中运行：
-/generate-prp INITIAL.md
+# 5. 启动Jupyter Lab
+./docker-start-jupyter.sh
+```
 
-# 6. 执行PRP实现功能
-# 在 Claude Code 中运行：
-/execute-prp PRPs/你的功能名称.md
+### Docker手动部署
+```bash
+# CPU版本
+docker-compose -f deploy/cpu/docker-compose.yml up -d
+
+# GPU版本（需要NVIDIA Docker运行时）
+docker-compose -f deploy/gpu/docker-compose.yml up -d
+
+# 管理容器
+./deploy/shared/docker-utils.sh status
+./deploy/shared/docker-utils.sh logs cpu
+./deploy/shared/docker-utils.sh shell cpu
 ```
 
 ## 📚 目录
 
 - [什么是上下文工程？](#什么是上下文工程)
 - [模板结构](#模板结构)
+- [Docker部署指南](#docker部署指南)
+- [系统要求](#系统要求)
 - [逐步指南](#逐步指南)
 - [编写高效的INITIAL.md文件](#编写高效的initialmd文件)
 - [PRP工作流程](#prp工作流程)
 - [有效使用示例](#有效使用示例)
 - [最佳实践](#最佳实践)
+- [故障排除](#故障排除)
 
 ## 什么是上下文工程？
 
@@ -71,18 +84,21 @@ context-engineering-intro/
 │   │   ├── generate-prp.md    # 生成综合性PRPs
 │   │   └── execute-prp.md     # 执行PRPs实现功能
 │   └── settings.local.json    # Claude Code权限配置
-├── PRPs/
-│   ├── templates/
-│   │   └── prp_base.md       # PRPs基础模板
-│   └── EXAMPLE_multi_agent_prp.md  # 完整PRP示例
-├── examples/                  # 你的代码示例（关键！）
+├── deploy/                    # Docker部署配置
+│   ├── cpu/                   # CPU版本配置
+│   ├── gpu/                   # GPU版本配置
+│   └── shared/                # 共享工具脚本
+├── PRPs/                      # 产品需求提示词
+├── examples/                  # 代码示例
 ├── CLAUDE.md                 # AI助手的全局规则
 ├── INITIAL.md               # 功能需求模板
 ├── INITIAL_EXAMPLE.md       # 功能需求示例
+├── docker-compose.yml       # Docker编排配置
+├── docker-setup.sh          # Docker快速设置
+├── docker-run-examples.sh   # Docker示例运行
+├── docker-start-jupyter.sh  # Docker Jupyter启动
 └── README.md                # 本文档
 ```
-
-这个模板不专注于RAG和工具与上下文工程，因为我还有更多内容即将推出。;)
 
 ## 逐步指南
 
@@ -290,7 +306,71 @@ examples/
 - 包括项目特定规则
 - 定义编码标准
 
+## Docker部署指南
+
+### 快速部署
+使用提供的自动化脚本：
+```bash
+./docker-setup.sh          # 交互式设置
+./docker-run-examples.sh   # 运行示例代码
+./docker-start-jupyter.sh  # 启动Jupyter Lab
+```
+
+### 手动部署
+```bash
+# CPU版本
+docker-compose -f deploy/cpu/docker-compose.yml up -d
+
+# GPU版本（需要NVIDIA Docker运行时）
+docker-compose -f deploy/gpu/docker-compose.yml up -d
+
+# 开发环境
+docker-compose --profile dev up -d
+```
+
+### 容器管理
+```bash
+# 查看所有容器管理命令
+./deploy/shared/docker-utils.sh help
+
+# 常用命令
+./deploy/shared/docker-utils.sh status    # 查看状态
+./deploy/shared/docker-utils.sh logs cpu  # 查看日志
+./deploy/shared/docker-utils.sh shell cpu # 进入容器
+./deploy/shared/docker-utils.sh stop      # 停止所有容器
+```
+
+## 系统要求
+
+### CPU版本
+- Docker Engine 20.10+
+- 内存: 最少2GB，推荐4GB+
+- 存储: 最少5GB可用空间
+
+### GPU版本
+- Docker Engine 20.10+
+- NVIDIA Docker运行时
+- NVIDIA GPU驱动 535+
+- CUDA 12.6兼容性
+- 内存: 最少8GB，推荐16GB+
+- 存储: 最少10GB可用空间
+
+## 故障排除
+
+### 常见问题
+1. **Docker未安装**: 请先安装Docker和Docker Compose
+2. **端口冲突**: 修改docker-compose.yml中的端口映射
+3. **权限问题**: 使用`sudo`或配置Docker用户组
+4. **GPU不可用**: 检查NVIDIA驱动和Docker运行时
+
+### 获取帮助
+```bash
+./deploy/shared/docker-utils.sh help
+```
+
 ## 资源
 
 - [Claude Code文档](https://docs.anthropic.com/en/docs/claude-code)
+- [Docker官方文档](https://docs.docker.com/)
+- [NVIDIA Docker运行时文档](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/)
 - [上下文工程最佳实践](https://www.philschmid.de/context-engineering)
