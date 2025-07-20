@@ -47,6 +47,32 @@
 - [ ] 超参数优化（Optuna集成）
 - [ ] 模型部署（TorchServe集成）
 
+### 🔍 第五阶段：人工调试阶段
+- [ ] **配置Conda环境**
+  - [ ] 创建CPU环境：`conda create -n dl-cpu python=3.9 pytorch torchvision torchaudio cpuonly -c pytorch`
+  - [ ] 创建GPU环境：`conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`
+  - [ ] 验证环境：`python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"`
+
+- [ ] **调试代码步骤**
+  - [ ] **步骤1：基础验证**
+    - [ ] 运行：`python -c "import src.models.pytorch.resnet_classifier; print('✓ PyTorch模型导入成功')"`
+    - [ ] 运行：`python -c "import src.datasets.datamodules.cifar10_datamodule; print('✓ 数据模块导入成功')"`
+  
+  - [ ] **步骤2：数据验证**
+    - [ ] 下载测试数据集：`python scripts/download.py --datasets cifar10 --data_dir ./test_data`
+    - [ ] 验证数据：`python -c "from src.datasets.datamodules.cifar10_datamodule import CIFAR10DataModule; dm = CIFAR10DataModule(data_dir='./test_data'); dm.prepare_data(); print('✓ 数据集准备完成')"`
+  
+  - [ ] **步骤3：模型调试**
+    - [ ] CPU调试：`python -c "from src.models.pytorch.resnet_classifier import ResNetClassifier; model = ResNetClassifier(num_classes=10); print('✓ CPU模型创建成功')"`
+    - [ ] GPU调试：`python -c "import torch; from src.models.pytorch.resnet_classifier import ResNetClassifier; model = ResNetClassifier(num_classes=10).cuda() if torch.cuda.is_available() else print('无GPU'); print('✓ GPU模型创建成功')"`
+  
+  - [ ] **步骤4：训练调试**
+    - [ ] 快速训练测试：`python scripts/train.py model=resnet18 data=cifar10 trainer.max_epochs=1 trainer.limit_train_batches=5 trainer.limit_val_batches=5`
+  
+  - [ ] **步骤5：调试工具**
+    - [ ] 安装调试工具：`pip install ipdb rich`
+    - [ ] 使用交互调试：`python -m ipdb scripts/train.py model=resnet18 data=cifar10 trainer.fast_dev_run=true`
+
 ### 🧪 第六阶段：测试套件
 - [ ] 创建 `tests/` 极简测试
   - [ ] `test_models.py` - 模型测试（5秒测试）
