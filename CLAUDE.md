@@ -14,15 +14,15 @@
 src/
 ├── models/                # 高层模型定义
 ├── datasets/              # 高层数据集管理
-├── configs/               # Hydra配置系统
+├── configs/               # OmegaConf配置系统
 └── utils/                 # 通用工具封装
 ```
 
 #### 文件大小规范
-- **模型文件**：每文件不超过100行（LightningModule/paddle.Model）
-- **数据模块**：每文件不超过50行（DataModule实现）
-- **配置文件**：每文件不超过20行（Hydra YAML配置）
-- **工具脚本**：每文件不超过50行（高层API封装）
+- **模型文件**：每文件不超过200行（LightningModule/paddle.Model）
+- **数据模块**：每文件不超过100行（DataModule实现）
+- **配置文件**：每文件不超过50行（OmegaConf YAML配置）
+- **工具脚本**：每文件不超过100行（高层API封装）
 
 - **使用清晰、一致的导入**（优先使用包内的相对导入）。
 - **使用 python_dotenv 和 load_env()** 处理环境变量。
@@ -31,18 +31,11 @@ src/
   - `deploy/gpu/` - GPU 专用 Docker 配置
   - `deploy/shared/` - 共享部署脚本和工具
 
-### 🧪 测试与可靠性
-- **始终为新功能创建 Pytest 单元测试**（函数、类、路由等）。
-- **更新任何逻辑后**，检查现有单元测试是否需要更新。如果需要，请进行更新。
-- **测试应位于 `/tests` 文件夹**中，镜像主应用结构。
-  - 至少包括：
-    - 1个预期使用情况的测试
-    - 1个边界情况测试
-    - 1个失败情况测试
-- **Docker 环境下的测试**：
-  - 使用 `docker compose exec` 在容器中运行测试
-  - 确保容器化环境与本地测试环境一致
-  - 测试容器健康检查和启动脚本
+### 🔍 机器学习项目验证
+- **模型验证采用实验验证方式**：通过训练曲线、验证指标、可视化结果进行验证
+- **关键指标监控**：训练损失、验证准确率、过拟合检测
+- **结果复现**：固定随机种子，记录实验配置和结果
+- **模型性能基准**：与公开baseline比较，确保合理性
 
 ### ✅ 任务完成
 - **完成任务后立即在 `TASK.md` 中标记**。
@@ -52,62 +45,48 @@ src/
   - 更新 Docker 镜像版本标签
   - 记录 GPU 驱动和 CUDA 版本要求
 
-### 📊 数据集获取与管理（基于高层API）
-- **支持内置数据集**，一行代码自动下载：
-  - **CIFAR-10/100**: torchvision/paddle.vision内置
-  - **ImageNet**: torchvision/paddle.vision内置
-  - **MNIST**: 手写数字识别，内置数据集
-  - **FashionMNIST**: 时尚物品识别，内置数据集
-  - **COCO**: 检测/分割数据集，自动预处理
+### 📊 数据集获取与管理（基于ModelScope/HuggingFace）
+- **优先使用ModelScope和HuggingFace数据集**：
+  - **ModelScope**: `modelscope.datasets` 一行代码获取中文数据集
+  - **HuggingFace**: `datasets` 库获取国际通用数据集
+  - **公开数据集列表**：
+    ```
+    计算机视觉：cifar10, cifar100, imagenet-1k, coco2017, voc2007
+    自然语言处理：glue, squad, wmt14, lcsts, cmnli
+    多模态：coco_captions, flickr30k, laion400m
+    ```
 
-- **高层数据集获取系统**：
+- **ModelScope|HuggingFace数据集获取系统**：
   ```python
-  # src/datasets/downloader.py
-  class DatasetDownloader:
-      """基于高层API的数据集下载器（极简实现）"""
+  # src/datasets/modelscope_loader.py
+  from modelscope.msdatasets import MsDataset
+  
+  class ModelScopeDataLoader:
+      """ModelScope数据集加载器（极简实现）"""
       
       @classmethod
-      def download(cls, name: str, root: str = "./data"):
-          """一行代码下载数据集"""
-          datasets = {
-              "cifar10": lambda: torchvision.datasets.CIFAR10(root, download=True),
-              "cifar100": lambda: torchvision.datasets.CIFAR100(root, download=True),
-              "imagenet": lambda: torchvision.datasets.ImageNet(root, split="train", download=True),
-              "mnist": lambda: torchvision.datasets.MNIST(root, download=True),
-          }
-          return datasets[name]()
+      def load_dataset(cls, name: str, split="train", cache_dir="./data"):
+          """一行代码加载ModelScope数据集"""
+          return MsDataset.load(name, split=split, cache_dir=cache_dir)
   
-  # src/datasets/datamodules/cifar10_datamodule.py
-  import pytorch_lightning as pl
-  from torchvision import datasets, transforms
+  # src/datasets/huggingface_loader.py  
+  from datasets import load_dataset
   
-  class CIFAR10DataModule(pl.LightningDataModule):
-      """CIFAR-10 Lightning DataModule（<30行）"""
-      def __init__(self, batch_size=32, data_dir="./data"):
-          super().__init__()
-          self.save_hyperparameters()
+  class HuggingFaceDataLoader:
+      """HuggingFace数据集加载器（极简实现）"""
       
-      def prepare_data(self):
-          datasets.CIFAR10(self.hparams.data_dir, train=True, download=True)
-          datasets.CIFAR10(self.hparams.data_dir, train=False, download=True)
-      
-      def setup(self, stage=None):
-          transform = transforms.ToTensor()
-          if stage == "fit":
-              self.train_dataset = datasets.CIFAR10(self.hparams.data_dir, train=True, transform=transform)
-              self.val_dataset = datasets.CIFAR10(self.hparams.data_dir, train=False, transform=transform)
-      
-      def train_dataloader(self):
-          from torch.utils.data import DataLoader
-          return DataLoader(self.train_dataset, batch_size=self.hparams.batch_size)
+      @classmethod
+      def load_dataset(cls, name: str, split="train", cache_dir="./data"):
+          """一行代码加载HuggingFace数据集"""
+          return load_dataset(name, split=split, cache_dir=cache_dir)
   ```
 
-- **零配置数据集管理**：
+- **数据集统一管理**：
   ```
-  datasets/                    # 自动管理目录
-  ├── cifar10/                 # 自动下载和缓存
-  ├── imagenet/                # 自动解压和组织
-  └── cache/                   # 自动清理缓存
+  data/                    # 数据集统一管理目录
+  ├── cache/               # ModelScope/HF缓存目录
+  ├── processed/           # 预处理后的数据集
+  └── splits/              # 训练/验证/测试划分
   ```
 
 ### 📎 样式与约定
@@ -137,7 +116,7 @@ src/
 
 #### 核心优势
 - **代码量减少80%**：从传统200+行减少至50行以内
-- **零配置错误**：Hydra配置系统自动验证
+- **零配置错误**：OmegaConf配置系统自动验证
 - **自动实验跟踪**：TensorBoard/WandB零配置集成
 - **一键部署**：Docker镜像<10行，一键启动训练
 
@@ -166,7 +145,7 @@ src/
   model.fit(train_dataset, val_dataset, epochs=10)
   ```
 
-### 📁 极简配置系统（Hydra驱动）
+### 📁 极简配置系统（OmegaConf驱动）
 - **极简YAML配置**：
   ```
   configs/
@@ -219,14 +198,19 @@ src/
 - **极简命令行接口**：
   ```python
   # scripts/train.py（<50行）
-  import hydra
+  import argparse
+  from omegaconf import OmegaConf
   from pytorch_lightning import Trainer
   
-  @hydra.main(config_path="../configs", config_name="config")
-  def main(cfg):
+  def main():
+      parser = argparse.ArgumentParser()
+      parser.add_argument('--config', type=str, default='configs/config.yaml')
+      args = parser.parse_args()
+      
       # 一行代码训练
-      model = hydra.utils.instantiate(cfg.model)
-      datamodule = hydra.utils.instantiate(cfg.data)
+      cfg = OmegaConf.load(args.config)
+      model = instantiate_from_config(cfg.model)
+      datamodule = instantiate_from_config(cfg.data)
       trainer = Trainer(**cfg.trainer)
       trainer.fit(model, datamodule)
   
@@ -238,7 +222,7 @@ src/
   - **极简Dockerfile**（<10行）：
     ```dockerfile
     FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-devel
-    RUN pip install pytorch-lightning hydra-core torchmetrics
+    RUN pip install pytorch-lightning omegaconf torchmetrics
     COPY . /workspace
     WORKDIR /workspace
     ```
@@ -258,11 +242,49 @@ src/
   - 记录环境变量和配置选项
   - 提供故障排除和常见问题解答
 
+### 📋 项目构建记录
+- **在目标项目根目录创建 `PROJECT_BUILD_LOG.md`**：
+  - 记录使用本模板构建、优化、修改目标项目的全过程
+  - 包含时间戳、操作步骤、遇到的问题及解决方案
+  - 记录数据集选择、模型架构决策、训练配置变更
+  - 保存关键实验结果和性能对比
+
+- **PROJECT_BUILD_LOG.md 模板结构**：
+  ```markdown
+  # 项目构建记录
+  
+  ## 项目信息
+  - 项目名称：
+  - 构建时间：
+  - 使用模板版本：
+  
+  ## 数据集选择
+  - 数据集名称：
+  - 数据来源：ModelScope/HuggingFace
+  - 数据规模：
+  
+  ## 模型架构
+  - 基础模型：
+  - 修改内容：
+  
+  ## 训练配置
+  - 关键超参数：
+  - 训练时长：
+  
+  ## 实验结果
+  - 最佳指标：
+  - 关键发现：
+  ```
+
 ### 🧠 AI行为规则
 - **绝不假设缺失的上下文。如有疑问，请提问。**
 - **绝不虚构库或函数** - 仅使用已知、经验证的 Python 包。
 - **始终在代码或测试中引用前确认文件路径和模块名称**存在。
 - **绝不删除或覆盖现有代码**，除非明确指示或作为来自 `TASK.md` 的任务的一部分。
+- **项目构建规则**：
+  - 每个新项目必须在根目录创建 `PROJECT_BUILD_LOG.md`
+  - 所有重要决策和变更必须记录在日志中
+  - 实验结果必须包含可复现的配置信息
 - **Docker 部署规则**：
   - 优先使用官方基础镜像
   - 固定版本号以确保可重现性

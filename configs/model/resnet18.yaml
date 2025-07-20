@@ -1,0 +1,7 @@
+# ResNet18模型配置
+model:
+  name: resnet18
+  num_classes: 10
+  learning_rate: 0.001
+  pretrained: true
+  weight_decay: 1e-4

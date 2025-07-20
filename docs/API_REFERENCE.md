@@ -55,7 +55,7 @@ datamodule = ImageNetDataModule(batch_size=64, data_dir="./data/imagenet")
 
 ## 配置系统 API
 
-### Hydra 配置驱动
+### OmegaConf 配置驱动
 ```python
 # 命令行使用
 python scripts/train.py model=resnet18 data=cifar10 trainer.max_epochs=5

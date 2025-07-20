@@ -13,14 +13,14 @@ python scripts/debug.py
 ```bash
 conda create -n dl-cpu python=3.9 pytorch torchvision torchaudio cpuonly -c pytorch
 conda activate dl-cpu
-pip install pytorch-lightning hydra-core
+pip install pytorch-lightning omegaconf
 ```
 
 #### GPU环境
 ```bash
 conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 conda activate dl-gpu
-pip install pytorch-lightning hydra-core
+pip install pytorch-lightning omegaconf
 ```
 
 ## 调试步骤
@@ -142,7 +142,7 @@ pip install ipdb rich tensorboard
 
 4. **检查配置文件**
    ```bash
-   python -c "import hydra; from omegaconf import OmegaConf; print(OmegaConf.load('configs/config.yaml'))"
+   python -c "from omegaconf import OmegaConf; print(OmegaConf.load('configs/config.yaml'))"
    ```
 
 ## 性能调试

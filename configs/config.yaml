@@ -1,0 +1,28 @@
+# OmegaConf主配置文件
+# 一行命令训练：python scripts/train.py --config configs/config.yaml
+
+model:
+  name: resnet18
+  num_classes: 10
+  learning_rate: 0.001
+  pretrained: true
+  
+data:
+  name: cifar10
+  data_dir: ./data
+  batch_size: 32
+  num_workers: 4
+  normalize: true
+  
+trainer:
+  max_epochs: 10
+  accelerator: auto
+  devices: auto
+  precision: 32
+  log_every_n_steps: 50
+  
+logging:
+  log_dir: ./logs
+  experiment_name: default_experiment
+  
+seed: 42

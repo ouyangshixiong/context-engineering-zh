@@ -1,0 +1,10 @@
+# CIFAR-10数据集配置
+data:
+  name: cifar10
+  data_dir: ./data/cifar10
+  batch_size: 32
+  num_workers: 4
+  normalize: true
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1

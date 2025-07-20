@@ -6,23 +6,34 @@
 
 ## 🚀 快速开始
 
-### Docker部署（推荐）
+### 一行命令训练（OmegaConf配置系统）
 ```bash
-# 1. 克隆此模板
+# 1. 克隆并进入项目
 git clone https://github.com/coleam00/Context-Engineering-Intro.git
 cd Context-Engineering-Intro
 
-# 2. 快速启动Docker环境
+# 2. 使用OmegaConf训练模型
+python scripts/train.py --config configs/config.yaml
+
+# 3. 覆盖配置参数
+python scripts/train.py --config configs/config.yaml --model resnet18 --epochs 5
+
+# 4. 评估模型
+python scripts/eval.py --config configs/config.yaml --checkpoint logs/best.ckpt
+```
+
+### Docker部署（推荐）
+```bash
+# 1. 快速启动Docker环境
 ./docker-setup.sh
 
-# 3. 访问机器学习框架
-# 打开浏览器访问: http://localhost:8888
-
-# 4. 运行示例
+# 2. 在容器中训练
 ./docker-run-examples.sh
 
-# 5. 启动Jupyter Lab
+# 3. 启动Jupyter Lab
 ./docker-start-jupyter.sh
+
+# 4. 访问: http://localhost:8888
 ```
 
 ### Docker手动部署
