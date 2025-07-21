@@ -169,7 +169,7 @@ sudo systemctl restart docker
 
 # 预期输出：
 # ✅ PyTorch版本: 2.6.0+cpu
-# ✅ PaddlePaddle版本: 2.6.1
+# ✅ PaddlePaddle版本: 3.1.0
 # 💻 使用CPU模式
 ```
 
@@ -180,7 +180,7 @@ sudo systemctl restart docker
 
 # 预期输出：
 # ✅ PyTorch版本: 2.6.0+cu126
-# ✅ PaddlePaddle版本: 2.6.1
+# ✅ PaddlePaddle版本: 3.1.0
 # ✅ CUDA可用，GPU数量: 1
 ```
 

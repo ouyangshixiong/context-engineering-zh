@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir \
     -f https://download.pytorch.org/whl/torch_stable.html
 
 RUN pip install --no-cache-dir \
-    paddlepaddle==2.6.1
+    paddlepaddle==3.1.0
 
 # 复制应用代码
 COPY . .

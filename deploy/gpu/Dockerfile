@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r cnn-visual-tutorial/requirements.txt || true
 
 # 安装PaddlePaddle GPU版本
 RUN pip install --no-cache-dir \
-    paddlepaddle-gpu==2.6.1 \
+    paddlepaddle-gpu==3.1.0 \
     -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 # 复制应用代码
