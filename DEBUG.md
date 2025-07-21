@@ -18,7 +18,7 @@ pip install pytorch-lightning omegaconf
 
 #### GPU环境
 ```bash
-conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=12.6 -c pytorch -c nvidia
 conda activate dl-gpu
 pip install pytorch-lightning omegaconf
 ```

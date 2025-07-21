@@ -50,7 +50,7 @@
 ### 🔍 第五阶段：人工调试阶段
 - [ ] **配置Conda环境**
   - [ ] 创建CPU环境：`conda create -n dl-cpu python=3.9 pytorch torchvision torchaudio cpuonly -c pytorch`
-  - [ ] 创建GPU环境：`conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia`
+  - [ ] 创建GPU环境：`conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=12.6 -c pytorch -c nvidia`
   - [ ] 验证环境：`python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"`
 
 - [ ] **调试代码步骤**

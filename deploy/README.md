@@ -61,7 +61,7 @@ deploy/
 - Docker Engine 20.10+
 - NVIDIA Docker运行时
 - NVIDIA GPU驱动 450.80.02+
-- CUDA 11.8兼容性
+- CUDA 12.6兼容性
 - 内存: 最少8GB，推荐16GB+
 - 存储: 最少10GB可用空间
 
@@ -168,8 +168,8 @@ sudo systemctl restart docker
 ./deploy/shared/docker-utils.sh test cpu
 
 # 预期输出：
-# ✅ PyTorch版本: 2.1.0+cpu
-# ✅ PaddlePaddle版本: 2.5.0
+# ✅ PyTorch版本: 2.6.0+cpu
+# ✅ PaddlePaddle版本: 2.6.1
 # 💻 使用CPU模式
 ```
 
@@ -179,8 +179,8 @@ sudo systemctl restart docker
 ./deploy/shared/docker-utils.sh test gpu
 
 # 预期输出：
-# ✅ PyTorch版本: 2.1.0+cu118
-# ✅ PaddlePaddle版本: 2.5.0.post118
+# ✅ PyTorch版本: 2.6.0+cu126
+# ✅ PaddlePaddle版本: 2.6.1
 # ✅ CUDA可用，GPU数量: 1
 ```
 
@@ -222,7 +222,7 @@ sudo chown -R $USER:$USER .
 nvidia-smi
 
 # 检查Docker运行时
-docker run --rm --gpus all nvidia/cuda:11.8-base-ubuntu20.04 nvidia-smi
+docker run --rm --gpus all nvidia/cuda:12.6-base-ubuntu20.04 nvidia-smi
 ```
 
 ### 4. 内存不足

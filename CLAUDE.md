@@ -4,10 +4,13 @@
 - **使用一致的命名约定、文件结构和架构模式**，如 `PLANNING.md` 中所述。
 - **使用 Docker 进行项目部署**，支持 CPU 和 GPU 两种配置模式。
 
-### 🧱 代码结构与模块化（基于高层API）
+### 🧱 代码结构与模块化
 - **采用PyTorch Lightning和PaddlePaddle高层API**，实现极简代码架构
-- **绝不创建超过100行代码的文件**，利用高层API消除样板代码
-- **遵循官方最佳实践**，确保代码质量和可维护性
+- **绝不创建超过200行代码的文件**，利用高层API减少代码行数
+- **遵循PyTorch、PaddlePaddle官方最佳实践**，确保代码质量和可维护性
+
+### 私有RAG知识库
+- **遵循RAG知识**，优先查询私有RAG知识库，并优先遵循RAG知识，包括名词解释、规定、业务员流程和代码示例
 
 #### 核心架构层次
 ```
@@ -56,31 +59,6 @@ src/
     多模态：coco_captions, flickr30k, laion400m
     ```
 
-- **ModelScope|HuggingFace数据集获取系统**：
-  ```python
-  # src/datasets/modelscope_loader.py
-  from modelscope.msdatasets import MsDataset
-  
-  class ModelScopeDataLoader:
-      """ModelScope数据集加载器（极简实现）"""
-      
-      @classmethod
-      def load_dataset(cls, name: str, split="train", cache_dir="./data"):
-          """一行代码加载ModelScope数据集"""
-          return MsDataset.load(name, split=split, cache_dir=cache_dir)
-  
-  # src/datasets/huggingface_loader.py  
-  from datasets import load_dataset
-  
-  class HuggingFaceDataLoader:
-      """HuggingFace数据集加载器（极简实现）"""
-      
-      @classmethod
-      def load_dataset(cls, name: str, split="train", cache_dir="./data"):
-          """一行代码加载HuggingFace数据集"""
-          return load_dataset(name, split=split, cache_dir=cache_dir)
-  ```
-
 - **数据集统一管理**：
   ```
   data/                    # 数据集统一管理目录
@@ -93,7 +71,7 @@ src/
 - **使用 Python** 作为主要语言。
 - **遵循 PEP8**，使用类型提示，并用 black 格式化。
 - **使用 `pydantic` 进行数据验证**。
-- 如适用，使用 `FastAPI` 构建 API，使用 `SQLAlchemy` 或 `SQLModel` 作为 ORM。
+- 如适用，使用 `FastAPI` 构建 API，使用 `Flask`构建网页版演示。
 - **为每个函数编写文档字符串**，使用 Google 样式：
   ```python
   def example():
@@ -111,11 +89,11 @@ src/
 ### 🏃 极简训练实现（基于高层API）
 - **零样板代码训练**：利用PyTorch Lightning和PaddlePaddle高层API，每模型<100行
 - **一行命令训练**：`python scripts/train.py model=resnet18 data=cifar10`
-- **零配置多GPU**：自动检测GPU数量和类型
-- **自动优化**：混合精度、梯度累积、分布式训练等由框架自动处理
+- **GPU零配置**：仅仅支持cpu和 Nvidia GPU，cuda版本12.6
+- **自动优化**：混合精度、梯度累积等由框架自动处理
 
 #### 核心优势
-- **代码量减少80%**：从传统200+行减少至50行以内
+- **代码量减少**：从传统500+行减少至200行以内
 - **零配置错误**：OmegaConf配置系统自动验证
 - **自动实验跟踪**：TensorBoard/WandB零配置集成
 - **一键部署**：Docker镜像<10行，一键启动训练
@@ -221,7 +199,7 @@ src/
 ### 🐳 极简Docker约定：
   - **极简Dockerfile**（<10行）：
     ```dockerfile
-    FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-devel
+    FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
     RUN pip install pytorch-lightning omegaconf torchmetrics
     COPY . /workspace
     WORKDIR /workspace
