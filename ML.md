@@ -1,10 +1,34 @@
-#### 架构层次
+#### 标准化项目结构模板
 ```
-src/
-├── models/                # high-level 模型定义
-├── datasets/              # high-level 数据集管理
-├── configs/               # OmegaConf配置系统
-└── utils/                 # 通用工具封装
+  project_name/
+  ├── src/
+  │   ├── init.py
+  │   ├── models/
+  │   │   ├── init.py
+  │   │   └── {model_name}.py
+  │   ├── datasets/
+  │   │   ├── init.py
+  │   │   └── {dataset_name}.py
+  │   ├── configs/
+  │   │   ├── config.yaml
+  │   │   ├── model/
+  │   │   ├── data/
+  │   │   └── trainer/
+  │   └── utils/
+  │       └── visualization.py
+  ├── scripts/
+  │   ├── init.py
+  │   ├── train.py
+  │   ├── eval.py
+  │   ├── download.py
+  │   └── test.py
+  ├── deploy/
+  │   ├── cpu/
+  │   ├── gpu/
+  │   └── docker-compose.yml
+  ├── requirements.txt
+  ├── README.md
+  └── PROJECT_BUILD_LOG.md
 ```
 
 ## python默认配置
