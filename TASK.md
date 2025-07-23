@@ -1,93 +1,150 @@
-# 深度学习训练项目任务清单（基于高层API）
+# 机器学习模板项目任务清单（模板重构版）
 
-## 📋 主任务列表
+## 🎯 项目定位转变
 
-### ✅ 第一阶段：高层API架构设计 (已完成)
-- [x] 采用PyTorch Lightning和Paddle高层API架构
-- [x] 设计极简代码结构（每文件<100行）
-- [x] 规划OmegaConf配置驱动系统
-- [x] 制定零样板代码标准
+### ✅ 已完成：模板项目重构
+- [x] 明确模板vs目标项目边界
+- [x] 删除所有目标项目代码（≤100行约束）
+- [x] 保留纯文档+模板架构
+- [x] 更新CREATE.md为think hard规划模式
+- [x] 重构README.md为模板使用指南
 
-### 🔄 第二阶段：核心组件实现 (进行中)
-- [ ] 创建 `src/models/` 高层模型模块
-  - [ ] `pytorch/` - PyTorch Lightning模型
-    - [ ] `resnet_classifier.py` - ResNet分类器
-    - [ ] `efficientnet_classifier.py` - EfficientNet分类器
-  - [ ] `paddle/` - Paddle高层API模型
-    - [ ] `resnet_classifier.py` - ResNet分类器
-    - [ ] `efficientnet_classifier.py` - EfficientNet分类器
-- [ ] 创建 `src/datasets/` 数据模块
-  - [ ] `datamodules/` - Lightning DataModules
-    - [ ] `cifar10_datamodule.py` - CIFAR-10数据模块
-    - [ ] `imagenet_datamodule.py` - ImageNet数据模块
-  - [ ] `downloader.py` - 高层数据集下载器
-- [ ] 创建 `configs/` 配置系统
-  - [ ] `config.yaml` - 主配置文件
-  - [ ] `model/` - 模型配置
-  - [ ] `data/` - 数据配置
-  - [ ] `trainer/` - 训练器配置
+## 📋 模板项目任务清单
 
-### 🔧 第三阶段：脚本开发
-- [ ] 创建 `scripts/train.py` - 单文件训练脚本（<50行）
-- [ ] 创建 `scripts/eval.py` - 模型评估脚本（<30行）
-- [ ] 创建 `scripts/download.py` - 数据集下载脚本（<20行）
+### ✅ 第一阶段：模板项目架构（已完成）
+- [x] **文档系统完整**
+  - [x] CREATE.md - 项目创建规划指南（think hard模式）
+  - [x] INITIAL.md - 目标项目规格模板
+  - [x] VENV_CONFIG.md - CPU调试环境指南
+  - [x] DEBUG_CODE.md - 代码验证检查清单
+  - [x] DOCKER_CONFIG.md - GPU生产环境配置
+  - [x] DEPLOY.md - 生产部署检查清单
+  - [x] PROJECT_BUILD_LOG.md - 构建记录模板
 
-### 📊 第四阶段：数据集支持
-- [ ] 实现内置数据集支持（一行代码）
-  - [ ] CIFAR-10/CIFAR-100 (torchvision/paddle.vision)
-  - [ ] ImageNet (torchvision/paddle.vision)
-  - [ ] MNIST/FashionMNIST (内置数据集)
-  - [ ] COCO (自动下载和预处理)
-- [ ] 创建数据集注册表（极简配置）
+- [x] **配置模板就绪**
+  - [x] configs/config.yaml - 主配置模板
+  - [x] configs/model/*.yaml - 模型配置模板
+  - [x] configs/data/*.yaml - 数据集配置模板
+  - [x] configs/trainer/*.yaml - 训练器配置模板
 
-### ⚙️ 第五阶段：高级功能
-- [ ] 实验跟踪集成（Lightning自动集成）
-  - [ ] TensorBoard日志
-  - [ ] WandB集成
-- [ ] 超参数优化（Optuna集成）
-- [ ] 模型部署（TorchServe集成）
+- [x] **部署模板就绪**
+  - [x] deploy/cpu/Dockerfile - CPU环境模板
+  - [x] deploy/gpu/Dockerfile - GPU环境模板
+  - [x] deploy/shared/ - 共享部署脚本
 
-### 🔍 第五阶段：人工调试阶段
-- [ ] **配置Conda环境**
-  - [ ] 创建CPU环境：`conda create -n dl-cpu python=3.9 pytorch torchvision torchaudio cpuonly -c pytorch`
-  - [ ] 创建GPU环境：`conda create -n dl-gpu python=3.9 pytorch torchvision torchaudio pytorch-cuda=12.6 -c pytorch -c nvidia`
-  - [ ] 验证环境：`python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"`
+### 🔄 第二阶段：目标项目生成器（待创建）
+- [ ] 创建 `tools/create.py` - 目标项目生成器（<50行）
+  - [ ] 读取INITIAL.md规格生成项目结构
+  - [ ] 基于CREATE.md规划创建配置文件
+  - [ ] 生成符合≤200行约束的目标项目
+  - [ ] 支持PyTorch/PaddlePaddle双栈生成
 
-- [ ] **调试代码步骤**
-  - [ ] **步骤1：基础验证**
-    - [ ] 运行：`python -c "import src.models.pytorch.resnet_classifier; print('✓ PyTorch模型导入成功')"`
-    - [ ] 运行：`python -c "import src.datasets.datamodules.cifar10_datamodule; print('✓ 数据模块导入成功')"`
-  
-  - [ ] **步骤2：数据验证**
-    - [ ] 下载测试数据集：`python scripts/download.py --datasets cifar10 --data_dir ./test_data`
-    - [ ] 验证数据：`python -c "from src.datasets.datamodules.cifar10_datamodule import CIFAR10DataModule; dm = CIFAR10DataModule(data_dir='./test_data'); dm.prepare_data(); print('✓ 数据集准备完成')"`
-  
-  - [ ] **步骤3：模型调试**
-    - [ ] CPU调试：`python -c "from src.models.pytorch.resnet_classifier import ResNetClassifier; model = ResNetClassifier(num_classes=10); print('✓ CPU模型创建成功')"`
-    - [ ] GPU调试：`python -c "import torch; from src.models.pytorch.resnet_classifier import ResNetClassifier; model = ResNetClassifier(num_classes=10).cuda() if torch.cuda.is_available() else print('无GPU'); print('✓ GPU模型创建成功')"`
-  
-  - [ ] **步骤4：训练调试**
-    - [ ] 快速训练测试：`python scripts/train.py model=resnet18 data=cifar10 trainer.max_epochs=1 trainer.limit_train_batches=5 trainer.limit_val_batches=5`
-  
-  - [ ] **步骤5：调试工具**
-    - [ ] 安装调试工具：`pip install ipdb rich`
-    - [ ] 使用交互调试：`python -m ipdb scripts/train.py model=resnet18 data=cifar10 trainer.fast_dev_run=true`
+### 📊 第三阶段：目标项目模板（待规划）
+- [ ] 目标项目目录结构模板
+  - [ ] `src/` - 高层API实现（≤200行）
+    - [ ] `models/` - 模型定义（Lightning/Paddle高层）
+    - [ ] `datasets/` - 数据处理（DataModules）
+    - [ ] `utils/` - 工具函数
+  - [ ] `scripts/` - 训练脚本（<50行/文件）
+    - [ ] `train.py` - 训练入口
+    - [ ] `eval.py` - 评估入口  
+    - [ ] `download.py` - 数据下载
+  - [ ] `configs/` - 配置管理（OmegaConf驱动）
+  - [ ] `tests/` - 测试套件
+  - [ ] `deploy/` - 部署配置
 
-### 🧪 第六阶段：测试套件
-- [ ] 创建 `tests/` 极简测试
-  - [ ] `test_models.py` - 模型测试（5秒测试）
-  - [ ] `test_datamodules.py` - 数据模块测试（10秒测试）
-  - [ ] `test_endtoend.py` - 端到端测试（1分钟训练）
+### 🔧 第四阶段：高层API实现模板
+- [ ] **PyTorch Lightning版本**
+  - [ ] 基于Lightning的高层模型基类（<150行）
+  - [ ] LightningDataModule数据抽象（<100行）
+  - [ ] 自动实验跟踪集成（WandB/TensorBoard）
 
-### 🐳 第七阶段：Docker集成
-- [ ] 创建 `docker/Dockerfile.gpu` - GPU镜像（<10行）
-- [ ] 创建 `docker/Dockerfile.cpu` - CPU镜像（<10行）
-- [ ] 创建 `docker-compose.yml` - 一键启动
+- [ ] **PaddlePaddle高层API版本**  
+  - [ ] 基于Paddle高层API的模型实现（<150行）
+  - [ ] Paddle数据加载器封装（<100行）
+  - [ ] 自动可视化集成
 
-### 📚 第八阶段：文档和示例
-- [ ] 更新README.md - 极简使用指南
-- [ ] 创建Jupyter示例 - 交互式教程
-- [ ] 创建API文档 - 自动生成
+### 🧪 第五阶段：数据集集成模板
+- [ ] **内置数据集支持**（一行配置）
+  - [ ] CIFAR-10/100（torchvision/paddle.vision）
+  - [ ] ImageNet（自动下载+缓存）
+  - [ ] COCO（目标检测）
+  - [ ] VOC（经典检测数据集）
+
+- [ ] **数据集注册系统**
+  - [ ] 统一数据集接口（高层API）
+  - [ ] 自动下载和预处理
+  - [ ] 配置驱动数据集选择
+
+### ⚙️ 第六阶段：配置驱动系统
+- [ ] **OmegaConf配置系统**
+  - [ ] 主配置模板（config.yaml）
+  - [ ] 模型配置模板（model/*.yaml）
+  - [ ] 数据配置模板（data/*.yaml）
+  - [ ] 训练器配置模板（trainer/*.yaml）
+
+- [ ] **动态配置验证**
+  - [ ] 配置文件自动验证
+  - [ ] 参数依赖关系检查
+  - [ ] 运行时配置更新
+
+### 📋 第七阶段：验证流程模板
+- [ ] **VENV验证模板**
+  - [ ] CPU-only环境配置
+  - [ ] 基础导入测试模板
+  - [ ] 1-epoch快速验证
+
+- [ ] **DEBUG验证模板**
+  - [ ] 系统化代码验证流程
+  - [ ] 数据集完整性检查
+  - [ ] 模型功能验证
+
+- [ ] **DOCKER验证模板**
+  - [ ] GPU环境自动配置
+  - [ ] 性能基准测试
+  - [ ] 多GPU训练验证
+
+## 🎯 高层API实现约束
+
+### 代码质量要求
+- [ ] **高层API标准**
+  - [ ] 每个文件≤200行（符合CLAUDE.md）
+  - [ ] 零样板代码（Lightning/Paddle自动处理）
+  - [ ] 100%类型注解（高层API自动推断）
+  - [ ] 配置驱动（YAML+OmegaConf）
+
+### 功能验证标准
+- [ ] **高层API验证**
+  - [ ] CIFAR-10训练：单命令完成（<1分钟）
+  - [ ] ImageNet训练：配置驱动（<5分钟设置）
+  - [ ] 多GPU训练：零代码修改
+  - [ ] 框架切换：单参数配置
+
+## 📅 模板开发时间规划
+
+| 阶段 | 预计时间 | 关键里程碑 | 高层API优势 |
+|------|----------|------------|-------------|
+| 模板文档 | 0.5天 | 文档系统完整 | 规划驱动 |
+| 创建工具 | 1天 | 目标项目生成器 | 代码生成 |
+| 目标模板 | 2天 | 高层API模板 | 代码减少80% |
+| 配置系统 | 0.5天 | OmegaConf集成 | 零配置错误 |
+| 验证模板 | 1天 | 完整验证流程 | 一键验证 |
+| 文档更新 | 0.5天 | 使用指南更新 | 自动生成 |
+| **总计** | **5.5天** | **完整模板** | **效率提升** |
+
+## 🔍 模板成功标准
+
+### 最终验证
+1. **模板项目**: 纯文档+模板（≤100行）
+2. **创建流程**: CREATE.md → INITIAL.md → 目标项目
+3. **验证流程**: VENV_CONFIG.md → DEBUG_CODE.md → DOCKER_CONFIG.md
+4. **高层API**: 目标项目≤200行代码
+
+### 用户体验验收
+- [ ] 新手：5分钟完成项目创建
+- [ ] 开发者：配置驱动开发
+- [ ] 研究员：一行代码切换框架
+- [ ] 部署者：一键Docker部署
 
 ## 🔍 极简实施步骤
 

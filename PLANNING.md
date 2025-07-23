@@ -1,55 +1,250 @@
-# 深度学习训练框架规划（高层API驱动）
+# 机器学习项目模板规划（Think Hard模式）
 
-## 🎯 训练目标体系
+## 🎯 项目定位与边界
 
-### 核心训练能力
-- **一行命令训练**：`python train.py model=resnet18 data=cifar10`
-- **零配置复现**：YAML配置文件驱动所有实验参数
-- **自动性能优化**：框架自动处理混合精度、多GPU、分布式训练
-- **极简代码架构**：每组件<100行代码，高层API封装
+### 模板vs目标项目区分
+- **模板项目**（当前）：纯文档+模板系统（≤100行代码约束）
+- **目标项目**（生成产物）：高层API实现（≤200行代码约束）
 
-### 训练效率指标
-| 维度 | 传统方案 | 高层API方案 | 提升倍数 |
-|------|----------|-------------|----------|
-| 代码量 | 500+行 | 50-100行 | 5-10x |
-| 配置时间 | 数小时 | 数分钟 | 60x |
-| 多GPU适配 | 数天 | 零修改 | ∞ |
-| 实验复现 | 手动记录 | 配置驱动 | 100% |
-
-## 🔄 四阶段训练规划
-
+### 核心规划原则
 ```mermaid
 graph TD
-    A[阶段1: 核心模型架构] --> B[阶段2: 数据管道系统]
-    B --> C[阶段3: 配置驱动训练]
-    C --> D[阶段4: 代码调试人工验证]
-    D --> E[阶段5: 部署与优化]
+    A[模板项目] --> B[CREATE.md规划]
+    B --> C[INITIAL.md规格]
+    C --> D[目标项目生成]
+    D --> E[VENV验证]
+    E --> F[DEBUG验证]
+    F --> G[DOCKER部署]
     
-    A --> A1[模型接口标准]
-    A --> A2[PyTorch封装]
-    A --> A3[PaddlePaddle封装]
-    A --> A4[模型注册机制]
-    
-    B --> B1[数据集自动下载]
-    B --> B2[DataModule封装]
-    B --> B3[数据增强配置]
-    B --> B4[多数据集混合]
-    
-    C --> C1[OmegaConf配置]
-    C --> C2[参数版本管理]
-    C --> C3[超参数搜索]
-    C --> C4[监控配置]
-    
-    D --> D1[环境兼容性验证]
-    D --> D2[API一致性检查]
-    D --> D3[边界条件测试]
-    D --> D4[错误传播验证]
-    D --> D5[性能基准测试]
-    
-    E --> E1[Docker容器化]
-    E --> E2[多环境配置]
-    E --> E3[模型导出优化]
-    E --> E4[CI/CD管道]
+    style A fill:#FFD700,stroke:#333
+    style D fill:#90EE90,stroke:#333
+    style G fill:#87CEEB,stroke:#333
+```
+
+## 🧠 Think Hard规划框架
+
+### 阶段1：需求澄清（5分钟深度思考）
+**核心问题矩阵**：
+| 维度 | 关键问题 | 决策影响 |
+|------|----------|----------|
+| **业务价值** | 这个项目解决什么真实问题？ | 决定项目必要性和优先级 |
+| **技术可行性** | 当前技术栈能否支持需求？ | 评估实现风险和替代方案 |
+| **资源约束** | GPU/内存/时间限制是什么？ | 确定模型规模和训练策略 |
+| **维护成本** | 长期维护的复杂度如何？ | 影响技术选型和架构设计 |
+
+**决策记录模板**：
+```yaml
+需求澄清记录:
+  问题定义: "需要解决的具体机器学习任务"
+  场景分析: "实时/离线/批处理应用场景"
+  精度要求: "mAP@0.5 ≥ 0.85 或准确率 ≥ 95%"
+  速度要求: "推理延迟 ≤ 200ms/张"
+  资源限制: "8GB GPU内存，4核CPU"
+```
+
+### 阶段2：技术选型决策矩阵（10分钟评估）
+
+**框架选择评估**：
+| 评估维度 | PyTorch | PaddlePaddle | 权重 | 评分 |
+|----------|---------|--------------|------|------|
+| **团队熟悉度** | ★★★★☆ | ★★★☆☆ | 0.30 | 4.2 vs 3.6 |
+| **部署便利性** | ★★★☆☆ | ★★★★☆ | 0.25 | 3.5 vs 4.2 |
+| **性能优化** | ★★★★☆ | ★★★★☆ | 0.25 | 4.0 vs 4.0 |
+| **社区支持** | ★★★★★ | ★★★☆☆ | 0.20 | 5.0 vs 3.5 |
+
+**选择决策树**：
+```
+如果 团队PyTorch经验丰富 → 选择PyTorch
+如果 需要中文文档支持 → 选择PaddlePaddle
+如果 需要快速部署 → 选择PaddlePaddle
+如果 需要丰富生态 → 选择PyTorch
+```
+
+### 阶段3：高层API架构设计（15分钟深度设计）
+
+**零样板架构原则**：
+- **模型层**：LightningModule/Paddle高层API封装（≤150行）
+- **数据层**：DataModule/DataLoader高层抽象（≤100行）
+- **配置层**：OmegaConf驱动动态配置（YAML定义）
+- **训练层**：Trainer自动处理训练循环（零手动代码）
+
+**目录结构规格**：
+```
+目标项目/                  # 高层API实现（≤200行）
+├── src/
+│   ├── models/           # 模型定义（Lightning/Paddle）
+│   ├── datasets/         # 数据管道（DataModules）
+│   └── utils/            # 工具函数
+├── scripts/              # 训练脚本（<50行/文件）
+├── configs/              # 配置管理（OmegaConf驱动）
+├── tests/                # 验证测试
+└── deploy/               # 部署配置
+```
+
+## 🎯 配置驱动规划
+
+### 主配置模板（单文件驱动）
+```yaml
+# config.yaml - 一行配置完成训练设置
+project:
+  name: "yolov10_medical"
+  type: "detection"
+
+model:
+  name: "yolov10n"
+  num_classes: 80
+  pretrained: true
+
+data:
+  name: "coco2017"
+  batch_size: 16
+  num_workers: 4
+  transforms: "default"
+
+trainer:
+  max_epochs: 300
+  accelerator: "gpu"
+  devices: "auto"
+  precision: 16
+```
+
+### 分层配置继承
+```yaml
+# 基础配置 → 模型配置 → 数据配置 → 环境配置
+configs/
+├── base.yaml           # 通用基础配置
+├── model/
+│   ├── yolov10n.yaml   # 模型特定配置
+│   └── resnet50.yaml
+├── data/
+│   ├── coco2017.yaml   # 数据集配置
+│   └── cifar10.yaml
+└── trainer/
+    ├── gpu.yaml        # 训练器配置
+    └── cpu.yaml
+```
+
+## 🔄 两阶段验证规划
+
+### VENV阶段：CPU环境验证（代码正确性优先）
+**验证目标**：确保代码在CPU环境下的基本正确性
+```bash
+# 1. 配置CPU环境
+conda create -n debug-cpu python=3.10 pytorch-cpu
+
+# 2. 基础导入验证
+python -c "import src.models; print('✓ 模型导入成功')"
+
+# 3. 数据集验证
+python scripts/download.py --dataset cifar10 --test-mode
+
+# 4. 1-epoch快速验证
+python scripts/train.py model=resnet18 data=cifar10 trainer.fast_dev_run=true
+```
+
+### DOCKER阶段：GPU性能验证（生产就绪）
+**验证目标**：确保GPU环境下的性能和稳定性
+```bash
+# 1. 构建GPU镜像
+docker build -t ml-project -f deploy/gpu/Dockerfile .
+
+# 2. 性能基准测试
+docker run --gpus all ml-project python scripts/train.py \
+  model=resnet50 data=imagenet trainer.max_epochs=1
+
+# 3. 多GPU验证
+docker run --gpus all ml-project python scripts/train.py \
+  trainer.devices=4 trainer.strategy=ddp
+```
+
+## 🎯 高层API设计原则
+
+### 零样板实现
+- **模型定义**：LightningModule封装（≤150行）
+- **数据处理**：DataModule抽象（≤100行）
+- **训练流程**：Trainer自动处理（零手动代码）
+- **配置管理**：OmegaConf驱动（YAML定义）
+
+### 自动优化特性
+- **混合精度**：自动FP16训练
+- **多GPU训练**：DDP策略零配置
+- **梯度累积**：突破内存限制
+- **实验跟踪**：WandB/TensorBoard集成
+
+## 📊 项目类型决策树
+
+### 项目类型选择指南
+```
+项目类型选择：
+├── 图像分类？
+│   ├── 数据集：ImageNet/CIFAR-10
+│   ├── 模型：ResNet/EfficientNet
+│   └── 时间：1-6小时
+├── 目标检测？
+│   ├── 数据集：COCO/VOC
+│   ├── 模型：YOLOv10/Faster R-CNN
+│   └── 时间：6-24小时
+├── 语义分割？
+│   ├── 数据集：VOC/Cityscapes
+│   ├── 模型：DeepLab/U-Net
+│   └── 时间：12-48小时
+└── 自定义任务？
+    ├── 配置驱动实现
+    └── 高层API扩展
+```
+
+### 硬件需求评估
+| 项目类型 | 最小配置 | 推荐配置 | 训练时间 |
+|----------|----------|----------|----------|
+| CIFAR-10分类 | 4GB GPU | 8GB GPU | 10-30分钟 |
+| ImageNet分类 | 8GB GPU | 24GB GPU | 6-24小时 |
+| COCO检测 | 12GB GPU | 40GB GPU | 12-48小时 |
+
+## 🔍 Think Hard决策验证
+
+### 风险矩阵评估
+| 风险项 | 概率 | 影响 | 缓解措施 |
+|--------|------|------|----------|
+| **框架兼容性** | 低 | 中 | 统一接口设计 |
+| **性能退化** | 低 | 高 | 早期基准测试 |
+| **学习曲线** | 低 | 中 | 完善文档示例 |
+| **配置复杂度** | 低 | 低 | 默认配置模板 |
+
+### 成功验收标准
+- [ ] **功能验证**：一行命令完成CIFAR-10训练（<5分钟）
+- [ ] **性能验证**：高层API性能与传统方案等效
+- [ ] **配置验证**：YAML配置100%复现实验
+- [ ] **部署验证**：Docker一键部署成功
+- [ ] **用户体验**：新手5分钟内完成首次训练
+
+## 📋 规划实施检查清单
+
+### 模板项目验收（已完成）
+- [x] 文档系统完整（CREATE.md到DEPLOY.md）
+- [x] 配置模板就绪（configs/目录）
+- [x] 部署模板就绪（deploy/目录）
+- [x] 模板代码≤100行约束
+
+### 目标项目生成验收
+- [ ] 生成器工具创建（tools/create.py）
+- [ ] 高层API模板实现（≤200行）
+- [ ] 两阶段验证流程完整
+- [ ] 配置驱动架构验证
+
+## 🎯 极简实施路径
+
+### 2周完成计划
+| 周次 | 关键任务 | 交付物 | 验证标准 |
+|------|----------|--------|----------|
+| **Week 1** | 模板完善+生成器 | 目标项目生成器 | CREATE.md → 目标项目 |
+| **Week 2** | 高层API模板 | 200行完整项目 | VENV→DEBUG→DOCKER验证 |
+
+### 一键验证流程
+```bash
+# 完整的模板→目标项目→验证流程
+python tools/create.py --name my_project --type detection
+cd my_project
+# 自动进入VENV→DEBUG→DOCKER验证
 ```
 
 ### 阶段1：核心模型架构

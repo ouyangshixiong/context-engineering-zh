@@ -1,0 +1,72 @@
+
+## ⚙️ 修复 ModelScope 与 Hugging Face `datasets` 不兼容问题
+
+### **一、核心背景**
+
+ModelScope 在处理 `MsDataset`、pipeline 导入等功能时，依赖 Hugging Face `datasets` 中多个内部 API（如 `_prepare_path_and_storage_options`、`get_metadata_patterns`、`HubDatasetModuleFactoryWithoutScript` 等）。随着 `datasets` 版本更新，这些私有 API 经常被移除或重命名，导致导入失败 ([GitCode 博客][1])。
+
+---
+
+### **二、官方推荐解决方案**
+
+应使用包含兼容 `datasets` 的 ModelScope 版本，避免手动版本冲突：
+
+```bash
+pip uninstall modelscope datasets -y
+pip install "modelscope[datasets]" -U
+```
+
+该方式将自动安装适配的 `datasets`（例如 `3.0.x`），并确保 API 完整 ([GitCode 博客][1])。
+
+---
+
+### **三、兼容版本范围建议**
+
+如果手动控制依赖，确保版本满足：
+
+* `modelscope >= 1.14.0`
+* `datasets` 版本应在 **3.0.0 – 3.2.0** 范围内（例如 `datasets==3.2.0`） ([GitCode 博客][2])。
+
+---
+
+### **四、验证步骤**
+
+1. 安装或升级后，在终端运行：
+
+   ```bash
+   python -c "from datasets.load import HubDatasetModuleFactoryWithoutScript; print('OK')"
+   ```
+
+   或：
+
+   ```bash
+   python -c "from datasets.data_files import get_metadata_patterns; print('OK')"
+   ```
+
+2. 若无错误，即可继续执行：
+
+   ```bash
+   python scripts/download.py --datasets voc2007
+   ```
+
+---
+
+### **五、最佳实践建议**
+
+* 使用虚拟环境隔离依赖（如 `conda` 或 `venv`）。
+* 推荐优先通过 `pip install "modelscope[datasets]"` 安装一套完整兼容环境。
+* 若手动维护 `requirements.txt`，请指定版本：
+
+```txt
+modelscope>=1.14.0
+datasets>=3.0.0,<=3.2.0
+```
+
+* 遇到导入错误时，优先检查 `datasets` 版本是否在上述范围内。
+
+---
+
+这样处理可以有效规避 ModelScope 与 `datasets` 的版本冲突，将问题控制在最小范围内。如果之后有新问题，可继续补充在此条目里。
+
+[1]: https://blog.gitcode.com/8b7801022389b22cbbf32dedb43c5c51.html?utm_source=chatgpt.com "解决ModelScope库中导入pipeline时出现的datasets模块兼容 ..."
+[2]: https://blog.gitcode.com/281aba2207afc854a2cec00df0ca5fe6.html?utm_source=chatgpt.com "ModelScope与HuggingFace Datasets版本兼容性问题解析"
