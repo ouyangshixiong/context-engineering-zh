@@ -2,13 +2,65 @@
 
 > **项目规格的终极文字模板** - 将15分钟Think Hard的决策结果转化为可执行的技术规格，成为项目开发的唯一真实来源。
 
+## 📊 规范（Spec）继承框架
+
+### 🎯 从CREATE.md的规范（Spec）继承
+
+本规格文档完整继承CREATE.md的think hard规划结果，建立从需求分析到技术规格的映射关系：
+
+#### 📋 规范（Spec）映射表
+
+| CREATE.md决策点 | INITIAL.md规格继承 | 验证标准 |
+|-----------------|-------------------|----------|
+| **业务价值澄清** | [需求规格定义](#1-需求规格定义) | 项目目标可量化 |
+| **技术选型决策** | [技术栈规格](#2-技术栈规格) | 框架选择有依据 |
+| **资源评估结果** | [性能基准](#5-训练规格) | 计算需求可承受 |
+| **时间规划框架** | [训练规格](#5-训练规格) | 里程碑可达成 |
+
+#### 🔄 规范（Spec）驱动流程
+
+```mermaid
+graph TD
+    CREATE[CREATE.md<br/>15分钟思考] --> INITIAL[INITIAL.md<br/>技术规格]
+    INITIAL --> VENV[VENV_CONFIG.md<br/>CPU验证]
+    INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
+    INITIAL --> DOCKER[DOCKER_CONFIG.md<br/>GPU部署]
+    INITIAL --> DEPLOY[DEPLOY.md<br/>生产上线]
+    
+    style CREATE fill:#FFD700,stroke:#333
+    style INITIAL fill:#90EE90,stroke:#333
+    style DOCKER fill:#87CEEB,stroke:#333
+    style DEPLOY fill:#FF6B6B,stroke:#333
+```
+
+#### 📊 规格验证矩阵
+
+| 规格类别 | 来源文档 | 继承字段 | 验证方法 |
+|----------|----------|----------|----------|
+| **需求规格** | CREATE.md:业务价值 | 项目类型、目标指标 | 与CREATE.md决策一致性 |
+| **技术规格** | CREATE.md:技术选型 | 框架版本、依赖版本 | 与ML.md版本矩阵匹配 |
+| **架构规格** | CREATE.md:架构设计 | 目录结构、代码约束 | 符合CLAUDE.md约束 |
+| **验证规格** | CREATE.md:时间规划 | 训练参数、性能基准 | 与DEBUG_CODE.md验证清单对应 |
+
+### 🎯 AI智能体使用指南
+
+**对于编码智能体**：
+1. **读取顺序**：先CREATE.md做需求分析 → 再INITIAL.md获取技术规格
+2. **继承验证**：确保INITIAL.md的每个规格都能在CREATE.md找到决策依据
+3. **规格追踪**：建立CREATE.md决策 → INITIAL.md规格 → 实现代码的完整追踪链
+
+**对于用户**：
+- 每个技术决策都有CREATE.md的思考依据
+- 每个规格参数都有明确的业务价值支撑
+- 整个开发流程遵循CREATE.md→INITIAL.md→实现的规范（Spec）路径
+
 ## 📊 项目概况
 
 ### 基础信息
 - **文档用途**：接收CREATE.md的think hard规划结果
 - **目标项目**：由模板项目创建的最终产物
 - **创建方式**：VENV→DEBUG→DOCKER两阶段验证
-- **规范遵循**：CLAUDE.md定义的20行核心约束
+- **规范（Spec）遵循**：CLAUDE.md定义的20行核心约束
 
 ## 🎯 项目规格模板
 

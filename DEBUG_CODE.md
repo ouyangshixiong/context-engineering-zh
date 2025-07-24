@@ -525,16 +525,228 @@ ValidationError: Invalid config
 | COCO128 | 16 | 1 | ~5分钟 | ~3GB |
 | ImageNet | 32 | 1 | ~45分钟 | ~2GB |
 
+## 🎯 规范（Spec）验证与规格追踪
+
+### 📋 从INITIAL.md获取验证标准
+
+#### **规格验证矩阵**
+
+| INITIAL.md规格字段 | 验证方法 | 检查脚本 | 通过标准 |
+|-------------------|----------|----------|----------|
+| **project_spec.name** | 项目名称检查 | `echo $PROJECT_NAME` | 与INITIAL.md一致 |
+| **algorithm_spec.model_architecture** | 模型创建测试 | `python -c "from src.models..."` | 模型成功实例化 |
+| **performance_targets.training.epoch_time** | 训练时间验证 | `time python scripts/train.py...` | 符合时间预期 |
+| **performance_targets.inference.latency** | 推理速度测试 | `python scripts/benchmark.py` | 达到延迟要求 |
+
+#### **规格继承验证**
+
+```bash
+# 验证CREATE.md决策在INITIAL.md中的继承
+python -c "
+from pathlib import Path
+import yaml
+
+# 检查规格文档存在
+spec_files = [
+    '../CREATE.md',
+    '../INITIAL.md',
+    '../ML.md',
+    '../TASK.md'
+]
+
+for file in spec_files:
+    if Path(file).exists():
+        print(f'✅ {file} 存在')
+    else:
+        print(f'❌ {file} 缺失')
+
+# 验证规格一致性
+print('\n=== 规格一致性检查 ===')
+try:
+    # 读取INITIAL.md中的规格
+    with open('../INITIAL.md', 'r') as f:
+        initial_content = f.read()
+    
+    # 检查关键规格字段
+    required_specs = [
+        'project_spec.name',
+        'algorithm_spec.model_architecture', 
+        'training_spec.epochs',
+        'performance_targets.inference.latency'
+    ]
+    
+    for spec in required_specs:
+        if spec in initial_content:
+            print(f'✅ {spec} 已定义')
+        else:
+            print(f'❌ {spec} 缺失')
+            
+except Exception as e:
+    print(f'❌ 规格读取失败: {e}')
+"
+```
+
+### 🔍 规格驱动验证流程
+
+#### **验证CREATE.md技术选型**
+
+```bash
+# 1. 验证框架选择（CREATE.md → ML.md → 实现）
+python -c "
+import torch
+import paddle
+
+# 检查PyTorch版本（CREATE.md决策 → ML.md版本矩阵）
+expected_pytorch = '2.6.0'
+actual_pytorch = torch.__version__
+if expected_pytorch in actual_pytorch:
+    print(f'✅ PyTorch版本符合CREATE.md决策: {actual_pytorch}')
+else:
+    print(f'❌ PyTorch版本不符: 期望{expected_pytorch}, 实际{actual_pytorch}')
+
+# 检查PaddlePaddle版本
+expected_paddle = '2.6.0'
+actual_paddle = paddle.__version__
+if expected_paddle in actual_paddle:
+    print(f'✅ PaddlePaddle版本符合CREATE.md决策: {actual_paddle}')
+else:
+    print(f'❌ PaddlePaddle版本不符: 期望{expected_paddle}, 实际{actual_paddle}')
+"
+```
+
+#### **验证INITIAL.md性能目标**
+
+```bash
+# 2. 验证性能基准（INITIAL.md → 实际运行）
+python -c "
+import time
+import torch
+from src.models.pytorch.yolov10 import YOLOv10
+
+# 测试推理延迟
+model = YOLOv10(num_classes=80)
+model.eval()
+dummy_input = torch.randn(1, 3, 640, 640)
+
+# 预热
+for _ in range(5):
+    _ = model(dummy_input)
+
+# 正式测试
+start_time = time.time()
+with torch.no_grad():
+    for _ in range(100):
+        _ = model(dummy_input)
+end_time = time.time()
+
+avg_latency = (end_time - start_time) / 100 * 1000  # ms
+print(f'推理延迟: {avg_latency:.2f}ms')
+
+# 与INITIAL.md规格对比
+expected_latency = 200  # ms
+if avg_latency <= expected_latency:
+    print(f'✅ 延迟符合INITIAL.md规格: ≤{expected_latency}ms')
+else:
+    print(f'❌ 延迟超标: 期望≤{expected_latency}ms, 实际{avg_latency:.2f}ms')
+"
+```
+
+#### **验证部署规格合规性**
+
+```bash
+# 3. 验证部署规格（INITIAL.md → DOCKER_CONFIG.md）
+python -c "
+import subprocess
+import sys
+
+# 检查Docker环境（INITIAL.md部署规格）
+try:
+    result = subprocess.run(['docker', '--version'], 
+                          capture_output=True, text=True)
+    if result.returncode == 0:
+        print(f'✅ Docker环境符合INITIAL.md规格: {result.stdout.strip()}')
+    else:
+        print('❌ Docker环境检查失败')
+except:
+    print('❌ Docker未安装')
+
+# 检查GPU可用性（INITIAL.md硬件要求）
+import torch
+gpu_available = torch.cuda.is_available()
+if gpu_available:
+    gpu_count = torch.cuda.device_count()
+    gpu_name = torch.cuda.get_device_name(0)
+    print(f'✅ GPU符合INITIAL.md规格: {gpu_count}个GPU ({gpu_name})')
+else:
+    print('⚠️ 当前为CPU环境，需验证GPU环境配置')
+"
+```
+
+### 📊 规格追踪报告
+
+#### **生成规格验证报告**
+
+```bash
+# 创建规格验证报告
+python -c "
+import datetime
+import json
+
+report = {
+    'timestamp': str(datetime.datetime.now()),
+    'spec_source': 'INITIAL.md',
+    'validation_items': {
+        'project_name': '待验证',
+        'framework_version': '待验证',
+        'model_architecture': '待验证',
+        'performance_target': '待验证',
+        'deployment_spec': '待验证'
+    },
+    'status': 'spec_verification_in_progress'
+}
+
+print('=== 规格验证报告 ===')
+print(json.dumps(report, indent=2, ensure_ascii=False))
+
+# 保存报告
+with open('outputs/spec_validation_report.json', 'w') as f:
+    json.dump(report, f, indent=2, ensure_ascii=False)
+print('✅ 规格验证报告已生成')
+"
+```
+
+### 🎯 规格合规检查清单
+
+#### **CREATE.md决策验证**
+- [ ] 项目名称与CREATE.md规划一致
+- [ ] 技术栈选择符合CREATE.md决策
+- [ ] 资源需求评估与CREATE.md匹配
+- [ ] 时间规划框架已正确实施
+
+#### **INITIAL.md规格验证**
+- [ ] 算法功能规格已实现
+- [ ] 性能目标已达到
+- [ ] 目录结构符合规格
+- [ ] 训练规格参数正确配置
+- [ ] 部署规格已验证
+
+#### **规格追踪链建立**
+- [ ] CREATE.md → INITIAL.md → 实现代码 有完整追踪
+- [ ] 每个验证步骤都有规格依据
+- [ ] 所有偏差都有记录和解释
+- [ ] 规格验证报告已生成
+
 ## 🎯 下一步
 
-完成代码验证后：
-1. 查看 [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) 配置GPU环境
-2. 运行 [DEPLOY.md](./DEPLOY.md) 进行生产部署
-3. 更新 [PROJECT_BUILD_LOG.md](./PROJECT_BUILD_LOG.md)
+完成代码验证和规范验证后：
+1. **规格合规确认**：确保所有验证结果符合INITIAL.md规格
+2. **查看 [DOCKER_CONFIG.md](./DOCKER_CONFIG.md)**：配置GPU环境，验证部署规格
+3. **运行 [DEPLOY.md](./DEPLOY.md)**：进行生产部署，验证最终规格合规性
+4. **更新 [PROJECT_BUILD_LOG.md](./PROJECT_BUILD_LOG.md)**：记录规格验证结果
 
-**规划流程**：
-- 项目创建前：完成CREATE.md → 写入INITIAL.md → 开始VENV配置
-- 项目验证中：DEBUG阶段确保代码质量 → DOCKER阶段验证性能
+**规范（Spec）驱动验证流程**：
+- 项目创建前：完成CREATE.md → 写入INITIAL.md → 建立规格追踪链
+- 项目验证中：DEBUG阶段确保代码质量 → 验证规格合规性 → DOCKER阶段验证性能规格
 
 ---
 **验证时间**: ~10分钟 | **调试时间**: ~30分钟 | **总计**: ~40分钟

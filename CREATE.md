@@ -2,6 +2,62 @@
 
 > **革命性的15分钟深度思考法** - 通过系统化文字规划避免90%的项目返工，让每个技术决策都有据可依。
 
+## 📋 规范（Spec）引用与驱动框架
+
+### 🎯 规范（Spec）驱动开发（Spec-Driven Development）
+
+本规划指南是一个**规范（Spec）驱动系统**的入口，通过引用完整的规范（Spec）文档体系，确保从需求分析到生产部署的全程规范（Spec）合规。
+
+#### 📊 规范（Spec）文档体系
+
+| 规范（Spec）层级 | 对应文档 | 核心作用 | 引用关系 |
+|------------------|----------|----------|----------|
+| **需求规范（Spec）** | [PLANNING.md](./PLANNING.md) | 机器学习项目规划方法论 | 指导15分钟think hard流程 |
+| **技术规范（Spec）** | [ML.md](./ML.md) | 框架版本矩阵与技术选型 | 支撑技术可行性评估 |
+| **任务规范（Spec）** | [TASK.md](./TASK.md) | 项目任务分解与验收标准 | 确保规划结果可执行 |
+| **验证规范（Spec）** | [DEBUG_CODE.md](./DEBUG_CODE.md) | 代码验证检查清单 | 验证规划结果的正确性 |
+| **部署规范（Spec）** | [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) | 环境配置与部署策略 | 实现规划结果的生产部署 |
+| **调试规范（Spec）** | [DEBUG.md](./DEBUG.md) | 系统化调试方法 | 解决规划到实现的问题 |
+
+#### 🔄 规范（Spec）驱动流程图
+
+```mermaid
+graph TD
+    CREATE[CREATE.md<br/>需求分析] --> PLANNING[PLANNING.md<br/>规划方法论]
+    CREATE --> TASK[TASK.md<br/>任务分解]
+    CREATE --> ML[ML.md<br/>技术规范]
+    
+    PLANNING --> INITIAL[INITIAL.md<br/>技术规格]
+    TASK --> INITIAL
+    ML --> INITIAL
+    
+    INITIAL --> VENV[VENV_CONFIG.md<br/>CPU验证]
+    INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
+    INITIAL --> DOCKER[DOCKER_CONFIG.md<br/>GPU部署]
+    INITIAL --> DEPLOY[DEPLOY.md<br/>生产部署]
+    
+    DEBUG --> DEBUG_DOC[DEBUG.md<br/>调试指南]
+    
+    style CREATE fill:#FFD700,stroke:#333
+    style INITIAL fill:#90EE90,stroke:#333
+    style DOCKER fill:#87CEEB,stroke:#333
+    style DEPLOY fill:#FF6B6B,stroke:#333
+```
+
+#### 📋 规范（Spec）使用指南
+
+**对于编码智能体（AI Agent）**：
+1. **需求分析阶段**：从CREATE.md开始，引用PLANNING.md的方法论
+2. **技术选型阶段**：参考ML.md的框架版本矩阵进行决策
+3. **任务分解阶段**：使用TASK.md的任务模板确保完整性
+4. **验证阶段**：按照DEBUG_CODE.md的清单逐项验证
+5. **部署阶段**：遵循DOCKER_CONFIG.md和DEPLOY.md的规范
+
+**对于用户**：
+- 每个决策点都有对应的规范（Spec）文档支撑
+- 每个技术选择都有明确的验证标准
+- 每个实现步骤都有规范（Spec）化的检查清单
+
 ## 🧠 核心规划理念
 
 ### 💡 为什么需要深度思考？
@@ -85,6 +141,39 @@ graph TD
    ```
 
 ### ⚙️ 技术可行性评估（4分钟技术决策）
+
+#### 📋 规范（Spec）驱动技术选型
+
+**技术选型必须遵循以下规范（Spec）文档**：
+
+1. **框架选择** → 参考[ML.md](./ML.md)的【框架版本矩阵】
+2. **模型架构** → 参考[PLANNING.md](./PLANNING.md)的【项目类型决策树】
+3. **硬件需求** → 参考[ML.md](./ML.md)的【硬件需求评估表】
+4. **配置验证** → 参考[DEBUG_CODE.md](./DEBUG_CODE.md)的【环境检查】章节
+
+#### **任务类型决策树（规范（Spec）引用）**
+
+基于[PLANNING.md](./PLANNING.md)的规范（Spec），项目类型选择如下：
+
+```mermaid
+graph TD
+    A[项目类型选择] --> B{参考PLANNING.md}
+    B --> C[图像分类]
+    B --> D[目标检测]
+    B --> E[语义分割]
+    
+    C --> C1[模型: ResNet/EfficientNet]
+    C --> C2[数据集: ImageNet/CIFAR-10]
+    C --> C3[时间: 1-6小时]
+    
+    D --> D1[模型: YOLOv10/Faster R-CNN]
+    D --> D2[数据集: COCO/VOC]
+    D --> D3[时间: 6-24小时]
+    
+    E --> E1[模型: DeepLab/U-Net]
+    E --> E2[数据集: VOC/Cityscapes]
+    E --> E3[时间: 12-48小时]
+```
 
 #### **任务类型决策树**
 

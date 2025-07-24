@@ -1,16 +1,16 @@
-# 🎯 智能规范驱动的机器学习框架
+# 🎯 智能规范（Spec）驱动的机器学习框架
 
-> **声明式机器学习编排系统** - 通过可执行规范和自主验证代理，将自然语言需求转化为生产级ML训练项目的智能框架
+> **声明式机器学习编排系统** - 通过可执行规范（Spec）和自主验证代理，将自然语言需求转化为生产级ML训练项目的智能框架
 
 ## 🧠 核心理念：规范 → 代理 → 生产
 
-### 🎯 为什么选择智能规范驱动开发？
+### 🎯 为什么选择智能规范（Spec）驱动开发？
 
 ### 🧠 开发范式对比：直觉模式 vs 规范模式
 
 在2025年的机器学习开发生态中，两种截然不同的范式已经形成：
 
-| **直觉模式** | **规范模式（本框架）** |
+| **直觉模式** | **规范（Spec）模式（本框架）** |
 |-------------|---------------------|
 | **原型优先**的快速迭代 | **生产级**系统化开发 |
 | 黑盒魔法的自动部署 | 透明可审计的智能编排 |
@@ -18,7 +18,7 @@
 | 演示和MVP的快速胜利 | 可持续维护的ML基础设施 |
 | **用例**：带AI功能的落地页 | **用例**：YOLOv10训练管道 |
 
-**本框架采用规范模式**：每个决策都有明确记录，每个代理行为都可追踪，每次部署都符合规范。专为需要以下特性的**软件工程师和算法开发者**设计：
+**本框架采用规范（Spec）模式**：每个决策都有明确记录，每个代理行为都可追踪，每次部署都符合规范（Spec）。专为需要以下特性的**软件工程师和算法开发者**设计：
 - 生产可靠性优于演示速度
 - 代码透明性优于黑盒自动化
 - 算法控制性优于前端便利性
@@ -31,7 +31,7 @@
 - **验证缺口**：人工验证造成可靠性瓶颈
 - **技术债务**：隐式决策成为未来维护噩梦
 
-**我们的突破**：**声明式ML编排系统**以规范为唯一真理来源，自主代理负责实现、验证和部署。
+**我们的突破**：**声明式ML编排系统**以规范（Spec）为唯一真理来源，自主代理负责实现、验证和部署。
 
 ### 🚀 智能架构概览
 
@@ -70,9 +70,9 @@ graph LR
 
 ```mermaid
 classDiagram
-    class 规范编译器 {
+    class 规范（Spec）编译器 {
         +需求解析()
-        +生成规范AST()
+        +生成规范（Spec）AST()
         +完整性验证()
     }
     
@@ -85,7 +85,7 @@ classDiagram
     class 编码代理 {
         +生成实现()
         +性能优化()
-        +规范合规性保证()
+        +规范（Spec）合规性保证()
     }
     
     class 验证代理 {
@@ -100,15 +100,15 @@ classDiagram
         +编排扩展()
     }
     
-    规范编译器 --> 规划代理 : 可执行规范
+    规范（Spec）编译器 --> 规划代理 : 可执行规范（Spec）
     规划代理 --> 编码代理 : 架构计划
     编码代理 --> 验证代理 : 实现产物
     验证代理 --> 运维代理 : 已验证产物
 ```
 
-### 📊 声明式ML规范分层
+### 📊 声明式ML规范（Spec）分层
 
-#### **第1层：需求规范 (CREATE.md)**
+#### **第1层：需求规范（Spec） (CREATE.md)**
 ```yaml
 # 智能需求规范 (ARS)
 spec_version: "v2.0"
@@ -124,7 +124,7 @@ agent_crew:
     test_suite: ["单元测试", "集成测试", "性能基准"]
 ```
 
-#### **第2层：实现规范 (INITIAL.md)**
+#### **第2层：实现规范（Spec） (INITIAL.md)**
 ```yaml
 # 可执行实现规范 (EIS)
 model_spec:
@@ -140,7 +140,7 @@ model_spec:
     format: "[x,y,w,h,置信度,类别]"
 ```
 
-#### **第3层：部署规范 (DOCKER_CONFIG.md)**
+#### **第3层：部署规范（Spec） (DOCKER_CONFIG.md)**
 ```yaml
 # 部署编排规范 (DOS)
 infrastructure:
@@ -152,15 +152,15 @@ infrastructure:
 
 ## 🎯 智能开发工作流
 
-### 🔄 90分钟规范到生产周期
+### 🔄 90分钟规范（Spec）到生产周期
 
 ```mermaid
 flowchart TD
-    A[🎯 需求分析<br/>CREATE.md] -->|智能规划| B[⚙️ 可执行规范<br/>INITIAL.md]
+    A[🎯 需求分析<br/>CREATE.md] -->|智能规划| B[⚙️ 可执行规范（Spec）<br/>INITIAL.md]
     B -->|代理协调| C[🔧 智能验证<br/>VENV_CONFIG.md]
     C -->|自主测试| D[✅ 质量保证<br/>DEBUG_CODE.md]
-    D -->|规范合规部署| E[🚀 生产代理<br/>DOCKER_CONFIG.md]
-    E -->|持续监控| F[🔄 规范演进<br/>DEPLOY.md]
+    D -->|规范（Spec）合规部署| E[🚀 生产代理<br/>DOCKER_CONFIG.md]
+    E -->|持续监控| F[🔄 规范（Spec）演进<br/>DEPLOY.md]
     
     style A fill:#FFD700,stroke:#333
     style B fill:#90EE90,stroke:#333
@@ -172,9 +172,9 @@ flowchart TD
 
 | 指标维度 | 智能系统 | 传统方法 | 提升效果 |
 |---------|----------|----------|----------|
-| **规范到代码** | 15分钟 | 4-8小时 | **提速95%** |
+| **规范（Spec）到代码** | 15分钟 | 4-8小时 | **提速95%** |
 | **验证覆盖率** | 100%自动化 | 30-50%人工 | **提升3倍** |
-| **部署可靠性** | 99.9%规范合规 | 60-70%配置漂移 | **提升40%** |
+| **部署可靠性** | 99.9%规范（Spec）合规 | 60-70%配置漂移 | **提升40%** |
 | **维护开销** | 10%被动响应 | 60%被动响应 | **减少80%** |
 
 ## 🎯 声明式ML项目模板
@@ -183,7 +183,7 @@ flowchart TD
 
 #### **模板A：计算机视觉检测**
 ```yaml
-# 智能CV检测规范
+# 智能CV检测规范（Spec）
 spec_type: "cv_detection"
 domain: "自动驾驶"
 performance_sla:
@@ -198,7 +198,7 @@ agent_configuration:
 
 #### **模板B：医学影像分类**
 ```yaml
-# 智能医学ML规范
+# 智能医学ML规范（Spec）
 spec_type: "medical_classification"
 domain: "放射科"
 compliance: ["FDA", "HIPAA", "DICOM"]
@@ -214,7 +214,7 @@ agent_configuration:
 
 #### **模板C：工业质量控制**
 ```yaml
-# 智能工业ML规范
+# 智能工业ML规范（Spec）
 spec_type: "industrial_qc"
 domain: "制造业"
 deployment_target: "边缘设备"
@@ -230,19 +230,19 @@ agent_configuration:
 
 ## 🎯 智能验证框架
 
-### 🔍 自主质量门禁
+### 🔍 自主质量gate
 
-#### **门禁1：规范合规性验证**
+#### **gate1：规范（Spec）合规性验证**
 - **代理**：合规性验证器
-- **功能**：确保实现与声明规范匹配
+- **功能**：确保实现与声明规范（Spec）匹配
 - **产物**：合规性报告、偏差分析
 
-#### **门禁2：性能基准测试**
+#### **gate2：性能基准测试**
 - **代理**：性能分析器
 - **功能**：针对声明SLA的自动基准测试
 - **产物**：性能基线、优化建议
 
-#### **门禁3：安全与可靠性审计**
+#### **gate3：安全与可靠性审计**
 - **代理**：安全审计器
 - **功能**：自动化安全扫描和可靠性验证
 - **产物**：安全报告、修复计划
@@ -251,10 +251,100 @@ agent_configuration:
 
 ```mermaid
 pie title 智能验证覆盖率
-    "规范合规性" : 35
+    "规范（Spec）合规性" : 35
     "性能SLA" : 25
     "安全检查" : 20
     "可靠性验证" : 20
+```
+
+## 🎯 规范（Spec）驱动开发（Spec-Driven Development）
+
+### 🔄 三层规范（Spec）架构
+
+#### **第1层：需求规范（Spec）（CREATE.md）**
+```yaml
+# 智能需求规范 (ARS)
+spec_source: "CREATE.md"
+capabilities:
+  - 15分钟Think Hard规划
+  - 框架版本矩阵决策
+  - 资源需求精确评估
+  - 技术选型有理有据
+inheritance:
+  - 引用PLANNING.md方法论
+  - 引用ML.md版本矩阵
+  - 引用TASK.md任务分解
+  - 引用DEBUG_CODE.md验证清单
+```
+
+#### **第2层：技术规格（INITIAL.md）**
+```yaml
+# 可执行技术规格 (ETS)
+spec_source: "INITIAL.md"
+inheritance:
+  - 继承CREATE.md所有决策
+  - 具体化技术参数
+  - 量化性能指标
+  - 明确实施路径
+tracking:
+  - CREATE.md决策 → INITIAL.md规格 → 实现验证
+```
+
+#### **第3层：验证规格（DEBUG_CODE.md）**
+```yaml
+# 验证合规规格 (VCS)
+spec_source: "DEBUG_CODE.md"
+inheritance:
+  - 验证INITIAL.md规格实现
+  - 确保CREATE.md决策落地
+  - 建立规格追踪链
+compliance:
+  - CPU环境验证CREATE.md技术选型
+  - GPU环境验证INITIAL.md性能目标
+  - 部署环境验证所有规格要求
+```
+
+### 📊 规范（Spec）引用可视化
+
+```mermaid
+graph TD
+    subgraph 需求规范（Spec）层
+        CREATE[CREATE.md<br/>需求分析] --> PLAN[PLANNING.md<br/>规划方法论]
+        CREATE --> ML[ML.md<br/>技术规范]
+        CREATE --> TASK[TASK.md<br/>任务规范]
+    end
+    
+    subgraph 技术规格层
+        INITIAL[INITIAL.md<br/>技术规格] --> VENV[VENV_CONFIG.md<br/>CPU验证]
+        INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
+    end
+    
+    subgraph 部署规范（Spec）层
+        DOCKER[DOCKER_CONFIG.md<br/>GPU部署] --> DEPLOY[DEPLOY.md<br/>生产部署]
+    end
+    
+    CREATE -.->|继承| INITIAL
+    INITIAL -.->|验证| DEBUG
+    DEBUG -.->|实现| DOCKER
+    
+    style CREATE fill:#FFD700,stroke:#333
+    style INITIAL fill:#90EE90,stroke:#333
+    style DOCKER fill:#87CEEB,stroke:#333
+    style DEPLOY fill:#FF6B6B,stroke:#333
+```
+
+### 🎯 AI智能体规范（Spec）使用指南
+
+**对于编码智能体**：
+1. **需求分析阶段**：从CREATE.md开始，引用PLANNING.md的方法论进行15分钟Think Hard
+2. **技术选型阶段**：参考ML.md的框架版本矩阵进行决策
+3. **任务分解阶段**：使用TASK.md的任务模板确保完整性
+4. **验证阶段**：按照DEBUG_CODE.md的清单逐项验证
+5. **部署阶段**：遵循DOCKER_CONFIG.md和DEPLOY.md的规范
+
+**规格追踪链**：
+```
+CREATE.md决策 → INITIAL.md规格 → 实现代码 → DEBUG验证 → 部署验证
 ```
 
 ## 🎯 智能ML开发入门
@@ -281,34 +371,34 @@ python agentic-cli monitor --watch-mode
 
 ### 📋 智能开发检查清单
 
-#### **规范定义阶段**
+#### **规范（Spec）定义阶段**
 - [ ] 使用智能规划在CREATE.md中捕获需求
-- [ ] 在INITIAL.md中生成可执行规范
+- [ ] 在INITIAL.md中生成可执行规范（Spec）
 - [ ] 声明可衡量的性能SLA
 - [ ] 记录代理优化的资源约束
 
 #### **代理协调阶段**
 - [ ] 规划代理验证架构决策
-- [ ] 编码代理生成规范合规实现
+- [ ] 编码代理生成规范（Spec）合规实现
 - [ ] 验证代理运行全面测试套件
 - [ ] 运维代理创建生产就绪部署
 
 #### **持续演进阶段**
 - [ ] 监控代理跟踪生产指标
-- [ ] 自动检测规范漂移
+- [ ] 自动检测规范（Spec）漂移
 - [ ] 基于新需求重新协调代理团队
-- [ ] 版本控制维护规范演进历史
+- [ ] 版本控制维护规范（Spec）演进历史
 
 ## 🎯 高级智能特性
 
-### 🔄 持续规范演进
+### 🔄 持续规范（Spec）演进
 
 ```mermaid
 graph LR
-    A[生产指标] --> B[规范漂移检测器]
+    A[生产指标] --> B[规范（Spec）漂移检测器]
     B --> C[代理协调器]
     C --> D[规划代理]
-    D --> E[规范更新]
+    D --> E[规范（Spec）更新]
     E --> F[代理团队重新部署]
     
     style A fill:#FFD700,stroke:#333
@@ -329,10 +419,10 @@ graph LR
 
 ### 🌟 智能ML标准
 
-#### **开放规范**
-- **ARS**：智能需求规范格式
-- **EIS**：可执行实现规范模式
-- **DOS**：部署编排规范标准
+#### **开放规范（Spec）**
+- **ARS**：智能需求规范（Spec）格式
+- **EIS**：可执行实现规范（Spec）模式
+- **DOS**：部署编排规范（Spec）标准
 
 #### **代理注册中心**
 - **认证代理**：社区验证的代理实现
@@ -455,7 +545,7 @@ classDiagram
 - **PaddlePaddle 2.6.0**：中文文档，产业优化，推理加速
 - **CUDA 12.6**：最新GPU加速，向下兼容
 
-#### **配置管理（文字规范）**
+#### **配置管理（文字规范（Spec））**
 ```yaml
 # 通过文字描述理解配置层次
 config_structure:
@@ -629,7 +719,7 @@ docker exec my_project python scripts/train.py model=yolov10n data=coco2017
 ```
 ai-written-yolo/                 # 模板项目根目录
 ├── README.md                   # 本文件：模板使用指南
-├── CLAUDE.md                   # AI助手行为最高规范
+├── CLAUDE.md                   # AI助手行为最高规范（Spec）
 ├── CREATE.md                   # 项目创建规划指南
 ├── INITIAL.md                  # 目标项目规格模板
 ├── VENV_CONFIG.md              # CPU调试环境指南
