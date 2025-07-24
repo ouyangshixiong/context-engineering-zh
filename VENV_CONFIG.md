@@ -13,7 +13,26 @@
 
 ## 🚀 一键安装
 
-### 方案1: Conda环境（推荐）
+### 方案1: Python虚拟环境（推荐 - AI Agent友好）
+
+```bash
+# 创建虚拟环境
+python -m venv ml-debug
+source ml-debug/bin/activate  # Linux/Mac
+# 或 ml-debug\Scripts\activate  # Windows
+
+# 升级pip
+python -m pip install --upgrade pip
+
+# 安装CPU版本依赖
+pip install -r requirements-cpu.txt
+
+# 验证安装
+python -c "import torch; print('✅ PyTorch CPU OK')"
+python -c "import paddle; print('✅ PaddlePaddle CPU OK')"
+```
+
+### 方案2: Conda环境（可选）
 
 ```bash
 # 创建并激活环境
@@ -26,18 +45,6 @@ pip install -r requirements-cpu.txt
 # 验证安装
 python -c "import torch; print('✅ PyTorch CPU OK')"
 python -c "import paddle; print('✅ PaddlePaddle CPU OK')"
-```
-
-### 方案2: 虚拟环境
-
-```bash
-# 创建虚拟环境
-python -m venv ml-debug
-source ml-debug/bin/activate  # Linux/Mac
-# 或 ml-debug\Scripts\activate  # Windows
-
-# 安装依赖
-pip install -r requirements-cpu.txt
 ```
 
 ## 📋 详细安装步骤
@@ -232,6 +239,13 @@ pip install --no-cache-dir -r requirements-cpu.txt
 ```bash
 # 错误: Package version conflicts
 # 解决方案：创建干净环境
+# 虚拟环境方案
+rm -rf ml-debug
+python -m venv ml-debug
+source ml-debug/bin/activate
+pip install -r requirements-cpu.txt
+
+# 或Conda方案
 conda remove -n ml-debug --all -y
 conda create -n ml-debug python=3.10 -y
 conda activate ml-debug
@@ -267,11 +281,19 @@ python -c "import sys; print(sys.path)"
 ### 从CPU切换到GPU环境
 
 ```bash
-# 备份CPU环境
+# 备份CPU环境（虚拟环境）
+source ml-debug/bin/activate
+pip freeze > cpu-requirements.txt
+
+# 或Conda环境备份
 conda env export > cpu-environment.yml
 
-# 创建GPU环境
-conda deactivate
+# 创建GPU环境（推荐虚拟环境）
+python -m venv ml-gpu
+source ml-gpu/bin/activate
+pip install -r requirements-gpu.txt
+
+# 或Conda GPU环境
 conda create -n ml-gpu python=3.10 -y
 conda activate ml-gpu
 pip install -r requirements-gpu.txt

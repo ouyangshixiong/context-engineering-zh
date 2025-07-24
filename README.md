@@ -696,8 +696,9 @@ python tools/create.py --name my_project --type detection
 cd my_project
 
 # 3. 创建CPU调试环境
-conda create -n debug-cpu python=3.10
-conda activate debug-cpu
+python -m venv debug-cpu
+source debug-cpu/bin/activate  # Linux/Mac
+# 或 debug-cpu\Scripts\activate  # Windows
 pip install -r requirements-cpu.txt
 
 # 4. 验证代码（1分钟测试）
