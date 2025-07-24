@@ -308,7 +308,7 @@ compliance:
 
 ```mermaid
 graph TD
-    subgraph 需求规范（Spec）层
+    subgraph 需求Spec层
         CREATE[CREATE.md<br/>需求分析] --> PLAN[PLANNING.md<br/>规划方法论]
         CREATE --> ML[ML.md<br/>技术规范]
         CREATE --> TASK[TASK.md<br/>任务规范]
@@ -319,7 +319,7 @@ graph TD
         INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
     end
     
-    subgraph 部署规范（Spec）层
+    subgraph 部署Spec层
         DOCKER[DOCKER_CONFIG.md<br/>GPU部署] --> DEPLOY[DEPLOY.md<br/>生产部署]
     end
     
