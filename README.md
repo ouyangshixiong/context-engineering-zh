@@ -70,7 +70,7 @@ graph LR
 
 ```mermaid
 classDiagram
-    class 规范（Spec）编译器 {
+    class Spec编译器 {
         +需求解析()
         +生成规范（Spec）AST()
         +完整性验证()
@@ -100,7 +100,7 @@ classDiagram
         +编排扩展()
     }
     
-    规范（Spec）编译器 --> 规划代理 : 可执行规范（Spec）
+    Spec编译器 --> 规划代理 : 可执行规范（Spec）
     规划代理 --> 编码代理 : 架构计划
     编码代理 --> 验证代理 : 实现产物
     验证代理 --> 运维代理 : 已验证产物
