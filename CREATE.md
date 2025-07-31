@@ -2,22 +2,93 @@
 
 > **革命性的15分钟深度思考法** - 通过系统化文字规划避免90%的项目返工，让每个技术决策都有据可依。
 
-## 📋 规范（Spec）引用与驱动框架
+## 🤖 多智能体规范引用体系（Spec-Driven Multi-Agent System）
 
-### 🎯 规范（Spec）驱动开发（Spec-Driven Development）
+### 🎯 智能体协作架构
 
-本规划指南是一个**规范（Spec）驱动系统**的入口，通过引用完整的规范（Spec）文档体系，确保从需求分析到生产部署的全程规范（Spec）合规。
+本规划指南是**多智能体规范驱动系统**的核心入口，通过精确的规范引用确保AI代理团队的高效协作。每个智能体都有明确的职责边界和引用规范。
 
-#### 📊 规范（Spec）文档体系
+#### 📊 多智能体职责矩阵
 
-| 规范（Spec）层级 | 对应文档 | 核心作用 | 引用关系 |
-|------------------|----------|----------|----------|
-| **需求规范（Spec）** | [PLANNING.md](./PLANNING.md) | 机器学习项目规划方法论 | 指导15分钟think hard流程 |
-| **技术规范（Spec）** | [ML.md](./ML.md) | 框架版本矩阵与技术选型 | 支撑技术可行性评估 |
-| **任务规范（Spec）** | [TASK.md](./TASK.md) | 项目任务分解与验收标准 | 确保规划结果可执行 |
-| **验证规范（Spec）** | [DEBUG_CODE.md](./DEBUG_CODE.md) | 代码验证检查清单 | 验证规划结果的正确性 |
-| **部署规范（Spec）** | [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) | 环境配置与部署策略 | 实现规划结果的生产部署 |
-| **调试规范（Spec）** | [DEBUG.md](./DEBUG.md) | 系统化调试方法 | 解决规划到实现的问题 |
+| 智能体角色 | 核心文档 | 规范引用位置 | 输入规范 | 输出规范 | 验证标准 |
+|------------|----------|--------------|----------|----------|----------|
+| **规划代理** | [PLANNING.md](./PLANNING.md) | 第2章"Think Hard框架" | CREATE.md需求描述 | 技术决策矩阵 | 15分钟标准流程 |
+| **任务代理** | [TASK.md](./TASK.md) | 第3章"任务分解模板" | PLANNING.md决策结果 | 任务分解清单 | 100%覆盖率 |
+| **技术代理** | [ML.md](./ML.md) | 第1章"框架版本矩阵" | TASK.md任务规格 | 技术选型方案 | 性能基准验证 |
+| **验证代理** | [DEBUG_CODE.md](./DEBUG_CODE.md) | 全程验证清单 | INITIAL.md技术规格 | 验证报告 | 零配置漂移 |
+| **部署代理** | [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) | 第4章"部署规范" | 验证报告通过 | 部署清单 | GPU利用率>90% |
+
+#### 🔄 智能体协作流程图
+
+```mermaid
+graph TD
+    subgraph 需求分析阶段
+        CREATE[CREATE.md] --> PLAN[规划代理<br/>PLANNING.md]
+        CREATE --> TASK[任务代理<br/>TASK.md]  
+        CREATE --> ML[技术代理<br/>ML.md]
+    end
+    
+    subgraph 规格生成阶段
+        PLAN --> INITIAL[INITIAL.md<br/>技术规格]
+        TASK --> INITIAL
+        ML --> INITIAL
+    end
+    
+    subgraph 验证部署阶段
+        INITIAL --> DEBUG[验证代理<br/>DEBUG_CODE.md]
+        INITIAL --> DOCKER[部署代理<br/>DOCKER_CONFIG.md]
+        DEBUG --> DEPLOY[DEPLOY.md<br/>生产部署]
+    end
+    
+    subgraph 规范引用链
+        PLAN -.->|决策矩阵| TASK
+        TASK -.->|任务清单| ML  
+        ML -.->|技术规格| INITIAL
+    end
+    
+    style CREATE fill:#FFD700,stroke:#333
+    style PLAN fill:#90EE90,stroke:#333
+    style INITIAL fill:#87CEEB,stroke:#333
+    style DOCKER fill:#FF6B6B,stroke:#333
+```
+
+#### 📋 规范引用精确位置
+
+**规划代理规范引用**:
+- 📍 使用PLANNING.md第2章"Think Hard框架"进行15分钟深度分析
+- 📍 引用ML.md第1章"框架版本矩阵"进行技术选型
+- 📍 依据TASK.md第3章"任务分解模板"制定实施计划
+
+**任务代理规范引用**:
+- 📍 基于PLANNING.md的技术决策进行任务分解
+- 📍 使用ML.md的硬件需求评估制定资源计划
+- 📍 输出符合INITIAL.md标准的任务清单
+
+**技术代理规范引用**:
+- 📍 根据CREATE.md的需求澄清选择技术栈
+- 📍 使用ML.md的性能基准验证技术可行性
+- 📍 生成INITIAL.md中的技术规格文档
+
+### 🎯 智能体使用指南
+
+#### 对于AI编码代理
+1. **需求分析阶段**: 从CREATE.md开始，引用PLANNING.md进行15分钟Think Hard
+2. **技术选型阶段**: 参考ML.md的框架版本矩阵进行决策
+3. **任务分解阶段**: 使用TASK.md的任务模板确保完整性
+4. **验证阶段**: 按照DEBUG_CODE.md的清单逐项验证
+5. **部署阶段**: 遵循DOCKER_CONFIG.md和DEPLOY.md的规范
+
+#### 对于用户
+每个决策点都有对应的规范文档支撑，每个技术选择都有明确的验证标准，每个实现步骤都有规范化的检查清单。
+
+### 📊 规范驱动验证标准
+
+| 验证阶段 | 规范文档 | 智能体职责 | 验收标准 | 时间限制 |
+|----------|----------|------------|----------|----------|
+| **需求澄清** | CREATE.md+PLANNING.md | 规划代理 | 15分钟Think Hard完成 | 15分钟 |
+| **技术选型** | ML.md+TASK.md | 技术代理 | 框架决策有理有据 | 10分钟 |
+| **任务分解** | TASK.md+PLANNING.md | 任务代理 | 任务清单100%覆盖 | 5分钟 |
+| **规格确认** | INITIAL.md | 所有代理 | 技术规格完整准确 | 5分钟 |
 
 #### 🔄 规范（Spec）驱动流程图
 
