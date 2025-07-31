@@ -1,0 +1,250 @@
+# 🚀 部署用大数据集配置
+# 专为DOCKER部署阶段设计，支持完整数据集训练
+
+defaults:
+  - _self_
+
+# 生产数据集列表
+production_datasets:
+  coco2017:
+    name: "COCO2017-production"
+    dataset_type: "COCODetection"
+    description: "COCO2017完整数据集，118K训练图像，80个目标类别"
+    
+    # 完整数据配置
+    data_dir: "./data/production/coco2017"
+    train_dir: "train2017"
+    val_dir: "val2017"
+    test_dir: "test2017"
+    annotations_dir: "annotations"
+    
+    # 完整数据规模
+    num_samples: 118287
+    train_samples: 118287
+    val_samples: 5000
+    test_samples: 40670
+    
+    # 80个COCO类别完整列表
+    num_classes: 80
+    class_names: [
+      "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",
+      "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
+      "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra",
+      "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+      "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+      "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+      "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange",
+      "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+      "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+      "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+      "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
+      "toothbrush"
+    ]
+    
+    # GPU优化配置
+    batch_size: 64           # 基础batch大小
+    batch_size_8gb: 32       # 8GB显存
+    batch_size_16gb: 64      # 16GB显存
+    batch_size_24gb: 128     # 24GB显存
+    
+    num_workers: 8           # GPU并行加载
+    pin_memory: true         # GPU加速
+    persistent_workers: true
+    
+    # 高分辨率配置
+    image_size: [640, 640]
+    multi_scale: true
+    multi_scale_range: [320, 640]
+    
+    # 丰富的数据增强
+    train_transforms:
+      - type: "Mosaic"
+        prob: 1.0
+      - type: "RandomAffine"
+        degrees: 0.0
+        translate: 0.1
+        scale: [0.5, 1.5]
+        shear: 0.0
+      - type: "HSV"
+        hgain: 0.015
+        sgain: 0.7
+        vgain: 0.4
+      - type: "RandomFlip"
+        prob: 0.5
+      - type: "Resize"
+        size: [640, 640]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    val_transforms:
+      - type: "Resize"
+        size: [640, 640]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    # 下载配置
+    downloads:
+      train_images:
+        url: "http://images.cocodataset.org/zips/train2017.zip"
+        size: "18GB"
+        checksum: "69a8bb58ea5f8f99d24875f21416de2e"
+      val_images:
+        url: "http://images.cocodataset.org/zips/val2017.zip"
+        size: "1GB"
+        checksum: "4950dc9d00dbe1c305eeaa38c1a2f7ab"
+      annotations:
+        url: "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+        size: "252MB"
+        checksum: "113a836d90195c0a5b2dbe11b1e66d1b"
+
+  imagenet:
+    name: "ImageNet-production"
+    dataset_type: "ImageNetClassification"
+    description: "ImageNet-1K完整数据集，128万训练图像，1000个类别"
+    
+    data_dir: "./data/production/imagenet"
+    train_dir: "train"
+    val_dir: "val"
+    
+    # 大规模数据配置
+    num_samples: 1281167
+    train_samples: 1281167
+    val_samples: 50000
+    num_classes: 1000
+    
+    # GPU优化batch配置
+    batch_size: 256          # 基础配置
+    batch_size_8gb: 128      # 8GB显存
+    batch_size_16gb: 256     # 16GB显存
+    batch_size_24gb: 512     # 24GB显存
+    
+    num_workers: 16
+    pin_memory: true
+    persistent_workers: true
+    
+    # 标准ImageNet尺寸
+    image_size: [224, 224]
+    
+    # 完整数据增强
+    train_transforms:
+      - type: "RandomResizedCrop"
+        size: [224, 224]
+        scale: [0.08, 1.0]
+        ratio: [0.75, 1.33]
+      - type: "RandomHorizontalFlip"
+        prob: 0.5
+      - type: "ColorJitter"
+        brightness: 0.4
+        contrast: 0.4
+        saturation: 0.4
+        hue: 0.1
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    val_transforms:
+      - type: "Resize"
+        size: [256, 256]
+      - type: "CenterCrop"
+        size: [224, 224]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    # 需要用户自行下载ImageNet
+    download_instructions: |
+      ImageNet数据集需要用户自行从官网下载：
+      1. 注册ImageNet账户：http://www.image-net.org/
+      2. 下载ILSVRC2012训练集和验证集
+      3. 解压到./data/production/imagenet/
+      4. 运行数据验证脚本
+
+  openimages:
+    name: "OpenImages-production"
+    dataset_type: "OpenImagesDetection"
+    description: "Google Open Images V6，170万训练图像，600个类别"
+    
+    data_dir: "./data/production/openimages"
+    
+    # 超大规模数据
+    num_samples: 1743042
+    train_samples: 1743042
+    val_samples: 41620
+    num_classes: 600
+    
+    # 超大规模batch配置
+    batch_size: 64           # 基础配置
+    batch_size_8gb: 16       # 8GB显存（保守）
+    batch_size_16gb: 32      # 16GB显存
+    batch_size_24gb: 64      # 24GB显存
+    batch_size_48gb: 128     # 48GB显存（A100）
+    
+    num_workers: 16
+    pin_memory: true
+    
+    # 高分辨率
+    image_size: [512, 512]
+    
+    # 下载配置
+    downloads:
+      train_images:
+        url: "https://storage.googleapis.com/openimages/2018_04/train/train-images-boxable.csv"
+        note: "需要分批次下载，总大小约500GB"
+      validation_images:
+        url: "https://storage.googleapis.com/openimages/2018_04/validation/validation-images-boxable.csv"
+      annotations:
+        url: "https://storage.googleapis.com/openimages/2018_04/annotations/oidv6-train-annotations-bbox.csv"
+
+# 生产环境验证标准
+production_validation:
+  # 性能基准
+  performance_benchmarks:
+    coco2017:
+      training_time_1epoch:
+        "8GB_GPU": "~120分钟"
+        "16GB_GPU": "~60分钟"
+        "24GB_GPU": "~30分钟"
+      memory_usage:
+        "batch_32": "~6GB"
+        "batch_64": "~12GB"
+        "batch_128": "~24GB"
+    
+    imagenet:
+      training_time_1epoch:
+        "8GB_GPU": "~180分钟"
+        "16GB_GPU": "~90分钟"
+        "24GB_GPU": "~45分钟"
+      memory_usage:
+        "batch_128": "~4GB"
+        "batch_256": "~8GB"
+        "batch_512": "~16GB"
+  
+  # 完整性验证
+  integrity_checks:
+    - "目录结构完整性"
+    - "文件数量验证"
+    - "图像文件可读性"
+    - "标注文件格式验证"
+    - "类别一致性检查"
+    - "内存使用监控"
+    - "数据加载性能测试"
+  
+  # 存储需求
+  storage_requirements:
+    coco2017: "~20GB（含解压文件）"
+    imagenet: "~150GB（含解压文件）"
+    openimages: "~500GB（含解压文件）"
+  
+  # 网络要求
+  network_requirements:
+    min_bandwidth: "100Mbps"
+    estimated_download_time:
+      coco2017: "~30分钟"
+      imagenet: "~4小时"
+      openimages: "~12小时"

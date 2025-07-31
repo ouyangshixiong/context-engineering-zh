@@ -441,3 +441,168 @@ model.fit(train_dataset, val_dataset, epochs=10)
 - **VENV阶段**: 使用CPU的MKL加速
 - **DOCKER阶段**: 启用混合精度训练
 - **多GPU**: 使用DDP策略和梯度累积
+
+## 📊 数据集规范与管理（Dataset Specification & Management）
+
+### 🎯 数据集分级使用策略
+
+根据项目阶段（VENV调试 vs DOCKER部署）采用不同规模的数据集，确保快速验证与生产训练的无缝切换。
+
+#### 📊 数据集分级表
+
+| 阶段 | 数据集类型 | 规模 | 验证时间 | 存储需求 | 适用场景 |
+|------|------------|------|----------|----------|----------|
+| **VENV调试** | COCO128 | 128张图像 | ~2分钟 | ~50MB | CPU环境代码验证 |
+| **VENV调试** | CIFAR-10 | 60K张32×32 | ~5分钟 | ~150MB | 模型结构验证 |
+| **DOCKER部署** | COCO2017 | 118K张图像 | ~8小时/epoch | ~20GB | 目标检测生产训练 |
+| **DOCKER部署** | ImageNet-1K | 1.28M张图像 | ~12小时/epoch | ~150GB | 分类生产训练 |
+
+### 🔄 两阶段数据集配置
+
+#### VENV调试配置（CPU环境）
+```yaml
+# configs/data/debug_datasets.yaml
+debug_coco128:
+  name: "COCO128-debug"
+  dataset_type: "COCODetection"
+  num_samples: 128
+  batch_size: 4        # CPU优化小batch
+  num_workers: 2       # CPU核心限制
+  image_size: [640, 640]
+  download_url: "https://ultralytics.com/assets/coco128.zip"
+```
+
+#### DOCKER部署配置（GPU环境）
+```yaml
+# configs/data/production_datasets.yaml
+prod_coco2017:
+  name: "COCO2017-production"
+  dataset_type: "COCODetection"
+  num_samples: 118287
+  batch_size: 64       # GPU优化大batch
+  num_workers: 8       # GPU并行加载
+  image_size: [640, 640]
+  multi_scale: true
+  download_url: "http://images.cocodataset.org/zips/train2017.zip"
+```
+
+### 🤖 智能数据集选择器
+
+#### 自动环境检测与配置
+```python
+# 一键智能选择
+from src.utils.dataset_selector import auto_select_dataset
+
+config_path = auto_select_dataset()  # 自动返回合适的配置
+# CPU环境 → debug_datasets.yaml
+# GPU环境 → 根据显存智能选择
+```
+
+#### 环境检测逻辑
+- **CPU环境**: 强制使用调试用小数据集
+- **小显存GPU** (<8GB): 使用调试数据集
+- **中等显存GPU** (8-16GB): 使用生产数据集（保守配置）
+- **大显存GPU** (>16GB): 使用生产数据集（完整配置）
+
+### 🛠️ 数据集管理工具
+
+#### 一键配置脚本
+```bash
+# 自动检测并配置数据集
+./scripts/setup_dataset.sh
+
+# 强制使用调试数据集
+./scripts/setup_dataset.sh debug
+
+# 强制使用生产数据集  
+./scripts/setup_dataset.sh production
+
+# 显示环境信息
+./scripts/setup_dataset.sh info
+```
+
+#### 快速验证命令
+```bash
+# 调试验证（<5分钟）
+python scripts/quick_validate.py --stage debug --dataset coco128
+
+# 部署验证（<30分钟）
+python scripts/full_validate.py --stage production --dataset coco2017
+```
+
+### 📋 数据集验证标准
+
+#### 完整性检查清单
+- [ ] 目录结构完整性（train/ val/ annotations/）
+- [ ] 文件数量验证（实际 vs 期望）
+- [ ] 图像文件可读性（格式检查）
+- [ ] 标注文件格式验证（JSON/COCO格式）
+- [ ] 类别一致性检查（类别ID连续性）
+
+#### 性能基准测试
+| 数据集 | 加载测试 | 内存使用 | 存储需求 | 下载时间 |
+|--------|----------|----------|----------|----------|
+| COCO128 | <10秒 | <1GB | 50MB | 30秒 |
+| COCO2017 | <60秒 | <8GB | 20GB | 30分钟 |
+| ImageNet | <120秒 | <16GB | 150GB | 4小时 |
+
+### 🔧 配置文件结构
+
+```
+configs/data/
+├── debug_datasets.yaml        # 调试用小数据集
+├── production_datasets.yaml   # 部署用大数据集
+└── dataset_spec.yaml          # 数据集规范定义
+```
+
+### ⚡ 快速开始
+
+#### VENV调试阶段
+```bash
+# 1. 创建调试环境
+conda create -n ml-debug python=3.10
+conda activate ml-debug
+
+# 2. 自动配置调试数据集
+./scripts/setup_dataset.sh debug
+
+# 3. 快速验证（<5分钟）
+python scripts/train.py model=yolov10n data=coco128 trainer.max_epochs=1 trainer.fast_dev_run=true
+```
+
+#### DOCKER部署阶段
+```bash
+# 1. 启动GPU环境
+docker run --gpus all -it pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
+
+# 2. 自动配置生产数据集
+./scripts/setup_dataset.sh production
+
+# 3. 完整训练
+python scripts/train.py model=yolov10n data=coco2017 trainer.max_epochs=100
+```
+
+### 📊 存储优化建议
+
+#### 存储空间管理
+- **调试数据**: ~1GB（包含所有调试数据集）
+- **生产数据**: 按需下载，可配置存储路径
+- **缓存管理**: 支持一键清理脚本
+
+#### 网络优化
+- **断点续传**: 支持下载中断恢复
+- **并行下载**: 多线程加速
+- **镜像源**: 支持国内镜像加速
+
+### 🎯 性能调优建议
+
+#### VENV阶段优化
+- 使用小batch_size减少内存占用
+- 限制num_workers避免CPU过载
+- 关闭pin_memory提升CPU效率
+
+#### DOCKER阶段优化
+- 根据GPU显存动态调整batch_size
+- 启用pin_memory加速GPU数据传输
+- 使用persistent_workers减少加载开销
+- 启用multi_scale训练提升模型泛化能力

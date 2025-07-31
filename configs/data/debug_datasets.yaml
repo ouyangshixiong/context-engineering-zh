@@ -1,0 +1,147 @@
+# 🐛 调试用小数据集配置
+# 专为VENV调试阶段设计，确保快速验证代码正确性
+
+defaults:
+  - _self_
+
+# 调试数据集列表
+debug_datasets:
+  coco128:
+    name: "COCO128-debug"
+    dataset_type: "COCODetection"
+    description: "调试专用，128张图像的快速验证数据集"
+    
+    # 数据路径配置
+    data_dir: "./data/debug/coco128"
+    train_dir: "train2017"
+    val_dir: "val2017"
+    annotations_dir: "annotations"
+    
+    # 数据规模控制
+    num_samples: 128
+    max_train_samples: 100
+    max_val_samples: 28
+    
+    # 类别配置
+    num_classes: 80
+    class_names: [
+      "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",
+      "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
+      "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra",
+      "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+      "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+      "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+      "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange",
+      "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+      "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+      "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+      "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
+      "toothbrush"
+    ]
+    
+    # CPU优化配置
+    batch_size: 4           # CPU小batch
+    num_workers: 2          # CPU核心限制
+    pin_memory: false       # CPU环境关闭
+    
+    # 图像预处理
+    image_size: [640, 640]
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+    
+    # 数据增强（调试阶段简化）
+    train_transforms:
+      - type: "Resize"
+        size: [640, 640]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    val_transforms:
+      - type: "Resize"
+        size: [640, 640]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    
+    # 下载配置
+    download_url: "https://ultralytics.com/assets/coco128.zip"
+    checksum: "a67d2821a91c8a5fd19da7a4c4229a1b"
+    extract_dir: "coco128"
+
+  cifar10:
+    name: "CIFAR10-debug"
+    dataset_type: "CIFAR10"
+    description: "经典小图像分类数据集，用于模型结构验证"
+    
+    data_dir: "./data/debug/cifar10"
+    num_classes: 10
+    class_names: ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+    
+    # 小规模配置
+    num_samples: 5000
+    max_train_samples: 4000
+    max_val_samples: 1000
+    
+    # CPU优化
+    batch_size: 32
+    num_workers: 2
+    pin_memory: false
+    
+    # 图像尺寸
+    image_size: [32, 32]
+    
+    # 简化变换
+    train_transforms:
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.4914, 0.4822, 0.4465]
+        std: [0.2023, 0.1994, 0.2010]
+    
+    val_transforms:
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.4914, 0.4822, 0.4465]
+        std: [0.2023, 0.1994, 0.2010]
+
+  tiny_imagenet:
+    name: "TinyImageNet-debug"
+    dataset_type: "ImageNetClassification"
+    description: "ImageNet的缩小版，用于端到端测试"
+    
+    data_dir: "./data/debug/tiny_imagenet"
+    num_classes: 200
+    
+    # 中等规模
+    num_samples: 100000
+    max_train_samples: 80000
+    max_val_samples: 20000
+    
+    # CPU配置
+    batch_size: 16
+    num_workers: 2
+    
+    # 图像尺寸
+    image_size: [64, 64]
+    
+    # 下载配置
+    download_url: "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
+
+# 调试阶段验证标准
+debug_validation:
+  max_download_time: 300    # 5分钟
+  max_load_time: 60         # 1分钟
+  max_memory_usage: 1000    # 1GB
+  required_files:
+    - "train/"
+    - "val/"
+    - "annotations/"  # COCO格式
+  
+  # 快速检查项
+  quick_checks:
+    - "数据集完整性"
+    - "标注文件可读性"
+    - "图像加载测试"
+    - "1-batch训练测试"
