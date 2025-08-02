@@ -3,6 +3,7 @@
 > **符合软件工程规范的自主编程智能体（software engineering specification for agentic-ai-coder ）** - 通过自主编程智能体理解和执行软件工程规范（Spec），将简单的自然语言需求逐步的、有序的转化为生产级ML训练项目
 
 > **名词解释 agentic-ai-coder ** - 自主编程智能体,例如:Claude Code、Qwen Coder
+
 > **名词解释 software engineering specification ** - 软件工程规范，例如:需求分析阶段、软件架构阶段、编码阶段、测试阶段
 
 ### 🧠 开发范式对比：直觉（Vibe）模式 vs 规范（Spec）模式
@@ -32,7 +33,7 @@
 
 **我们的突破**：**声明式ML编排系统**以清晰可读的规范文档（Spec markdown）为唯一真理来源，自主编程智能体负责规划、实现、验证和部署。
 
-### 🚀 智能架构概览
+### 🚀 Spec驱动的自主编程智能体框架的架构概览
 
 ```mermaid
 graph LR
@@ -63,9 +64,9 @@ graph LR
 | **部署策略** | 配置漂移 | 规范合规自动化 |
 | **维护模式** | 被动修复 | 主动规范演进
 
-## 🎯 智能ML开发管道
+## 🎯 ML项目自动开发管道
 
-### 🤖 多自主编程智能体协作架构
+### 🤖 自主编程智能体协作架构
 
 ```mermaid
 classDiagram
@@ -106,9 +107,9 @@ classDiagram
     验证自主编程智能体 --> 运维自主编程智能体 : 已验证产物
 ```
 
-### 📊 声明式ML规范（Spec）分层
+### 📊 声明式的规范驱动（Spec driven）的软件工程阶段
 
-#### **第1层：需求规范（Spec） (CREATE.md)**
+#### **第1阶段：需求规范（Spec） (CREATE.md)**
 ```yaml
 # 智能需求规范 (ARS)
 spec_version: "v2.0"
@@ -124,7 +125,7 @@ agent_crew:
     test_suite: ["单元测试", "集成测试", "性能基准"]
 ```
 
-#### **第2层：实现规范（Spec） (INITIAL.md)**
+#### **第2阶段：实现规范（Spec） (INITIAL.md)**
 ```yaml
 # 可执行实现规范 (EIS)
 model_spec:
@@ -140,7 +141,7 @@ model_spec:
     format: "[x,y,w,h,置信度,类别]"
 ```
 
-#### **第3层：部署规范（Spec） (DOCKER_CONFIG.md)**
+#### **第3阶段：部署规范（Spec） (DOCKER_CONFIG.md)**
 ```yaml
 # 部署编排规范 (DOS)
 infrastructure:
@@ -177,11 +178,11 @@ flowchart TD
 | **部署可靠性** | 99.9%规范（Spec）合规 | 60-70%配置漂移 | **提升40%** |
 | **维护开销** | 10%被动响应 | 60%被动响应 | **减少80%** |
 
-## 🎯 声明式ML项目模板
+## 🎯 声明式ML项目需求模板
 
-### 🏗️ 模板分类体系
+### 🏗️ 需求模板分类举例
 
-#### **模板A：计算机视觉检测**
+#### **需求模板A：计算机视觉检测**
 ```yaml
 # 智能CV检测规范（Spec）
 spec_type: "cv_detection"
@@ -196,7 +197,7 @@ agent_configuration:
   validator: "安全验证器"
 ```
 
-#### **模板B：医学影像分类**
+#### **需求模板B：医学影像分类**
 ```yaml
 # 智能医学ML规范（Spec）
 spec_type: "medical_classification"
@@ -212,7 +213,7 @@ agent_configuration:
   validator: "临床验证器"
 ```
 
-#### **模板C：工业质量控制**
+#### **需求模板C：工业质量控制**
 ```yaml
 # 智能工业ML规范（Spec）
 spec_type: "industrial_qc"
@@ -228,29 +229,29 @@ agent_configuration:
   validator: "鲁棒性验证器"
 ```
 
-## 🎯 智能验证框架
+## 🎯 自主编程智能体的验证框架
 
-### 🔍 自主质量gate
+### 🔍 自主质量验证（validation）
 
-#### **gate1：规范（Spec）合规性验证**
+#### **验证一：规范（Spec）合规性验证**
 - **自主编程智能体**：合规性验证器
 - **功能**：确保实现与声明规范（Spec）匹配
 - **产物**：合规性报告、偏差分析
 
-#### **gate2：性能基准测试**
+#### **验证二：性能基准测试**
 - **自主编程智能体**：性能分析器
 - **功能**：针对声明SLA的自动基准测试
 - **产物**：性能基线、优化建议
 
-#### **gate3：安全与可靠性审计**
+#### **验证三：安全与可靠性审计**
 - **自主编程智能体**：安全审计器
 - **功能**：自动化安全扫描和可靠性验证
 - **产物**：安全报告、修复计划
 
-### 📊 验证指标仪表板
+### 📊 验证结果仪表板
 
 ```mermaid
-pie title 智能验证覆盖率
+pie title 自主编程智能体验证统计
     "规范（Spec）合规性" : 35
     "性能SLA" : 25
     "安全检查" : 20
@@ -259,9 +260,9 @@ pie title 智能验证覆盖率
 
 ## 🎯 规范（Spec）驱动开发（Spec-Driven Development）
 
-### 🔄 三层规范（Spec）架构
+### 🔄 三阶段规范（Spec）架构
 
-#### **第1层：需求规范（Spec）（CREATE.md）**
+#### **第1阶段：需求规范（Spec）（CREATE.md）**
 ```yaml
 # 智能需求规范 (ARS)
 spec_source: "CREATE.md"
@@ -277,7 +278,7 @@ inheritance:
   - 引用DEBUG_CODE.md验证清单
 ```
 
-#### **第2层：技术规格（INITIAL.md）**
+#### **第2阶段：技术规格（INITIAL.md）**
 ```yaml
 # 可执行技术规格 (ETS)
 spec_source: "INITIAL.md"
@@ -290,7 +291,7 @@ tracking:
   - CREATE.md决策 → INITIAL.md规格 → 实现验证
 ```
 
-#### **第3层：验证规格（DEBUG_CODE.md）**
+#### **第3阶段：验证规格（DEBUG_CODE.md）**
 ```yaml
 # 验证合规规格 (VCS)
 spec_source: "DEBUG_CODE.md"
@@ -304,7 +305,7 @@ compliance:
   - 部署环境验证所有规格要求
 ```
 
-### 📊 规范（Spec）引用可视化
+### 📊 规范（Spec）文件的引用关系可视化
 
 ```mermaid
 graph TD
@@ -352,7 +353,7 @@ CREATE.md决策 → INITIAL.md规格 → 实现代码 → DEBUG验证 → 部署
 ### 📋 智能开发检查清单
 
 #### **规范（Spec）定义阶段**
-- [ ] 使用智能规划在CREATE.md中捕获需求
+- [ ] 使用规划自主编程智能体在CREATE.md中捕获需求
 - [ ] 在INITIAL.md中生成可执行规范（Spec）
 - [ ] 声明可衡量的性能SLA
 - [ ] 记录自主编程智能体优化的资源约束
@@ -404,7 +405,7 @@ graph LR
 - **项目质量不可控**：缺乏系统性验证流程
 
 ### 💡 我们的革命性解决方案
-**"文字描述即项目规格"** - 通过三层文档架构实现：
+**"文字描述即项目规格"** - 通过三阶段文档架构实现：
 
 ```mermaid
 graph TD
@@ -506,7 +507,7 @@ config_structure:
 
 ## 🚀 5分钟快速入门（文字版）
 
-### 🎯 选择你的项目类型
+### 🎯 输入你的项目类型
 
 #### **方案A：医疗影像检测项目**
 ```markdown
@@ -598,23 +599,6 @@ config_structure:
 
 ---
 
-## 🎯 项目愿景与社区
-
-### 🌟 我们的使命
-**让每个人都能通过文字描述创建生产级机器学习项目**
-
-### 🤝 贡献方式
-- **文档改进**：分享你的项目创建经验
-- **案例分享**：提交成功的项目文字规格
-- **问题反馈**：帮助完善文字指导手册
-
-### 📈 发展路线图
-- **v2.1**：增加更多行业项目文字模板
-- **v2.2**：集成AutoML文字指导功能
-- **v2.3**：支持多模态项目文字描述
-
----
-
 **🎯 核心记忆点**：**"这不是一个代码模板，而是一套通过文字描述创建机器学习项目的方法论"**
 
 ## 🚀 5分钟快速开始
@@ -664,10 +648,10 @@ docker-compose -f deploy/gpu/docker-compose.yml up -d
 docker exec my_project python scripts/train.py model=yolov10n data=coco2017
 ```
 
-## 📁 模板项目结构
+## 📁 框架项目结构
 
 ```
-ai-written-yolo/                 # 模板项目根目录
+framework_project_root/         # 框架项目根目录
 ├── README.md                   # 本文件：模板使用指南
 ├── CLAUDE.md                   # AI助手行为最高规范（Spec）
 ├── CREATE.md                   # 项目创建规划指南
@@ -688,27 +672,6 @@ ai-written-yolo/                 # 模板项目根目录
 │   └── shared/                 # 共享部署脚本
 └── tools/                      # 项目创建工具
     └── create.py               # 目标项目生成器
-```
-
-## 🎯 使用场景
-
-### 1. 新项目启动
-```bash
-# 使用模板创建目标项目
-python tools/create.py --name yolov10 --type detection --framework pytorch
-```
-
-### 2. 框架对比实验
-```bash
-# 在目标项目中切换框架
-# 编辑 configs/config.yaml:
-framework: pytorch  # 或 paddle
-```
-
-### 3. 数据集快速集成
-```bash
-# 在目标项目中下载数据集
-python scripts/download.py --dataset coco2017
 ```
 
 ## 🛠️ 技术栈支持
@@ -749,9 +712,6 @@ A: 通过配置文件一键切换，无需修改代码：
 # configs/config.yaml
 framework: pytorch  # 或 paddle
 ```
-
-### Q: 支持哪些数据集？
-A: 内置支持CIFAR-10、ImageNet、COCO、VOC等主流数据集，一行命令下载。
 
 ## 📚 下一步
 
