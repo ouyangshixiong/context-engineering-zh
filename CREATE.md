@@ -6,26 +6,26 @@
 
 ### 🎯 智能体协作架构
 
-本规划指南是**多智能体规范驱动系统**的核心入口，通过精确的规范引用确保AI代理团队的高效协作。每个智能体都有明确的职责边界和引用规范。
+本规划指南是**多智能体规范驱动系统**的核心入口，通过精确的规范引用确保自主编程智能体的高效协作。每个智能体都有明确的职责边界和引用规范。
 
 #### 📊 多智能体职责矩阵
 
 | 智能体角色 | 核心文档 | 规范引用位置 | 输入规范 | 输出规范 | 验证标准 |
 |------------|----------|--------------|----------|----------|----------|
-| **规划代理** | [PLANNING.md](./PLANNING.md) | 第2章"Think Hard框架" | CREATE.md需求描述 | 技术决策矩阵 | 15分钟标准流程 |
-| **任务代理** | [TASK.md](./TASK.md) | 第3章"任务分解模板" | PLANNING.md决策结果 | 任务分解清单 | 100%覆盖率 |
-| **技术代理** | [ML.md](./ML.md) | 第1章"框架版本矩阵" | TASK.md任务规格 | 技术选型方案 | 性能基准验证 |
-| **验证代理** | [DEBUG_CODE.md](./DEBUG_CODE.md) | 全程验证清单 | INITIAL.md技术规格 | 验证报告 | 零配置漂移 |
-| **部署代理** | [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) | 第4章"部署规范" | 验证报告通过 | 部署清单 | GPU利用率>90% |
+| **规划自主编程智能体** | [PLANNING.md](./PLANNING.md) | 第2章"Think Hard框架" | CREATE.md需求描述 | 技术决策矩阵 | 15分钟标准流程 |
+| **任务自主编程智能体** | [TASK.md](./TASK.md) | 第3章"任务分解模板" | PLANNING.md决策结果 | 任务分解清单 | 100%覆盖率 |
+| **技术自主编程智能体** | [ML.md](./ML.md) | 第1章"框架版本矩阵" | TASK.md任务规格 | 技术选型方案 | 性能基准验证 |
+| **验证自主编程智能体** | [DEBUG_CODE.md](./DEBUG_CODE.md) | 全程验证清单 | INITIAL.md技术规格 | 验证报告 | 零配置漂移 |
+| **部署自主编程智能体** | [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) | 第4章"部署规范" | 验证报告通过 | 部署清单 | GPU利用率>90% |
 
 #### 🔄 智能体协作流程图
 
 ```mermaid
 graph TD
     subgraph 需求分析阶段
-        CREATE[CREATE.md] --> PLAN[规划代理<br/>PLANNING.md]
-        CREATE --> TASK[任务代理<br/>TASK.md]  
-        CREATE --> ML[技术代理<br/>ML.md]
+        CREATE[CREATE.md] --> PLAN[规划自主编程智能体<br/>PLANNING.md]
+        CREATE --> TASK[任务自主编程智能体<br/>TASK.md]  
+        CREATE --> ML[技术自主编程智能体<br/>ML.md]
     end
     
     subgraph 规格生成阶段
@@ -35,8 +35,8 @@ graph TD
     end
     
     subgraph 验证部署阶段
-        INITIAL --> DEBUG[验证代理<br/>DEBUG_CODE.md]
-        INITIAL --> DOCKER[部署代理<br/>DOCKER_CONFIG.md]
+        INITIAL --> DEBUG[验证自主编程智能体<br/>DEBUG_CODE.md]
+        INITIAL --> DOCKER[部署自主编程智能体<br/>DOCKER_CONFIG.md]
         DEBUG --> DEPLOY[DEPLOY.md<br/>生产部署]
     end
     
@@ -54,25 +54,25 @@ graph TD
 
 #### 📋 规范引用精确位置
 
-**规划代理规范引用**:
+**规划自主编程智能体规范引用**:
 - 📍 使用PLANNING.md第2章"Think Hard框架"进行15分钟深度分析
 - 📍 引用ML.md第1章"框架版本矩阵"进行技术选型
 - 📍 依据TASK.md第3章"任务分解模板"制定实施计划
 
-**任务代理规范引用**:
+**任务自主编程智能体规范引用**:
 - 📍 基于PLANNING.md的技术决策进行任务分解
 - 📍 使用ML.md的硬件需求评估制定资源计划
 - 📍 输出符合INITIAL.md标准的任务清单
 
-**技术代理规范引用**:
+**技术自主编程智能体规范引用**:
 - 📍 根据CREATE.md的需求澄清选择技术栈
 - 📍 使用ML.md的性能基准验证技术可行性
 - 📍 生成INITIAL.md中的技术规格文档
 
 ### 🎯 智能体使用指南
 
-#### 对于AI编码代理
-1. **需求分析阶段**: 从CREATE.md开始，引用PLANNING.md进行15分钟Think Hard
+#### 对于AI编码自主编程智能体
+1. **需求分析阶段**: 从CREATE.md开始，引用PLANNING.md进行几分钟Think Hard
 2. **技术选型阶段**: 参考ML.md的框架版本矩阵进行决策
 3. **任务分解阶段**: 使用TASK.md的任务模板确保完整性
 4. **验证阶段**: 按照DEBUG_CODE.md的清单逐项验证
@@ -85,10 +85,10 @@ graph TD
 
 | 验证阶段 | 规范文档 | 智能体职责 | 验收标准 | 时间限制 |
 |----------|----------|------------|----------|----------|
-| **需求澄清** | CREATE.md+PLANNING.md | 规划代理 | 15分钟Think Hard完成 | 15分钟 |
-| **技术选型** | ML.md+TASK.md | 技术代理 | 框架决策有理有据 | 10分钟 |
-| **任务分解** | TASK.md+PLANNING.md | 任务代理 | 任务清单100%覆盖 | 5分钟 |
-| **规格确认** | INITIAL.md | 所有代理 | 技术规格完整准确 | 5分钟 |
+| **需求澄清** | CREATE.md+PLANNING.md | 规划自主编程智能体 | 几分钟Think Hard完成 | 5分钟 |
+| **技术选型** | ML.md+TASK.md | 技术自主编程智能体 | 框架决策有理有据 | 2分钟 |
+| **任务分解** | TASK.md+PLANNING.md | 任务自主编程智能体 | 任务清单100%覆盖 | 2分钟 |
+| **规格确认** | INITIAL.md | 所有自主编程智能体 | 技术规格完整准确 | 2分钟 |
 
 #### 🔄 规范（Spec）驱动流程图
 
