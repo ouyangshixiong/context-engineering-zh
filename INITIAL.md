@@ -42,17 +42,39 @@ graph TD
 | **架构规格** | CREATE.md:架构设计 | 目录结构、代码约束 | 符合CLAUDE.md约束 |
 | **验证规格** | CREATE.md:时间规划 | 训练参数、性能基准 | 与DEBUG_CODE.md验证清单对应 |
 
-### 🎯 AI智能体使用指南
+### 🤖 项目架构智能体使用指南
 
-**对于编码智能体**：
-1. **读取顺序**：先CREATE.md做需求分析 → 再INITIAL.md获取技术规格
-2. **继承验证**：确保INITIAL.md的每个规格都能在CREATE.md找到决策依据
-3. **规格追踪**：建立CREATE.md决策 → INITIAL.md规格 → 实现代码的完整追踪链
+**项目架构智能体**负责将CREATE.md的think hard结果转化为可执行的技术规格，并与所有Agent协作：
 
-**对于用户**：
-- 每个技术决策都有CREATE.md的思考依据
-- 每个规格参数都有明确的业务价值支撑
-- 整个开发流程遵循CREATE.md→INITIAL.md→实现的规范（Spec）路径
+#### 智能体协作流程
+```mermaid
+graph TD
+    CREATE[CREATE.md规划结果] --> PROJECT[项目架构智能体]
+    PROJECT --> INITIAL[INITIAL.md技术规格]
+    PROJECT --> CODE[代码生成智能体]
+    PROJECT --> VALIDATE[规格验证智能体]
+    PROJECT --> DEBUG[调试编排智能体]
+    PROJECT --> DEPLOY[部署编排智能体]
+    
+    style PROJECT fill:#90EE90,stroke:#333
+    style CREATE fill:#FFD700,stroke:#333
+    style INITIAL fill:#87CEEB,stroke:#333
+```
+
+#### 智能体职责分工
+| 智能体类型 | 职责范围 | 输入规范 | 输出标准 | 验证标准 |
+|------------|----------|----------|----------|----------|
+| **项目架构智能体** | 技术规格定义 | CREATE.md决策结果 | INITIAL.md完整规格 | 100%决策覆盖率 |
+| **代码生成智能体** | 高层API实现 | INITIAL.md技术规格 | ≤200行核心代码 | 零样板代码 |
+| **规格验证智能体** | 规范符合性检查 | INITIAL.md+实现代码 | 验证报告 | 100%规范符合 |
+| **调试编排智能体** | 调试流程设计 | INITIAL.md调试需求 | DEBUG_CODE.md流程 | 系统化调试 |
+| **部署编排智能体** | 生产部署方案 | INITIAL.md部署需求 | DOCKER_CONFIG.md配置 | 一键部署就绪 |
+
+**编码智能体使用规范**：
+1. **读取顺序**：项目架构智能体→CREATE.md→INITIAL.md→代码生成
+2. **规格验证**：每个技术决策都有CREATE.md思考依据
+3. **代码约束**：严格遵循≤200行高层API实现
+4. **部署验证**：通过部署编排智能体验证生产就绪性
 
 ## 📊 项目概况
 

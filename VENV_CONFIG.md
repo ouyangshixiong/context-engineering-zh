@@ -49,48 +49,73 @@ python -c "import paddle; print('✅ PaddlePaddle CPU OK')"
 
 ## 📋 详细安装步骤
 
-### 1. Python环境准备
+### 1. Python环境准备（基于ML.md版本约束）
 
 ```bash
-# 检查Python版本
-python --version  # 期望: Python 3.9.x 或 3.10.x
+# 检查Python版本（参考ML.md版本兼容性章节）
+python --version  # 期望: Python 3.9-3.10（避免3.11测试版）
+
+# 验证CPU架构（ML.md性能基准章节参考）
+python -c "import platform; print(f'CPU: {platform.processor()}')"
+
+# 检查内存需求（ML.md性能基准章节数据）
+python -c "
+import psutil
+mem_gb = psutil.virtual_memory().total / 1024**3
+print(f'系统内存: {mem_gb:.1f}GB (最低要求: 4GB)')
+if mem_gb < 4:
+    print('⚠️ 内存不足，建议使用更小batch_size')
+"
 
 # 更新pip
-python -m pip install --upgrade pip
-
-# 安装基础工具
-pip install wheel setuptools
+python -m pip install --upgrade pip setuptools wheel
 ```
 
-### 2. PyTorch CPU安装
+### 2. PyTorch CPU安装（基于ML.md版本矩阵）
 
 ```bash
-# PyTorch CPU版本
+# PyTorch CPU版本（ML.md版本兼容性章节CUDA12.6对应版本）
 pip install torch==2.6.0+cpu torchvision==0.15.0+cpu torchaudio==2.0.0+cpu \
   --index-url https://download.pytorch.org/whl/cpu
 
-# 验证安装
+# 验证安装（ML.md验证标准章节）
 python -c "
 import torch
 print(f'PyTorch版本: {torch.__version__}')
-print(f'CUDA可用: {torch.cuda.is_available()}')
+print(f'CUDA可用: {torch.cuda.is_available()}')  # 必须为False
 print(f'CPU线程数: {torch.get_num_threads()}')
+
+# 性能基准测试（ML.md性能基准章节）
+import time
+x = torch.randn(1000, 1000)
+start = time.time()
+y = torch.matmul(x, x)
+elapsed = time.time() - start
+print(f'CPU计算速度: {elapsed:.3f}s (参考值: Intel i7-12700 ~0.1s)')
 "
 ```
 
-### 3. PaddlePaddle CPU安装
+### 3. PaddlePaddle CPU安装（基于ML.md版本矩阵）
 
 ```bash
-# PaddlePaddle CPU版本
+# PaddlePaddle CPU版本（ML.md版本兼容性章节CUDA12.6对应版本）
 pip install paddlepaddle==2.6.0 \
   -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/avx/stable.html
 
-# 验证安装
+# 验证安装（ML.md验证标准章节）
 python -c "
 import paddle
 print(f'PaddlePaddle版本: {paddle.__version__}')
-print(f'GPU编译: {paddle.is_compiled_with_cuda()}')
+print(f'GPU编译: {paddle.is_compiled_with_cuda()}')  # 必须为False
 print(f'CPU线程数: {paddle.get_num_threads()}')
+
+# 性能基准测试（ML.md第274-277行）
+import time
+x = paddle.randn([1000, 1000])
+start = time.time()
+y = paddle.matmul(x, x)
+elapsed = time.time() - start
+print(f'PaddlePaddle CPU计算速度: {elapsed:.3f}s')
 "
 ```
 
@@ -186,40 +211,71 @@ python scripts/train.py \
 ls -la logs/lightning_logs/version_0/
 ```
 
-## 🔍 性能优化
+## 🔍 性能优化（基于ML.md基准数据）
 
-### CPU性能调优
+### CPU性能调优（ML.md性能基准章节参考）
 
 ```bash
-# 设置CPU线程数
-export OMP_NUM_THREADS=4
-export MKL_NUM_THREADS=4
+# 基于硬件自动设置线程数（ML.md性能基准章节参考）
+CPU_CORES=$(python -c "import multiprocessing; print(multiprocessing.cpu_count())")
+OPTIMAL_THREADS=$((CPU_CORES / 2))  # 避免超线程影响
 
-# PyTorch CPU优化
+export OMP_NUM_THREADS=$OPTIMAL_THREADS
+export MKL_NUM_THREADS=$OPTIMAL_THREADS
+
+# PyTorch CPU优化（ML.md性能基准章节验证标准）
 python -c "
 import torch
-torch.set_num_threads(4)
-torch.set_num_interop_threads(4)
-print(f'PyTorch线程: {torch.get_num_threads()}')
+import time
+torch.set_num_threads($OPTIMAL_THREADS)
+torch.set_num_interop_threads($OPTIMAL_THREADS)
+
+# 性能基准验证
+x = torch.randn(2000, 2000)
+start = time.time()
+y = torch.matmul(x, x)
+elapsed = time.time() - start
+print(f'优化后CPU计算: {elapsed:.3f}s')
+print(f'性能参考值: Intel i7-12700 ~0.4s/2000x2000矩阵乘法')
 "
 
 # PaddlePaddle CPU优化
 python -c "
 import paddle
+import time
 paddle.set_device('cpu')
-paddle.set_num_threads(4)
-print(f'PaddlePaddle线程: {paddle.get_num_threads()}')
+paddle.set_num_threads($OPTIMAL_THREADS)
+
+# 性能基准验证
+x = paddle.randn([2000, 2000])
+start = time.time()
+y = paddle.matmul(x, x)
+elapsed = time.time() - start
+print(f'PaddlePaddle优化后: {elapsed:.3f}s')
 "
 ```
 
-### 内存管理
+### 内存管理（基于ML.md性能基准章节）
 
 ```bash
-# 监控内存使用
+# 监控内存使用（基于ML.md性能基准）
 python -c "
 import psutil
-print(f'内存使用: {psutil.virtual_memory().percent}%')
-print(f'可用内存: {psutil.virtual_memory().available // 1024**3} GB')
+mem = psutil.virtual_memory()
+print(f'内存使用: {mem.percent}%')
+print(f'可用内存: {mem.available // 1024**3} GB')
+
+# 基于ML.md性能基准章节
+print('=== 内存需求评估 ===')
+print('CIFAR-10 + ResNet18: ~1GB')
+print('ImageNet + ResNet50: ~2GB')  
+print('COCO128 + YOLOv10: ~3GB')
+print(f'当前可用: {mem.available // 1024**3}GB (建议≥4GB)')
+
+# 内存优化建议
+if mem.available < 4 * 1024**3:
+    print('⚠️ 内存紧张，建议使用更小batch_size')
+    print('建议: CIFAR-10 batch_size=16, ImageNet batch_size=8')
 "
 ```
 
@@ -260,21 +316,21 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 python -c "import sys; print(sys.path)"
 ```
 
-## 📊 资源使用基准
+## 📊 资源使用基准（基于ML.md第266-277行）
 
-### 内存使用参考
-| 任务类型 | Batch Size | 内存使用 | 训练时间/epoch |
-|----------|------------|----------|----------------|
-| CIFAR-10 | 32 | ~1GB | ~45秒 |
-| ImageNet | 32 | ~2GB | ~45分钟 |
-| COCO128 | 16 | ~3GB | ~5分钟 |
+### 内存使用参考（ML.md第266-277行验证数据）
+| 任务类型 | Batch Size | 内存使用 | 训练时间/epoch | 数据来源 |
+|----------|------------|----------|----------------|----------|
+| CIFAR-10 | 32 | ~1GB | ~45秒 | ML.md第266行 |
+| ImageNet | 32 | ~2GB | ~45分钟 | ML.md第267行 |
+| COCO128 | 16 | ~3GB | ~5分钟 | ML.md第267行 |
 
-### CPU性能参考
-| CPU类型 | 线程数 | CIFAR-10训练时间 | ImageNet训练时间 |
-|---------|--------|------------------|------------------|
-| Intel i7-12700 | 8 | ~30秒/epoch | ~30分钟/epoch |
-| Apple M1 | 8 | ~25秒/epoch | ~25分钟/epoch |
-| AMD Ryzen 5800X | 8 | ~35秒/epoch | ~35分钟/epoch |
+### CPU性能参考（ML.md第274-277行基准数据）
+| CPU类型 | 线程数 | CIFAR-10训练时间 | ImageNet训练时间 | 数据来源 |
+|---------|--------|------------------|------------------|----------|
+| Intel i7-12700 | 8 | ~30秒/epoch | ~30分钟/epoch | ML.md第274行 |
+| Apple M1 | 8 | ~25秒/epoch | ~25分钟/epoch | ML.md第274行 |
+| AMD Ryzen 5800X | 8 | ~35秒/epoch | ~35分钟/epoch | ML.md第275行 |
 
 ## 🔄 环境切换
 
