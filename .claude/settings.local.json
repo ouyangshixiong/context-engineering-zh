@@ -19,7 +19,19 @@
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(chmod:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Bash(time:*)",
+      "Bash(PYTHONPATH=. python scripts/train.py --framework pytorch --config configs/quick_train.yaml)",
+      "Bash(PYTHONPATH=. time python scripts/train.py --framework paddle --config configs/quick_train.yaml)",
+      "Bash(PYTHONPATH=. python scripts/train.py --framework paddle --config configs/quick_train.yaml)",
+      "Bash(PYTHONPATH=. python test_paddle_quick.py)",
+      "Bash(PYTHONPATH=. python test_paddle_final.py)",
+      "Bash(nvidia-smi:*)",
+      "Bash(. venv/bin/activate)",
+      "Bash(./scripts/debug-spec-validator.sh:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
