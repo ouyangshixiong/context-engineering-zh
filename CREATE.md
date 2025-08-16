@@ -102,7 +102,7 @@ graph TD
     TASK --> INITIAL
     ML --> INITIAL
     
-    INITIAL --> VENV[VENV_CONFIG.md<br/>CPU验证]
+    INITIAL --> VENV[VENV_CONFIG.md<br/>GPU验证]
     INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
     INITIAL --> DOCKER[DOCKER_CONFIG.md<br/>GPU部署]
     INITIAL --> DEPLOY[DEPLOY.md<br/>生产部署]
@@ -326,12 +326,12 @@ gantt
     架构设计           :a3, after a2, 1d
     
     section 验证阶段
-    CPU环境搭建        :b1, after a3, 1d
+    GPU环境搭建        :b1, after a3, 1d
     代码验证           :b2, after b1, 1d
     性能测试           :b3, after b2, 1d
     
     section 部署阶段
-    GPU环境配置        :c1, after b3, 1d
+    CPU环境配置        :c1, after b3, 1d
     生产部署           :c2, after c1, 1d
     上线验证           :c3, after c2, 1d
 ```
@@ -541,7 +541,7 @@ gantt
 ## 实施策略（文字时间规划）
 **阶段划分**：
 - 规划阶段：[需求澄清 + 技术选型，1天]
-- 验证阶段：[CPU环境 + 代码验证，2天]
+- 验证阶段：[GPU环境 + 代码验证，2天]
 - 部署阶段：[GPU优化 + 生产上线，2天]
 
 **风险控制**：
@@ -799,7 +799,7 @@ memory_requirements:
 
 完成规划后：
 1. 将详细规格写入INITIAL.md
-2. 开始VENV_CONFIG.md的CPU环境配置
+2. 开始VENV_CONFIG.md的GPU环境配置
 3. 按DEBUG_CODE.md验证代码
 4. 最终DOCKER_CONFIG.md部署
 
@@ -834,8 +834,8 @@ python scripts/init.py --name deeplab --type segmentation \
 ### 文档系统完整性
 - [ ] CREATE.md 规划指南完整
 - [ ] INITIAL.md 规格模板就绪
-- [ ] VENV_CONFIG.md CPU配置指南
-- [ ] DOCKER_CONFIG.md GPU配置指南
+- [ ] VENV_CONFIG.md GPU配置指南
+- [ ] DOCKER_CONFIG.md CPU配置指南
 - [ ] DEPLOY.md 部署检查清单
 
 ### 配置模板存在
@@ -875,9 +875,9 @@ python -c "from omegaconf import OmegaConf; OmegaConf.load('configs/config.yaml'
 ## 📚 下一步
 
 完成项目创建后：
-1. 查看 [VENV_CONFIG.md](./VENV_CONFIG.md) 配置CPU环境
+1. 查看 [VENV_CONFIG.md](./VENV_CONFIG.md) 配置GPU环境
 2. 运行 [DEBUG_CODE.md](./DEBUG_CODE.md) 验证代码
-3. 配置 [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) 部署GPU环境
+3. 配置 [DOCKER_CONFIG.md](./DOCKER_CONFIG.md) 部署CPU环境
 
 ---
 **创建时间**: 立即 | **预计用时**: 2分钟

@@ -22,7 +22,7 @@
 ```mermaid
 graph TD
     CREATE[CREATE.md<br/>15分钟思考] --> INITIAL[INITIAL.md<br/>技术规格]
-    INITIAL --> VENV[VENV_CONFIG.md<br/>CPU验证]
+    INITIAL --> VENV[VENV_CONFIG.md<br/>GPU验证]
     INITIAL --> DEBUG[DEBUG_CODE.md<br/>代码验证]
     INITIAL --> DOCKER[DOCKER_CONFIG.md<br/>GPU部署]
     INITIAL --> DEPLOY[DEPLOY.md<br/>生产上线]
@@ -412,7 +412,7 @@ industrial_classification:
 4. 建立两阶段验证流程
 
 ### 3. 验证规格实现
-1. VENV阶段：CPU验证代码正确性
+1. VENV阶段：GPU验证代码正确性
 2. DEBUG阶段：系统性代码验证
 3. DOCKER阶段：GPU性能验证
 4. DEPLOY阶段：生产部署验证

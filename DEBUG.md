@@ -4,43 +4,74 @@
 
 ### 🔍 一键调试检查
 ```bash
-# 全自动化环境诊断
+# 全自动化环境诊断（GPU优先验证）
 python scripts/debug.py
 
-# 手动分步检查（推荐学习用）
-python scripts/debug.py --step-by-step
+# 手动分步检查（GPU调试学习用）
+python scripts/debug.py --step-by-step --gpu-first
 ```
 
 ### 🏗️ 环境配置指南
 
-#### 💻 CPU调试环境（推荐首次验证）
+#### 🚀 GPU调试环境（**首要验证环境** - CUDA 12.6.3专用）
 ```bash
-# 创建隔离的CPU调试环境
-conda create -n dl-cpu python=3.10
-conda activate dl-cpu
+# 创建GPU调试环境（基于ML.md版本矩阵）
+conda create -n ml-gpu-debug python=3.10
+conda activate ml-gpu-debug
 
-# 安装PyTorch CPU版本
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# 安装PyTorch GPU版本（CUDA 12.6.3专用）
+pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 torchaudio==2.0.0+cu126 \
+  --index-url https://download.pytorch.org/whl/cu126
 
-# 安装项目依赖
-pip install pytorch-lightning omegaconf hydra-core rich
+# 安装PaddlePaddle GPU版本（CUDA 12.6.3专用）
+pip install paddlepaddle-gpu==2.6.0.post126 \
+  -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
-# 验证安装
-python -c "import torch; print('✅ PyTorch CPU版本安装成功')"
+# 验证GPU安装
+python -c "import torch; print(f'✅ PyTorch GPU: {torch.__version__}')"
+python -c "import torch; print(f'✅ CUDA版本: {torch.version.cuda}')"
+python -c "import torch; print(f'✅ GPU数量: {torch.cuda.device_count()}')"
+python -c "import paddle; print(f'✅ PaddlePaddle GPU: {paddle.__version__}')"
+
+# 基于ML.md第274-277行的性能基准验证
+python -c "
+import torch, time
+if torch.cuda.is_available():
+    x = torch.randn(8192, 8192).cuda()
+    torch.cuda.synchronize()
+    start = time.time()
+    y = torch.matmul(x, x)
+    torch.cuda.synchronize()
+    print(f'🔥 GPU基准测试: {time.time()-start:.3f}s (期望: RTX3060 ~0.002s)')
+    print(f'🔥 GPU利用率: {torch.cuda.utilization()}% (期望: ≥90%)')
+"
 ```
 
-#### 🚀 GPU生产环境
+#### 💻 CPU生产环境（**部署验证阶段**）
 ```bash
-# 创建GPU开发环境
-conda create -n dl-gpu python=3.10
-conda activate dl-gpu
+# 创建CPU生产环境（Docker部署专用）
+conda create -n ml-cpu-deploy python=3.10
+conda activate ml-cpu-deploy
 
-# 安装CUDA 12.6兼容版本
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+# 安装PyTorch CPU版本
+pip install torch==2.6.0+cpu torchvision==0.15.0+cpu torchaudio==2.0.0+cpu \
+  --index-url https://download.pytorch.org/whl/cpu
 
-# 验证CUDA可用性
-python -c "import torch; print(f'✅ CUDA可用: {torch.cuda.is_available()}')"
-python -c "import torch; print(f'🎯 GPU数量: {torch.cuda.device_count()}')"
+# 安装PaddlePaddle CPU版本
+pip install paddlepaddle==2.6.0
+
+# 验证CPU安装
+python -c "import torch; print('✅ PyTorch CPU版本安装成功')"
+python -c "import paddle; print('✅ PaddlePaddle CPU版本安装成功')"
+
+# 基于ML.md第274-277行的CPU基准验证
+python -c "
+import torch, time
+x = torch.randn(1000, 1000)
+start = time.time()
+y = torch.matmul(x, x)
+print(f'🖥️ CPU基准测试: {time.time()-start:.3f}s (期望: i7-12700 ~0.8s)')
+"
 ```
 
 ## 🔍 分步调试指南
@@ -65,25 +96,41 @@ if torch.cuda.is_available():
 
 ### 2️⃣ 数据集验证（3分钟）
 ```bash
-# 📥 下载测试数据集
-python scripts/download.py --datasets cifar10 --data_dir ./test_data
+# 📥 GPU优先测试数据集下载
+python scripts/download.py --datasets coco128 --data_dir ./test_data
 
-# ✅ 验证数据完整性
+# ✅ GPU环境数据完整性验证
+python -c "
+from src.datasets.datamodules.coco_datamodule import COCODataModule
+from pathlib import Path
+
+data_dir = './test_data'
+if Path(data_dir).exists():
+    dm = COCODataModule(data_dir=data_dir, batch_size=16)  # GPU优化batch_size
+    dm.prepare_data()
+    dm.setup('fit')
+    print(f'✅ GPU训练样本: {len(dm.train_dataset):,}')
+    print(f'✅ GPU验证样本: {len(dm.val_dataset):,}')
+    print(f'✅ 类别数量: {dm.num_classes}')
+    print(f'✅ 图像尺寸: {dm.train_dataset[0][0].shape}')
+    print(f'✅ GPU内存需求: ~4GB (基于ML.md第266-277行)')
+else:
+    print('❌ 数据目录不存在，请先下载GPU测试数据集')
+"
+
+# 🎯 CIFAR-10 CPU验证（部署阶段）
 python -c "
 from src.datasets.datamodules.cifar10_datamodule import CIFAR10DataModule
 from pathlib import Path
 
 data_dir = './test_data'
 if Path(data_dir).exists():
-    dm = CIFAR10DataModule(data_dir=data_dir)
+    dm = CIFAR10DataModule(data_dir=data_dir, batch_size=32)  # CPU优化batch_size
     dm.prepare_data()
     dm.setup('fit')
-    print(f'✅ 训练样本: {len(dm.train_dataset):,}')
-    print(f'✅ 验证样本: {len(dm.val_dataset):,}')
-    print(f'✅ 类别数量: {dm.num_classes}')
-    print(f'✅ 图像尺寸: {dm.train_dataset[0][0].shape}')
-else:
-    print('❌ 数据目录不存在，请先下载数据集')
+    print(f'✅ CPU训练样本: {len(dm.train_dataset):,}')
+    print(f'✅ CPU验证样本: {len(dm.val_dataset):,}')
+    print(f'✅ CPU内存需求: ~2GB RAM')
 "
 ```
 

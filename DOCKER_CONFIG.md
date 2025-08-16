@@ -1,16 +1,15 @@
-# 🐳 GPU生产环境配置指南
+# 🐳 CPU生产环境配置指南
 
-> 专为高性能训练设计的Docker GPU环境，支持PyTorch和PaddlePaddle
+> 专为CPU推理部署设计的Docker环境，支持PyTorch和PaddlePaddle CPU优化
 
 ## 🎯 环境概述
 
 | 组件 | 版本 | 用途 | 备注 |
 |------|------|------|------|
-| CUDA | 12.6 | GPU计算 | 最新稳定版 |
-| PyTorch | 2.6.0+cu126 | 深度学习框架 | GPU加速 |
-| PaddlePaddle | 2.6.0+gpu | 深度学习框架 | GPU加速 |
+| PyTorch | 2.6.0+cpu | 深度学习框架 | CPU优化版本 |
+| PaddlePaddle | 2.6.0+cpu | 深度学习框架 | CPU优化版本 |
 | 内存需求 | ≥ 8GB | 运行要求 | 支持batch_size=64 |
-| GPU需求 | ≥ 8GB显存 | 训练要求 | RTX 3060以上 |
+| CPU需求 | ≥ 4核心 | 推理要求 | Intel i7/AMD Ryzen 7以上 |
 
 ## 🤖 部署编排智能体集成指南
 
@@ -69,7 +68,7 @@ docker run --rm --gpus all nvidia/cuda:12.6.0-base-ubuntu20.04 nvidia-smi
 
 #### 基础Dockerfile
 ```dockerfile
-FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
+FROM python:3.10-slim
 
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
@@ -80,15 +79,15 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /workspace
 
 # 安装Python依赖
-COPY requirements-gpu.txt .
-RUN pip install --no-cache-dir -r requirements-gpu.txt
+COPY requirements-cpu.txt .
+RUN pip install --no-cache-dir -r requirements-cpu.txt
 
 # 复制项目文件
 COPY . .
 
 # 设置环境变量
 ENV PYTHONPATH=/workspace
-ENV CUDA_VISIBLE_DEVICES=0,1,2,3
+ENV OMP_NUM_THREADS=4
 
 # 暴露端口
 EXPOSE 8888 6006

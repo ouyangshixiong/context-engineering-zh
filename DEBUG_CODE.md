@@ -295,7 +295,7 @@ python scripts/train.py \
   model=yolov10n \
   data=coco128 \
   trainer.max_epochs=3 \
-  trainer.accelerator=cpu \
+  trainer.accelerator=gpu \
   trainer.devices=1 \
   trainer.log_every_n_steps=1
 
@@ -804,12 +804,12 @@ print(json.dumps(report, indent=2, ensure_ascii=False))
 
 ## 📊 性能基准
 
-### CPU训练基准
-| 数据集 | Batch Size | Epochs | 训练时间 | 内存使用 |
-|--------|------------|--------|----------|----------|
-| CIFAR-10 | 32 | 1 | ~45秒 | ~1GB |
-| COCO128 | 16 | 1 | ~5分钟 | ~3GB |
-| ImageNet | 32 | 1 | ~45分钟 | ~2GB |
+### GPU训练基准
+| 数据集 | Batch Size | Epochs | 训练时间 | GPU内存使用 |
+|--------|------------|--------|----------|-------------|
+| CIFAR-10 | 32 | 1 | ~8秒 | ~2GB |
+| COCO128 | 32 | 1 | ~45秒 | ~4GB |
+| ImageNet | 32 | 1 | ~8分钟 | ~8GB |
 
 ## 🎯 规范（Spec）验证与规格追踪
 

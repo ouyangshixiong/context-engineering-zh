@@ -42,8 +42,8 @@ graph TD
 ### 📊 框架版本精确规范
 | 阶段 | 智能体职责 | PyTorch版本 | PaddlePaddle版本 | CUDA版本 | 规范引用位置 | 验证标准 |
 |------|------------|-------------|------------------|----------|--------------|----------|
-| **VENV调试** | 技术自主编程智能体CPU验证 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第1章 | CPU环境验证 |
-| **DOCKER部署** | 技术自主编程智能体GPU优化 | 2.6.0+cu126 | 2.6.0+gpu | 12.6 | ML.md第2章 | GPU利用率>90% |
+| **VENV调试** | 技术自主编程智能体GPU验证 | 2.6.0+cu126 | 2.6.0+gpu | 12.6.3 | ML.md第1章 | GPU利用率>90% |
+| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
 
 ### 🎯 技术自主编程智能体决策框架
 
@@ -164,12 +164,12 @@ configurations = {
 
 | 阶段 | 智能体职责 | PyTorch版本 | PaddlePaddle版本 | CUDA版本 | 规范引用位置 | 验证标准 |
 |------|------------|-------------|------------------|----------|--------------|----------|
-| **VENV调试** | 技术自主编程智能体CPU验证 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第1章 | CPU环境验证 |
-| **DOCKER部署** | 技术自主编程智能体GPU优化 | 2.6.0+cu126 | 2.6.0+gpu | 12.6 | ML.md第2章 | GPU利用率>90% |
+| **VENV调试** | 技术自主编程智能体GPU验证 | 2.6.0+cu126 | 2.6.0+gpu | 12.6.3 | ML.md第1章 | GPU利用率>90% |
+| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
 
-### VENV调试环境（CPU-only）
+### VENV调试环境（GPU验证环境）
 
-#### PyTorch CPU环境
+#### PyTorch GPU环境
 ```bash
 # 创建调试环境
 conda create -n ml-debug python=3.10
@@ -183,16 +183,16 @@ pip install torch==2.6.0+cpu torchvision==0.15.0+cpu torchaudio==2.0.0+cpu \
 python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"
 ```
 
-#### PaddlePaddle CPU环境
+#### PaddlePaddle GPU环境
 ```bash
-# PaddlePaddle CPU版本
-pip install paddlepaddle==2.6.0 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/avx/stable.html
+# PaddlePaddle GPU版本
+pip install paddlepaddle-gpu==2.6.0.post126 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 # 验证安装
 python -c "import paddle; print(f'PaddlePaddle: {paddle.__version__}, GPU: {paddle.is_compiled_with_cuda()}')"
 ```
 
-#### 通用依赖（CPU环境）
+#### 通用依赖（GPU验证环境）
 ```bash
 pip install pytorch-lightning==2.0.0 omegaconf==2.3.0 \
   torchmetrics==0.11.0 scikit-learn==1.3.0 \
