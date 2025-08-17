@@ -65,7 +65,7 @@ python scripts/train.py model=yolov10n data=coco128 trainer.max_epochs=1 trainer
 **环境**: Docker + CUDA 12.6
 **配置**:
 - CUDA: 12.6
-- PyTorch: 2.6.0+cu126
+- PyTorch: 2.4.1
 - GPU: RTX 3060 12GB
 - Batch Size: 32
 

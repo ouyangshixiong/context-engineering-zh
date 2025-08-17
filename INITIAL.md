@@ -160,8 +160,8 @@ tech_stack:
 ```yaml
 dependencies:
   pytorch:
-    - torch==2.6.0+cu126
-    - torchvision==0.15.0+cu126
+    - torch==2.4.1
+    - torchvision==0.15.0
     - pytorch-lightning==2.0.0
   
   medical:

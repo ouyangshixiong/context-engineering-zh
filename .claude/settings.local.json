@@ -31,7 +31,8 @@
       "Bash(nvidia-smi:*)",
       "Bash(. venv/bin/activate)",
       "Bash(./scripts/debug-spec-validator.sh:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

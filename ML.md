@@ -42,8 +42,8 @@ graph TD
 ### 📊 框架版本精确规范
 | 阶段 | 智能体职责 | PyTorch版本 | PaddlePaddle版本 | CUDA版本 | 规范引用位置 | 验证标准 |
 |------|------------|-------------|------------------|----------|--------------|----------|
-| **VENV调试** | 技术自主编程智能体GPU验证 | 2.6.0+cu126 | 2.6.0+gpu | 12.6.3 | ML.md第1章 | GPU利用率>90% |
-| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
+| **VENV调试** | 技术自主编程智能体GPU验证 | 2.4.1 | 2.6.0+gpu | N/A | ML.md第1章 | GPU利用率>90% |
+| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.4.1+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
 
 ### 🎯 技术自主编程智能体决策框架
 
@@ -164,8 +164,8 @@ configurations = {
 
 | 阶段 | 智能体职责 | PyTorch版本 | PaddlePaddle版本 | CUDA版本 | 规范引用位置 | 验证标准 |
 |------|------------|-------------|------------------|----------|--------------|----------|
-| **VENV调试** | 技术自主编程智能体GPU验证 | 2.6.0+cu126 | 2.6.0+gpu | 12.6.3 | ML.md第1章 | GPU利用率>90% |
-| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.6.0+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
+| **VENV调试** | 技术自主编程智能体GPU验证 | 2.4.1 | 2.6.0+gpu | N/A | ML.md第1章 | GPU利用率>90% |
+| **DOCKER部署** | 技术自主编程智能体CPU优化 | 2.4.1+cpu | 2.6.0+cpu | N/A | ML.md第2章 | CPU推理优化 |
 
 ### VENV调试环境（GPU验证环境）
 
@@ -176,7 +176,7 @@ conda create -n ml-debug python=3.10
 conda activate ml-debug
 
 # PyTorch CPU版本
-pip install torch==2.6.0+cpu torchvision==0.15.0+cpu torchaudio==2.0.0+cpu \
+pip install torch==2.4.1+cpu torchvision==0.19.1+cpu torchaudio==2.4.1+cpu \
   --index-url https://download.pytorch.org/whl/cpu
 
 # 验证安装
@@ -200,21 +200,21 @@ pip install pytorch-lightning==2.0.0 omegaconf==2.3.0 \
   tensorboard==2.13.0 wandb==0.15.0
 ```
 
-### DOCKER部署环境（GPU加速 - CUDA 12.6.3专用）
+### DOCKER部署环境（GPU加速 - CUDA 12.4.1专用）
 
 #### 镜像类型选择指南
 
 | 镜像类型 | 推荐镜像 | 精确标签 | 大小 | 使用场景 | 包含组件 |
 |----------|----------|----------|------|----------|----------|
-| **开发/训练** | nvidia/cuda | `12.6.3-cudnn-devel-ubuntu20.04` | ~5.2GB | 完整开发环境 | CUDA + cuDNN + 编译工具 |
-| **部署/推理** | nvidia/cuda | `12.6.3-cudnn-runtime-ubuntu20.04` | ~3.1GB | 生产部署 | CUDA + cuDNN（无编译工具） |
-| **基础验证** | nvidia/cuda | `12.6.3-base-ubuntu20.04` | ~1.8GB | 环境测试 | 仅CUDA运行时 |
+| **开发/训练** | nvidia/cuda | `12.4.1-cudnn-devel-ubuntu20.04` | ~5.2GB | 完整开发环境 | CUDA + cuDNN + 编译工具 |
+| **部署/推理** | nvidia/cuda | `12.4.1-cudnn-runtime-ubuntu20.04` | ~3.1GB | 生产部署 | CUDA + cuDNN（无编译工具） |
+| **基础验证** | nvidia/cuda | `12.4.1-base-ubuntu20.04` | ~1.8GB | 环境测试 | 仅CUDA运行时 |
 
 #### 版本验证与选择逻辑
 ```bash
 # 验证镜像版本信息
-docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 bash -c "
-echo '=== CUDA 12.6.3镜像版本验证 ==='
+docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 bash -c "
+echo '=== CUDA 12.4.1镜像版本验证 ==='
 echo 'CUDA版本:' 
 nvcc --version | grep release
 echo 'cuDNN版本:' 
@@ -226,7 +226,7 @@ cat /etc/os-release | grep VERSION_ID
 "
 
 # 预期输出：
-# CUDA版本: release 12.6, V12.6.85
+# CUDA版本: release 12.4, V12.4.120
 # cuDNN版本: CUDNN_MAJOR 9, CUDNN_MINOR 3, CUDNN_PATCHLEVEL 0
 # Python版本: Python 3.10.12
 # Ubuntu版本: VERSION_ID="20.04"
@@ -235,12 +235,12 @@ cat /etc/os-release | grep VERSION_ID
 #### 镜像选择决策树
 ```mermaid
 graph TD
-    A[选择CUDA 12.6.3镜像] --> B{需要编译吗?}
+    A[选择CUDA 12.4.1镜像] --> B{需要编译吗?}
     B -->|是| C[使用devel镜像]
     B -->|否| D{需要cuDNN吗?}
-    C --> E[nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04]
-    D -->|是| F[nvidia/cuda:12.6.3-cudnn-runtime-ubuntu20.04]
-    D -->|否| G[nvidia/cuda:12.6.3-base-ubuntu20.04]
+    C --> E[nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04]
+    D -->|是| F[nvidia/cuda:12.4.1-cudnn-runtime-ubuntu20.04]
+    D -->|否| G[nvidia/cuda:12.4.1-base-ubuntu20.04]
     
     style E fill:#90EE90
     style F fill:#87CEEB
@@ -248,8 +248,8 @@ graph TD
 ```
 
 #### 精确版本对齐策略
-**nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04** 相比其他镜像优势：
-- **版本精确匹配**：CUDA 12.6.3 + cuDNN 9.3.0 + Python 3.10.12
+**nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04** 相比其他镜像优势：
+- **版本精确匹配**：CUDA 12.4.1 + cuDNN 9.3.0 + Python 3.10.12
 - **体积优化**：比pytorch/pytorch镜像小35%（5.2GB vs 8GB）
 - **灵活性高**：可自定义PyTorch/PaddlePaddle版本
 - **稳定性强**：官方CUDA基础镜像，更新及时
@@ -258,7 +258,7 @@ graph TD
 
 **PyTorch GPU版本（推荐nvidia/cuda镜像）**
 ```dockerfile
-FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04
 
 # 安装Python和系统依赖
 RUN apt-get update && apt-get install -y \
@@ -272,10 +272,10 @@ RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # 安装PyTorch GPU版本
 RUN pip install --no-cache-dir \
-    torch==2.6.0+cu126 \
-    torchvision==0.15.0+cu126 \
-    torchaudio==2.0.0+cu126 \
-    --index-url https://download.pytorch.org/whl/cu126
+    torch==2.4.1 \
+    torchvision==0.15.1 \
+    torchaudio==2.4.1 \
+    -i https://mirrors.aliyun.com/pypi/simple/
 
 # 安装其他依赖
 RUN pip install --no-cache-dir \
@@ -283,7 +283,7 @@ RUN pip install --no-cache-dir \
     omegaconf==2.3.0 \
     torchmetrics==0.11.0 \
     wandb==0.15.0 \
-    tensorboard==2.13.0
+    tensorboard==2.13.0 -i https://mirrors.aliyun.com/pypi/simple/
 
 WORKDIR /workspace
 COPY . .
@@ -301,69 +301,69 @@ RUN pip install --no-cache-dir \
     matplotlib==3.7.0 \
     seaborn==0.12.0 \
     wandb==0.15.0 \
-    tensorboard==2.13.0
+    tensorboard==2.13.0 -i https://mirrors.aliyun.com/pypi/simple/
 
 WORKDIR /workspace
 COPY . .
 CMD ["python", "scripts/train.py"]
 ```
 
-### 完整版本兼容性矩阵（nvidia/cuda:12.6.3专用）
+### 完整版本兼容性矩阵（nvidia/cuda:12.4.1专用）
 
-#### CUDA 12.6.3镜像版本对应表
+#### CUDA 12.4.1镜像版本对应表
 | Python版本 | 镜像类型 | PyTorch版本 | PaddlePaddle版本 | NVIDIA驱动 | 状态 | 推荐场景 |
 |------------|----------|-------------|------------------|------------|------|----------|
-| **3.10** | devel | **2.6.0+cu126** | **2.6.0.post126** | **≥535.104** | ✅**完美匹配** | 训练/开发 |
-| **3.10** | runtime | **2.6.0+cu126** | **2.6.0.post126** | **≥535.104** | ✅**完美匹配** | 部署/推理 |
-| **3.9** | devel | 2.6.0+cu126 | 2.6.0.post126 | ≥535.104 | ✅稳定兼容 | 兼容性要求 |
-| **3.8** | devel | 2.6.0+cu126 | 2.6.0.post126 | ≥535.104 | ✅稳定兼容 | 老项目迁移 |
-| **3.11** | devel | 2.6.0+cu126 | 2.6.0.post126 | ≥535.104 | ⚠️实验支持 | 新技术测试 |
+| **3.10** | devel | **2.4.1** | **2.6.0.post126** | **≥535.104** | ✅**完美匹配** | 训练/开发 |
+| **3.10** | runtime | **2.4.1** | **2.6.0.post126** | **≥535.104** | ✅**完美匹配** | 部署/推理 |
+| **3.9** | devel | 2.4.1 | 2.6.0.post126 | ≥535.104 | ✅稳定兼容 | 兼容性要求 |
+| **3.8** | devel | 2.4.1 | 2.6.0.post126 | ≥535.104 | ✅稳定兼容 | 老项目迁移 |
+| **3.11** | devel | 2.6.0 | 2.6.0.post126 | ≥535.104 | ⚠️实验支持 | 新技术测试 |
 
 #### 关键版本信息确认
 ```bash
-# CUDA 12.6.3精确版本确认
-docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 nvcc --version
+# CUDA 12.4.1精确版本确认
+docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 nvcc --version
 # 预期输出：release 12.6, V12.6.85
 
 # cuDNN版本确认
-docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR -A 2
+docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR -A 2
 # 预期输出：CUDNN_MAJOR 9, CUDNN_MINOR 3, CUDNN_PATCHLEVEL 0
 
 # Python 3.10版本确认
-docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 python3.10 --version
+docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 python3.10 --version
 # 预期输出：Python 3.10.12
 ```
 
 #### 版本锁定精确组合
 ```yaml
-# 推荐版本组合（CUDA 12.6.3专用）
+# 推荐版本组合（CUDA 12.4.1专用）
 optimal_config:
   python: "3.10.12"
-  cuda: "12.6.3"
+  cuda: "12.4.1"
   cudnn: "9.3.0"
-  pytorch: "2.6.0+cu126"
-  torchvision: "0.15.0+cu126"
-  torchaudio: "2.0.0+cu126"
+  pytorch: "2.4.1"
+  torchvision: "0.15.1"
+  torchaudio: "2.4.1"
   paddlepaddle: "2.6.0.post126"
   nvidia_driver: ">=535.104.05"
 ```
 
 > **警告**：Python 3.11为测试版支持，可能存在兼容性问题
 
-#### CUDA 12.6.3版本冲突解决方案
+#### CUDA 12.4.1版本冲突解决方案
 | 冲突类型 | 症状 | 根因分析 | 精确解决方案 | 验证命令 |
 |----------|------|----------|--------------|----------|
-| **CUDA 12.6.3不匹配** | `ImportError: libcudart.so.12.6` | PyTorch/Paddle版本未对齐 | 使用精确版本：`torch==2.6.0+cu126` | `python -c "import torch; print(torch.version.cuda)"` |
-| **Python 3.10缺失** | `python3.10: command not found` | 镜像Python版本不符 | 指定Python3.10安装路径 | `docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 python3.10 --version` |
-| **NVIDIA驱动过低** | `CUDA driver version is insufficient` | 驱动版本<535.104 | 升级驱动至≥535.104.05 | `nvidia-smi` |
-| **cuDNN版本冲突** | `CUDNN_STATUS_NOT_INITIALIZED` | cuDNN 9.3.0未正确加载 | 确认镜像包含cuDNN 9.3.0 | `docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR` |
+| **CUDA 12.4.1不匹配** | `ImportError: libcudart.so.12.4` | PyTorch/Paddle版本未对齐 | 使用精确版本：`torch==2.4.1` | `python -c "import torch; print(torch.version.cuda)"` |
+| **Python 3.10缺失** | `python3.10: command not found` | 镜像Python版本不符 | 指定Python3.10安装路径 | `docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 python3.10 --version` |
+| **NVIDIA驱动过低** | `CUDA driver version is insufficient` | 驱动版本<530.x | 升级驱动至≥530.x | `nvidia-smi` |
+| **cuDNN版本冲突** | `CUDNN_STATUS_NOT_INITIALIZED` | cuDNN 9.3.0未正确加载 | 确认镜像包含cuDNN 9.3.0 | `docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR` |
 
-#### CUDA 12.6.3专用版本检测脚本
+#### CUDA 12.4.1专用版本检测脚本
 ```bash
 #!/bin/bash
-# CUDA 12.6.3专用环境检测与修复脚本
+# CUDA 12.4.1专用环境检测与修复脚本
 
-echo "🔍 CUDA 12.6.3环境完整性检测器"
+echo "🔍 CUDA 12.4.1环境完整性检测器"
 echo "=================================="
 
 # 颜色定义
@@ -389,7 +389,7 @@ check_version() {
 }
 
 # 精确版本检测
-echo "=== CUDA 12.6.3专用版本检测 ==="
+echo "=== CUDA 12.4.1专用版本检测 ==="
 
 # 1. NVIDIA驱动检测
 if command -v nvidia-smi &> /dev/null; then
@@ -406,7 +406,7 @@ fi
 # 2. Docker镜像版本检测
 echo ""
 echo "=== Docker镜像版本验证 ==="
-docker run --rm nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 bash -c "
+docker run --rm nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 bash -c "
     echo 'CUDA版本:' 
     nvcc --version 2>/dev/null | grep release | awk '{print \$6}' | sed 's/,//'
     echo 'cuDNN版本:' 
@@ -446,7 +446,7 @@ echo "=== 一键修复命令 ==="
 echo "如果发现版本不匹配，请执行："
 echo ""
 echo "# 修复PyTorch版本："
-echo "pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 torchaudio==2.0.0+cu126 -f https://download.pytorch.org/whl/cu126/torch_stable.html"
+echo "pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 -i https://mirrors.aliyun.com/pypi/simple/"
 echo ""
 echo "# 修复PaddlePaddle版本："
 echo "pip install paddlepaddle-gpu==2.6.0.post126 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html"
@@ -490,31 +490,31 @@ except:
 print('环境验证完成，建议查看ML.md获取详细配置')
 "
 
-#### CUDA 12.6.3性能基准（ResNet-50 on ImageNet）
+#### CUDA 12.4.1性能基准（ResNet-50 on ImageNet）
 
 | 环境配置 | 镜像版本 | 训练时间/epoch | 内存使用 | GPU利用率 | 验证标准 |
 |----------|----------|----------------|----------|-----------|----------|
 | **VENV CPU** | N/A | ~45分钟 | 2GB RAM | N/A | 1-epoch成功 |
-| **DOCKER 1xGPU** | 12.6.3-devel | ~6.5分钟 | 8GB VRAM | **95%** | GPU利用率≥90% |
-| **DOCKER 4xGPU** | 12.6.3-devel | ~1.8分钟 | 32GB VRAM | **94%** | 多GPU线性扩展 |
-| **DOCKER推理** | 12.6.3-runtime | ~8.2分钟 | 7GB VRAM | **93%** | 生产环境验证 |
+| **DOCKER 1xGPU** | 12.4.1-devel | ~6.5分钟 | 8GB VRAM | **95%** | GPU利用率≥90% |
+| **DOCKER 4xGPU** | 12.4.1-devel | ~1.8分钟 | 32GB VRAM | **94%** | 多GPU线性扩展 |
+| **DOCKER推理** | 12.4.1-runtime | ~8.2分钟 | 7GB VRAM | **93%** | 生产环境验证 |
 
-#### CUDA 12.6.3 GPU利用率验证
+#### CUDA 12.4.1 GPU利用率验证
 ```bash
 # 专用GPU利用率监控脚本
 #!/bin/bash
-# CUDA 12.6.3 GPU利用率验证器
+# CUDA 12.4.1 GPU利用率验证器
 
-echo "🔥 CUDA 12.6.3 GPU利用率验证"
+echo "🔥 CUDA 12.4.1 GPU利用率验证"
 echo "=============================="
 
 # 启动GPU训练监控
 echo "1. 启动GPU训练..."
 docker run --gpus all -v $(pwd):/workspace \
-  nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 \
+  nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 \
   bash -c "
     # 安装依赖
-    pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 --index-url https://download.pytorch.org/whl/cu126
+    pip install torch==2.4.1 torchvision==0.19.1 -i https://mirrors.aliyun.com/pypi/simple/
     pip install pytorch-lightning==2.0.0
     
     # 运行基准测试
@@ -523,7 +523,7 @@ docker run --gpus all -v $(pwd):/workspace \
     import time
     from pytorch_lightning import Trainer
     
-    # 验证CUDA 12.6.3
+    # 验证CUDA 12.4.1
     print(f'CUDA版本: {torch.version.cuda}')
     print(f'GPU设备: {torch.cuda.get_device_name(0)}')
     print(f'显存: {torch.cuda.get_device_properties(0).total_memory/1024**3:.1f}GB')
@@ -554,7 +554,7 @@ watch -n 1 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,tempe
 # - 温度 < 85°C
 ```
 
-#### CUDA 12.6.3性能验证结果
+#### CUDA 12.4.1性能验证结果
 基于RTX 3060 8GB的实际测试数据：
 ```bash
 # 验证命令
@@ -563,7 +563,7 @@ import torch
 import time
 
 # 验证环境
-print('=== CUDA 12.6.3验证结果 ===')
+print('=== CUDA 12.4.1验证结果 ===')
 print(f'PyTorch版本: {torch.__version__}')
 print(f'CUDA版本: {torch.version.cuda}')
 print(f'GPU: {torch.cuda.get_device_name(0)}')
@@ -583,7 +583,7 @@ print(f'内存使用: {torch.cuda.memory_allocated()/1024**3:.1f}GB')
 # 验证通过标准
 assert torch.cuda.utilization() >= 90, 'GPU利用率低于90%'
 assert torch.cuda.memory_allocated()/1024**3 < 6.4, '内存使用过高'
-print('✅ CUDA 12.6.3环境验证通过')
+print('✅ CUDA 12.4.1环境验证通过')
 "
 ```
 
@@ -691,32 +691,32 @@ if os.path.exists(log_file):
 - ✅ 模型检查点成功生成
 - ✅ 损失收敛（loss值下降）
 
-#### DOCKER阶段验证（GPU加速 - CUDA 12.6.3专用）
+#### DOCKER阶段验证（GPU加速 - CUDA 12.4.1专用）
 **核心目标：GPU利用率>90%，生产性能优化**
 
 ```bash
-# 1. CUDA 12.6.3硬件要求验证
+# 1. CUDA 12.4.1硬件要求验证
 nvidia-smi --query-gpu=name,driver_version,memory.total,memory.free --format=csv
 # 要求：驱动≥535.104.05，显存≥6GB
 
-# 2. CUDA 12.6.3 Docker支持验证
-docker run --rm --gpus all nvidia/cuda:12.6.3-base-ubuntu20.04 nvidia-smi
+# 2. CUDA 12.4.1 Docker支持验证
+docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu20.04 nvidia-smi
 # 预期：显示GPU信息，驱动版本≥535.104.05
 
-# 3. CUDA 12.6.3容器内精确验证
+# 3. CUDA 12.4.1容器内精确验证
 docker run --rm --gpus all -v $(pwd):/workspace \
-  nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 \
+  nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 \
   bash -c "
-    # 安装CUDA 12.6.3专用版本
-    pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 --index-url https://download.pytorch.org/whl/cu126
+    # 安装CUDA 12.4.1专用版本
+    pip install torch==2.4.1 torchvision==0.19.1 -i https://mirrors.aliyun.com/pypi/simple/
     pip install paddlepaddle-gpu==2.6.0.post126 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
     
     python -c \"
     import torch
     import paddle
     
-    # CUDA 12.6.3版本验证
-    print('🔍 CUDA 12.6.3环境验证')
+    # CUDA 12.4.1版本验证
+    print('🔍 CUDA 12.4.1环境验证')
     print(f'✅ PyTorch版本: {torch.__version__}')
     print(f'✅ PyTorch CUDA: {torch.version.cuda}')
     print(f'✅ GPU设备: {torch.cuda.get_device_name(0)}')
@@ -727,18 +727,18 @@ docker run --rm --gpus all -v $(pwd):/workspace \
     print(f'✅ PaddlePaddle GPU: {paddle.is_compiled_with_cuda()}')
     
     # 版本对齐验证
-    assert torch.version.cuda == '12.6', 'PyTorch CUDA版本必须为12.6'
+    assert torch.version.cuda == '12.4', 'PyTorch CUDA版本必须为12.6'
     assert paddle.is_compiled_with_cuda(), 'PaddlePaddle必须启用CUDA'
-    print('🚀 CUDA 12.6.3版本验证通过')
+    print('🚀 CUDA 12.4.1版本验证通过')
     \"
   "
 
-# 4. CUDA 12.6.3 GPU利用率基准测试
-echo "⚡ CUDA 12.6.3 GPU基准测试..."
+# 4. CUDA 12.4.1 GPU利用率基准测试
+echo "⚡ CUDA 12.4.1 GPU基准测试..."
 docker run --rm --gpus all -v $(pwd):/workspace \
-  nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04 \
+  nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 \
   bash -c "
-    pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 --index-url https://download.pytorch.org/whl/cu126
+    pip install torch==2.4.1 torchvision==0.19.1 -i https://mirrors.aliyun.com/pypi/simple/
     pip install pytorch-lightning==2.0.0
     
     python scripts/train.py \
@@ -755,15 +755,15 @@ docker run --rm --gpus all -v $(pwd):/workspace \
       trainer.limit_val_batches=20
   "
 
-# 5. CUDA 12.6.3实时GPU监控
+# 5. CUDA 12.4.1实时GPU监控
 watch -n 1 nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu --format=csv,noheader,nounits
 ```
 
-**DOCKER阶段成功标准（CUDA 12.6.3专用）：**
+**DOCKER阶段成功标准（CUDA 12.4.1专用）：**
 - ✅ NVIDIA驱动≥535.104.05
-- ✅ CUDA 12.6.3环境正常（nvcc版本：12.6.85）
+- ✅ CUDA 12.4.1环境正常（nvcc版本：12.6.85）
 - ✅ cuDNN 9.3.0正确加载
-- ✅ PyTorch 2.6.0+cu126版本匹配
+- ✅ PyTorch 2.4.1版本匹配
 - ✅ PaddlePaddle 2.6.0.post126版本匹配
 - ✅ GPU设备识别成功
 - ✅ 1-epoch训练在2分钟内完成
@@ -856,22 +856,22 @@ fi
 
 #### requirements-cpu.txt（调试环境）
 ```
-torch==2.6.0+cpu
-torchvision==0.15.0+cpu
+torch==2.4.1+cpu
+torchvision==0.19.1+cpu
 pytorch-lightning==2.0.0
 paddlepaddle==2.6.0
 omegaconf==2.3.0
 torchmetrics==0.11.0
 ```
 
-#### requirements-gpu.txt（CUDA 12.6.3专用 - 精确版本锁定）
+#### requirements-gpu.txt（CUDA 12.4.1专用 - 精确版本锁定）
 ```
-# PyTorch系列（CUDA 12.6.3专用）
-torch==2.6.0+cu126
-torchvision==0.15.0+cu126
-torchaudio==2.0.0+cu126
+# PyTorch系列（CUDA 12.4.1专用）
+torch==2.4.1
+torchvision==0.19.1
+torchaudio==2.4.1
 
-# PaddlePaddle系列（CUDA 12.6.3专用）
+# PaddlePaddle系列（CUDA 12.4.1专用）
 paddlepaddle-gpu==2.6.0.post126
 
 # 训练框架
@@ -1047,8 +1047,8 @@ fix_cuda_mismatch() {
     if [[ "$current_cuda" != "$system_cuda" ]]; then
         echo "检测到CUDA版本不匹配: PyTorch=$current_cuda vs 系统=$system_cuda"
         echo "解决方案:"
-        echo "1. 重新安装匹配版本: pip install torch==2.6.0+cu$(echo $system_cuda | sed 's/\.//')"
-        echo "2. 或使用CPU版本: pip install torch==2.6.0+cpu"
+        echo "1. 重新安装匹配版本: pip install torch==2.4.1+cu$(echo $system_cuda | sed 's/\.//')"
+        echo "2. 或使用CPU版本: pip install torch==2.4.1+cpu"
     fi
 }
 
@@ -1071,7 +1071,7 @@ fix_python_version() {
 | **ImportError: libcudart** | `ldd $(python -c "import torch; print(torch.__file__)") \| grep cuda` | 重新安装匹配CUDA版本 | 2分钟 |
 | **CUDA out of memory** | `nvidia-smi` 查看显存 | 减小batch_size或使用gradient accumulation | 1分钟 |
 | **Python版本冲突** | `python --version` | 使用conda/pyenv切换Python版本 | 3分钟 |
-| **Docker GPU不可用** | `docker run --rm --gpus all nvidia/cuda:12.6.3-base-ubuntu20.04 nvidia-smi` | 检查nvidia-docker安装 | 5分钟 |
+| **Docker GPU不可用** | `docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu20.04 nvidia-smi` | 检查nvidia-docker安装 | 5分钟 |
 | **网络下载失败** | `curl -I https://download.pytorch.org` | 配置镜像源或代理 | 1分钟 |
 
 #### 性能优化检查清单
@@ -1104,7 +1104,7 @@ if torch.cuda.is_available():
 if ! nvidia-smi >/dev/null 2&1; then
     echo "🖥️  零GPU环境配置"
     export CUDA_VISIBLE_DEVICES=""
-    pip install torch==2.6.0+cpu torchvision==0.15.0+cpu
+    pip install torch==2.4.1+cpu torchvision==0.19.1+cpu
 fi
 
 # 小显存GPU优化
@@ -1121,7 +1121,7 @@ fi
 - [ ] Python版本：3.8-3.10确认
 - [ ] CUDA版本：12.6推荐，11.8+最低
 - [ ] NVIDIA驱动：≥535.00
-- [ ] PyTorch：2.6.0+cu126安装成功
+- [ ] PyTorch：2.4.1安装成功
 - [ ] PaddlePaddle：2.6.0+gpu安装成功
 - [ ] GPU显存：≥6GB推荐
 - [ ] 磁盘空间：≥20GB可用
@@ -1146,7 +1146,7 @@ reset_ml_environment() {
     conda activate ml
     
     # 重新安装依赖
-    pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 --index-url https://download.pytorch.org/whl/cu126
+    pip install torch==2.4.1 torchvision==0.19.1 -i https://mirrors.aliyun.com/pypi/simple/
     pip install paddlepaddle-gpu==2.6.0
     
     echo "✅ 环境重置完成"
@@ -1287,7 +1287,7 @@ python scripts/train.py model=yolov10n data=coco128 trainer.max_epochs=1 trainer
 #### DOCKER部署阶段
 ```bash
 # 1. 启动GPU环境
-docker run --gpus all -it pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
+docker run --gpus all -it pytorch/pytorch:2.4.1-cuda12.6-cudnn9-devel
 
 # 2. 自动配置生产数据集
 ./scripts/setup_dataset.sh production

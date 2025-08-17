@@ -481,7 +481,7 @@ echo "=== 调试完成 ==="
 
 ```bash
 # 安装调试工具
-pip install ipdb rich tensorboard
+pip install ipdb rich tensorboard -i https://mirrors.aliyun.com/pypi/simple/
 
 # 交互式调试
 python -m ipdb scripts/train.py model=yolov10n data=coco128 trainer.fast_dev_run=true
@@ -540,7 +540,7 @@ import torch
 import paddle
 print(f'当前PyTorch: {torch.__version__}')
 print(f'当前PaddlePaddle: {paddle.__version__}')
-print('ML.md推荐组合: PyTorch 2.6.0+cu126 + PaddlePaddle 2.6.0')
+print('ML.md推荐组合: PyTorch 2.4.1 + PaddlePaddle 2.6.0')
 
 # 检查CUDA版本
 if torch.cuda.is_available():
@@ -549,8 +549,8 @@ if torch.cuda.is_available():
 "
 
 # 重新安装正确版本
-pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 -f https://download.pytorch.org/whl/cu126
-pip install paddlepaddle-gpu==2.6.0 -f https://www.paddlepaddle.org.cn/whl/linux/gpu-cuda126-cudnn9
+pip install torch==2.4.1 torchvision==0.19.1  -i https://mirrors.aliyun.com/pypi/simple/
+pip install paddlepaddle-gpu==2.6.0.post126 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html 
 ```
 
 ### 案例4: 模型架构错误（ML.md模型配置章节）
@@ -712,7 +712,7 @@ echo "=== 规格驱动调试开始 ==="
 python -c "
 import torch, paddle
 print('=== ML.md版本矩阵验证 ===')
-print(f'PyTorch: {torch.__version__} (ML.md要求: 2.6.0)')
+print(f'PyTorch: {torch.__version__} (ML.md要求: 2.4.1)')
 print(f'PaddlePaddle: {paddle.__version__} (ML.md要求: 2.6.0)')
 print(f'Python: {torch.__import__(\"sys\").version.split()[0]} (ML.md要求: 3.9-3.10)')
 "
@@ -883,7 +883,7 @@ import torch
 import paddle
 
 # 检查PyTorch版本（CREATE.md决策 → ML.md版本矩阵）
-expected_pytorch = '2.6.0'
+expected_pytorch = '2.4.1'
 actual_pytorch = torch.__version__
 if expected_pytorch in actual_pytorch:
     print(f'✅ PyTorch版本符合CREATE.md决策: {actual_pytorch}')

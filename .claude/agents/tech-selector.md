@@ -113,14 +113,14 @@ class TechArchitectureInterface:
         """功能标识符：tech-version-alignment - ML.md版本对齐"""
         # 基于ML.md第5章版本兼容性
         return {
-            "cuda_version": "12.6.3",
+            "cuda_version": "12.4.1",
             "compatibility_matrix": {
                 "python": ["3.8", "3.9", "3.10", "3.11"],
-                "pytorch": "2.6.0+cu126",
+                "pytorch": "2.4.1",
                 "paddle": "2.6.0.post126",
                 "driver_requirement": "≥535.104.05"
             },
-            "docker_config": "nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04",
+            "docker_config": "nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04",
             "validation_command": "python -c 'import torch; print(torch.version.cuda)'"
         }
     
@@ -295,7 +295,7 @@ def calculate_gpu_memory(model_name, batch_size):
 # 基于ML.md和TASK.md的统一技术规格
 tech_spec:
   framework:
-    primary: "PyTorch 2.6.0+cu126"
+    primary: "PyTorch 2.4.1"
     secondary: "PaddlePaddle 2.6.0+gpu"
     rationale: "基于ML.md第1章决策矩阵"
   
@@ -312,9 +312,9 @@ tech_spec:
     deployment_config: "≤30行 Docker配置"
   
   version_alignment:
-    cuda: "12.6.3"
+    cuda: "12.4.1"
     python: "3.10"
-    pytorch: "2.6.0+cu126"
+    pytorch: "2.4.1"
     paddle: "2.6.0.post126"
 ```
 

@@ -7,9 +7,9 @@
 | 组件 | 版本 | 用途 | 备注 |
 |------|------|------|------|
 | Python | 3.9-3.10 | 运行环境 | 支持PyTorch和PaddlePaddle |
-| PyTorch | 2.6.0+cu126 | 深度学习框架 | GPU加速版本 |
+| PyTorch | 2.4.1 | 深度学习框架 | GPU加速版本 |
 | PaddlePaddle | 2.6.0+gpu | 深度学习框架 | GPU加速版本 |
-| CUDA | 12.6.3 | GPU计算 | 最新稳定版 |
+| CUDA | 12.4.1 | GPU计算 | 稳定兼容版 |
 | GPU需求 | ≥ 6GB显存 | 训练要求 | RTX 3060以上 |
 | 内存需求 | ≥ 8GB | 运行要求 | 支持batch_size=64 |
 
@@ -94,9 +94,9 @@ python -m pip install --upgrade pip setuptools wheel
 ### 2. PyTorch GPU安装（基于ML.md版本矩阵）
 
 ```bash
-# PyTorch GPU版本（ML.md版本兼容性章节CUDA12.6对应版本）
-pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 torchaudio==2.0.0+cu126 \
-  --index-url https://download.pytorch.org/whl/cu126
+# PyTorch GPU版本（ML.md版本兼容性章节CUDA12.4对应版本）
+pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
+-i https://mirrors.aliyun.com/pypi/simple/
 
 # 验证安装（ML.md验证标准章节）
 python -c "
@@ -123,7 +123,7 @@ if torch.cuda.is_available():
 ### 3. PaddlePaddle GPU安装（基于ML.md版本矩阵）
 
 ```bash
-# PaddlePaddle GPU版本（ML.md版本兼容性章节CUDA12.6对应版本）
+# PaddlePaddle GPU版本（ML.md版本兼容性章节CUDA12.4对应版本）
 pip install paddlepaddle-gpu==2.6.0.post126 \
   -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
@@ -160,7 +160,7 @@ pip install pytorch-lightning==2.0.0 \
   tensorboard==2.13.0 \
   wandb==0.15.0 \
   ipdb==0.13.13 \
-  rich==13.4.0
+  rich==13.4.0 -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 ## 🧪 环境验证
@@ -362,7 +362,7 @@ if torch.cuda.is_available():
 # 错误: CUDA driver version is insufficient
 # 解决方案：检查NVIDIA驱动版本
 nvidia-smi
-# 要求驱动版本 ≥ 535.104.05 (支持CUDA 12.6)
+# 要求驱动版本 ≥ 530.x (支持CUDA 12.4)
 
 # 如果版本过低，升级驱动
 # Ubuntu示例：
@@ -412,16 +412,16 @@ python scripts/train.py \
 # 错误: PyTorch CUDA版本不匹配
 # 解决方案：使用精确版本匹配
 pip uninstall torch torchvision torchaudio
-pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 torchaudio==2.0.0+cu126 \
-  --index-url https://download.pytorch.org/whl/cu126
+pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
+  -i https://mirrors.aliyun.com/pypi/simple/
 
 # 验证CUDA版本匹配
 python -c "
 import torch
 print(f'PyTorch版本: {torch.__version__}')
 print(f'CUDA版本: {torch.version.cuda}')
-print(f'期望CUDA: 12.6')
-assert torch.version.cuda == '12.6', 'CUDA版本不匹配'
+print(f'期望CUDA: 12.4')
+assert torch.version.cuda == '12.4', 'CUDA版本不匹配'
 print('✅ CUDA版本匹配成功')
 "
 

@@ -179,7 +179,7 @@ sudo systemctl restart docker
 ./deploy/shared/docker-utils.sh test gpu
 
 # 预期输出：
-# ✅ PyTorch版本: 2.6.0+cu126
+# ✅ PyTorch版本: 2.4.1
 # ✅ PaddlePaddle版本: 3.1.0
 # ✅ CUDA可用，GPU数量: 1
 ```

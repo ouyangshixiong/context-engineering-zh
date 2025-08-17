@@ -13,17 +13,17 @@ python scripts/debug.py --step-by-step --gpu-first
 
 ### 🏗️ 环境配置指南
 
-#### 🚀 GPU调试环境（**首要验证环境** - CUDA 12.6.3专用）
+#### 🚀 GPU调试环境（**首要验证环境** - CUDA 12.4.1专用）
 ```bash
 # 创建GPU调试环境（基于ML.md版本矩阵）
 conda create -n ml-gpu-debug python=3.10
 conda activate ml-gpu-debug
 
-# 安装PyTorch GPU版本（CUDA 12.6.3专用）
-pip install torch==2.6.0+cu126 torchvision==0.15.0+cu126 torchaudio==2.0.0+cu126 \
-  --index-url https://download.pytorch.org/whl/cu126
+# 安装PyTorch GPU版本（CUDA 12.4.1专用）
+pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
+  -i https://mirrors.aliyun.com/pypi/simple/
 
-# 安装PaddlePaddle GPU版本（CUDA 12.6.3专用）
+# 安装PaddlePaddle GPU版本（CUDA 12.4.1专用）
 pip install paddlepaddle-gpu==2.6.0.post126 \
   -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
@@ -54,7 +54,7 @@ conda create -n ml-cpu-deploy python=3.10
 conda activate ml-cpu-deploy
 
 # 安装PyTorch CPU版本
-pip install torch==2.6.0+cpu torchvision==0.15.0+cpu torchaudio==2.0.0+cpu \
+pip install torch==2.4.1+cpu torchvision==0.19.1+cpu torchaudio==2.4.1+cpu \
   --index-url https://download.pytorch.org/whl/cpu
 
 # 安装PaddlePaddle CPU版本
