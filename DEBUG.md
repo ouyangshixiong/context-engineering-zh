@@ -13,18 +13,18 @@ python scripts/debug.py --step-by-step --gpu-first
 
 ### 🏗️ 环境配置指南
 
-#### 🚀 GPU调试环境（**首要验证环境** - CUDA 12.4.1专用）
+#### 🚀 GPU调试环境（**首要验证环境** - CUDA自动适配）
 ```bash
-# 创建GPU调试环境（基于ML.md版本矩阵）
-conda create -n ml-gpu-debug python=3.10
-conda activate ml-gpu-debug
+# 创建GPU调试环境（基于ML.md版本矩阵 - 强制python3.10）
+python3.10 -m venv venv-gpu-debug
+source venv-gpu-debug/bin/activate
 
-# 安装PyTorch GPU版本（CUDA 12.4.1专用）
+# 安装PyTorch GPU版本（自动适配CUDA 12.x，无需手动指定cuXXX后缀）
 pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
   -i https://mirrors.aliyun.com/pypi/simple/
 
-# 安装PaddlePaddle GPU版本（CUDA 12.4.1专用）
-pip install paddlepaddle-gpu==2.6.0.post126 \
+# 安装PaddlePaddle GPU版本（自动适配CUDA 12.x）
+pip install paddlepaddle-gpu==2.6.0 \
   -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 # 验证GPU安装
@@ -49,9 +49,9 @@ if torch.cuda.is_available():
 
 #### 💻 CPU生产环境（**部署验证阶段**）
 ```bash
-# 创建CPU生产环境（Docker部署专用）
-conda create -n ml-cpu-deploy python=3.10
-conda activate ml-cpu-deploy
+# 创建CPU生产环境（Docker部署专用 - 强制python3.10）
+python3.10 -m venv venv-cpu-deploy
+source venv-cpu-deploy/bin/activate
 
 # 安装PyTorch CPU版本
 pip install torch==2.4.1+cpu torchvision==0.19.1+cpu torchaudio==2.4.1+cpu \

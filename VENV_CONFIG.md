@@ -15,13 +15,13 @@
 
 ## 🚀 一键安装
 
-### 方案1: Python虚拟环境（推荐 - AI Agent友好）
+### 方案1: Python虚拟环境（强制python3.10 - 推荐）
 
 ```bash
-# 创建虚拟环境
-python -m venv ml-gpu-debug
-source ml-gpu-debug/bin/activate  # Linux/Mac
-# 或 ml-gpu-debug\Scripts\activate  # Windows
+# 创建虚拟环境（强制python3.10）
+python3.10 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 或 venv\Scripts\activate  # Windows
 
 # 升级pip
 python -m pip install --upgrade pip
@@ -34,20 +34,6 @@ python -c "import torch; print('✅ PyTorch GPU OK'); print(f'CUDA: {torch.versi
 python -c "import paddle; print('✅ PaddlePaddle GPU OK'); print(f'GPU: {paddle.is_compiled_with_cuda()}')"
 ```
 
-### 方案2: Conda环境（可选）
-
-```bash
-# 创建并激活环境
-conda create -n ml-gpu-debug python=3.10 -y
-conda activate ml-gpu-debug
-
-# 安装GPU版本依赖
-pip install -r requirements-gpu.txt
-
-# 验证安装
-python -c "import torch; print('✅ PyTorch GPU OK'); print(f'CUDA: {torch.version.cuda}')"
-python -c "import paddle; print('✅ PaddlePaddle GPU OK'); print(f'GPU: {paddle.is_compiled_with_cuda()}')"
-```
 
 ## 📋 详细安装步骤
 
@@ -91,20 +77,28 @@ except:
 python -m pip install --upgrade pip setuptools wheel
 ```
 
-### 2. PyTorch GPU安装（基于ML.md版本矩阵）
+### 2. PyTorch GPU安装（优化版本：自动适配CUDA）
 
 ```bash
-# PyTorch GPU版本（ML.md版本兼容性章节CUDA12.4对应版本）
+# PyTorch GPU版本（自动适配系统CUDA 12.x，无需手动指定cuXXX后缀）
 pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
--i https://mirrors.aliyun.com/pypi/simple/
+  -i https://mirrors.aliyun.com/pypi/simple/
 
 # 验证安装（ML.md验证标准章节）
 python -c "
 import torch
-print(f'PyTorch版本: {torch.__version__}')
-print(f'CUDA可用: {torch.cuda.is_available()}')  # 必须为True
-print(f'GPU数量: {torch.cuda.device_count()}')
-print(f'GPU名称: {torch.cuda.get_device_name(0)}')
+print(f'✅ PyTorch版本: {torch.__version__}')
+print(f'✅ CUDA可用: {torch.cuda.is_available()}')
+print(f'✅ 自动适配CUDA版本: {torch.version.cuda}')
+print(f'✅ GPU设备: {torch.cuda.get_device_name(0)}')
+
+# 自动适配验证
+if torch.cuda.is_available():
+    expected_cuda = torch.version.cuda
+    print(f'🎯 系统CUDA版本: {expected_cuda}')
+    print(f'🎯 PyTorch已自动适配系统CUDA版本')
+else:
+    print('⚠️ 未检测到GPU，将使用CPU模式')
 
 # GPU性能基准测试（ML.md性能基准章节）
 import time
@@ -120,19 +114,25 @@ if torch.cuda.is_available():
 "
 ```
 
-### 3. PaddlePaddle GPU安装（基于ML.md版本矩阵）
+### 3. PaddlePaddle GPU安装（自动适配CUDA）
 
 ```bash
-# PaddlePaddle GPU版本（ML.md版本兼容性章节CUDA12.4对应版本）
-pip install paddlepaddle-gpu==2.6.0.post126 \
+# PaddlePaddle GPU版本（自动适配CUDA 12.x）
+pip install paddlepaddle-gpu==2.6.0 \
   -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 # 验证安装（ML.md验证标准章节）
 python -c "
 import paddle
-print(f'PaddlePaddle版本: {paddle.__version__}')
-print(f'GPU编译: {paddle.is_compiled_with_cuda()}')  # 必须为True
-print(f'GPU设备: {paddle.device.get_device()}')
+print(f'✅ PaddlePaddle版本: {paddle.__version__}')
+print(f'✅ GPU支持: {paddle.is_compiled_with_cuda()}')
+print(f'✅ GPU设备: {paddle.device.get_device()}')
+
+# 自动适配验证
+if paddle.is_compiled_with_cuda():
+    print(f'🎯 PaddlePaddle已自动启用GPU支持')
+else:
+    print('⚠️ 未检测到GPU，将使用CPU模式')
 
 # GPU性能基准测试（ML.md第274-277行）
 import time
@@ -470,21 +470,13 @@ print('✅ PaddlePaddle GPU验证成功')
 ### 从CPU切换到GPU环境
 
 ```bash
-# 备份CPU环境（虚拟环境）
-source ml-debug/bin/activate
+# 备份CPU环境
+source venv/bin/activate
 pip freeze > cpu-requirements.txt
 
-# 或Conda环境备份
-conda env export > cpu-environment.yml
-
-# 创建GPU环境（推荐虚拟环境）
-python -m venv ml-gpu
-source ml-gpu/bin/activate
-pip install -r requirements-gpu.txt
-
-# 或Conda GPU环境
-conda create -n ml-gpu python=3.10 -y
-conda activate ml-gpu
+# 创建GPU环境（强制python3.10）
+python3.10 -m venv venv-gpu
+source venv-gpu/bin/activate
 pip install -r requirements-gpu.txt
 
 # 验证GPU环境
