@@ -1,4 +1,8 @@
 # Spec 驱动的 自主智能体 软件工程 机器学习 框架
+**简单几句需求就可以生成完整的各类算法，示例：**
+1. xx
+2. xx
+3. xx
 
 > 目标读者：AI agentic Coder、机器学习专家和软件工程专家。
 > 要求：同时兼顾大语言模型与人类可读性（便于 AI agent 阅读）。
@@ -22,13 +26,13 @@
 
 ## 1.1 问题陈述与方法论定位
 
-在机器学习算法的工程落地中，需求表述常以简短、模糊的自然语言形式表达。由此产生的问题与挑战包括：
-* 需求漂移（需求在多轮传递中变形）
+在机器学习算法的工程落地中，需求表述常以简短、模糊的自然语言形式表达。由此产生的问题与挑战：
+* 需求漂移（需求在多轮LLM对话传递中变形）
 * 实现不可追溯（隐式假设与工程决策未被记录）
 * 验证难以自动化（人工主导、覆盖不足）
 * 技术债务的累积
 
-**针对这些问题与挑战，本框架提出“Spec 驱动的自主智能体”（Spec-driven agentic-ai-coder）作为新一代的软件工程方法论**：将“可执行规范（Spec）”作为事实（ground truth，GT），由多角色自主智能体依照规范进行规划（plan）、实现（create）、验证（validate）与部署（deploy），从而实现面向机器学习（ML）的软件工程方法论的过程透明性、结果可审计性与流程可重复性。
+**针对这些问题与挑战，本框架提出《Spec 驱动的自主智能体（Spec-driven agentic-ai-coder）》作为新一代的软件工程方法论**：将“可执行规范（Spec）”作为事实（ground truth，GT），由多角色自主智能体依照规范进行规划（plan）、实现（create）、验证（validate）与部署（deploy），从而实现面向机器学习（ML）项目的软件工程方法论的理论科学性、过程透明性、流程可重复性和结果可审计性。
 
 ## 1.2 软件工程理论回顾
 
@@ -78,12 +82,13 @@
 
 ## 1.3 多角色自主智能体角色分工与自治体制
 
-框架定义一组自主智能体（planner, coder, validator, ops），它们基于统一的规范（Spec）文档进行协作：
+框架定义一组自主智能体（planner, coder, tester, ops），它们基于统一的规范（Spec）文档进行协作：
 
 * **Planner（规划智能体）**：将模糊需求形式化为可执行 Spec，做约束分析、资源估算和架构选择。
 * **Coder（编码智能体）**：依据 Spec 生成实现、封装可复用组件并进行性能优化。
+* **Dataset（数据集智能体）**： 为ML算法模型在1-epoch阶段和全量数据阶段，搜索，下载，读取，可视化和使用对应的数据集。例如：Huggingface、ModelScope支持的各种数据集。
 * **Reviewer（代码审查智能体）**：依据 Spec 审查代码是否完全满足需求，给出评价。
-* **Validator（验证智能体）**：对实现进行自动化测试、性能基准并生成报告。
+* **Tester（测试智能体）**：对实现进行各类测试、性能基准并生成报告。
 * **Ops（运维智能体）**：负责部署清单、监控配置、蓝绿/回滚策略与持续演进。
 
 这种角色化的智能体分工对应软件工程中的“职责分离”原则，并通过 Spec 将决策与实现显式绑定，形成“决策可追溯—实现可验证—部署可回退”的闭环。
@@ -113,7 +118,7 @@ flowchart LR
     S3[Stage 3: 任务拆解与代码生成]
     S4[Stage 4: venv环境与部署]
     IN[输入: 框架规范markdown文件集 + 简短自然语言需求]
-    OUT[输出: 目标项目初始包（requirements.md, tech.md, task.md, code skeleton, venv.md, mini dataset）]
+    OUT[输出: 目标项目初始包（requirements.md, tech.md, code skeleton, venv.md, mini dataset）]
 
     IN --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
@@ -171,18 +176,17 @@ flowchart LR
     subgraph S2["Stage 2 — 技术选型与数据集选择"]
         direction TB
         W2["WHO:
-        - Planner智能体
         - Coder智能体"]
 
         A2["DO WHAT:
-        - 候选模型列表
+        - 候选模型（2个）
         - 数据集计划(mini/full)
         - 预估资源需求
         - 算法对比表"]
 
         V2["满足条件:
         - 至少2个候选模型
-        - 每模型含数据集需求 & 训练时间"]
+        "]
         
         W2 --> A2 --> V2
     end
@@ -190,10 +194,11 @@ flowchart LR
     I2 --> S2 --> O2
 ```
 * **输入**：`requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
-* **DO WHAT**：基于需求文档和技术架构选型文件生成候选模型列表、训练数据计划（mini dataset 与 full dataset）、预估资源（显存、训练时长）和性能预期；生成算法对比表（CSV/YAML）。
-* **输出**：`tech.md`（包含 `候选AI模型`、`对应的数据集`、`约束条件`、`AI算法优劣势对比表格`）。
-* **WHO**：Planner规划智能体 + Coder编程智能体，其中 Planner 读取需求向，Coder 先了解技术和架构指导，并负责搜索需求对应的候选模型。
-* **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与预估训练时间。
+* **DO WHAT**：
+>阅读`requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
+* **输出**：`tech.md`（包含 2个候选AI模型、相匹配的数据集、模型的各种约束条件、AI算法优劣势对比表格）。
+* **WHO**：Coder智能体。
+* **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与约束。
 
 ### 3.1.3 Stage 3 — 任务拆解与代码生成
 ```mermaid
@@ -206,8 +211,7 @@ flowchart LR
     - OmegaConf_README.md"]
 
     O3["📤 输出文件:
-    - task.md
-    - code_skeleton/
+    - project/（包含README.md）
     - PROJECT_BUILD_LOG.md"]
 
     subgraph S3["Stage 3 — 任务拆解与代码生成"]
@@ -223,7 +227,7 @@ flowchart LR
         - 记录任务执行结果"]
 
         V3["满足条件:
-        - 代码骨架完整
+        - 代码骨架填充完整
         - PROJECT_BUILD_LOG.md逐项复核通过"]
 
         W3 --> A3 --> V3
@@ -233,49 +237,94 @@ flowchart LR
 ```
 * **输入**：`tech.md`、`requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
 * **活动**：
-    >以 checkbox 形式生成 `task.md`（每项明确输入/输出/验收测试/估时）；
+    >Planner智能体生成以 checkbox 形式的 task清单（每项明确输入/输出/验收测试/估时）；
     >按`ML.md`、`OmegaConf_README.md`规范内容生成项目代码骨架,包含目标项目的`README.md`；
-    >逐项执行task生成代码和配置文件，并填充代码骨架；
-* **输出**：`task.md`（任务清单），`code_skeleton/`（代码骨架），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录）。
-* **责任方**：Coder智能体（执行任务清单、生成代码、记录任务执行结果），Planner智能体（验收和复核）。
+    >Coder智能体逐项执行task生成代码和配置文件，并填充代码骨架；
+    >Planner智能体逐项验证task执行情况，验证和复核。总结并更新目标项目的`README.md`
+* **输出**：`{xx}_project/`（目标项目,包含：代码骨架，用真实项目名称代替`{xx}_project/`），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录）。
+* **责任方**：Planner智能体（生成task清单，验收和复核task）, Coder智能体（执行清单，包括生成代码、记录任务执行结果）。
 * **满足条件**：代码骨架填充完整，例如包含可运行的训练脚本和推理脚本。PROJECT_BUILD_LOG.md逐项复核都通过。
 
-### 3.1.4 Stage 4 — venv环境与部署
+### 3.1.4 Stage 4 — 代码与配置审核
 ```mermaid
 flowchart LR
     %% ================= Stage 4 =================
     I4["📥 输入文件:
     - 目标项目(含README/代码/配置)
-    - CLAUDE.md
-    - VENV_CONFIG.md
-    - DEBUG_CODE.md
-    - DOCKER_CONFIG.md"]
+    - PROJECT_BUILD_LOG.md"]
 
     O4["📤 输出文件:
-    - venv.md
-    - CLAUDE.md
-    - VENV_CONFIG.md
-    - DEBUG_CODE.md
-    - DOCKER_CONFIG.md"]
+    - REVIEW_REPORT.md"]
 
-    subgraph S4["Stage 4 — venv环境与部署"]
+    subgraph S4["Stage 4 — 代码与配置审核"]
         direction TB
         W4["WHO:
-        - Ops智能体"]
+        - Reviewer智能体"]
 
         A4["DO WHAT:
-        - 读取 README.md  VENV_CONFIG.md
-        - 生成 venv.md
-        - 复制规范文件到目标目录"]
+        - 静态检查代码风格、依赖与README.md一致性
+        - 检查算法核心代码是否完整
+        - 审核配置文件与README.md一致性
+        - 对PROJECT_BUILD_LOG.md逐项复核"]
 
         V4["满足条件:
-        - venv.md 正确
-        - 规范文件副本齐全"]
+        - REVIEW_REPORT.md所有条目通过"]
 
         W4 --> A4 --> V4
     end
 
     I4 --> S4 --> O4
+
+```
+* **输入**：：目标项目（包含`README.md`、代码、配置文件）、PROJECT_BUILD_LOG.md。
+
+* **DO WHAT**：
+>Reviewer智能体执行代码与配置的静态分析和`README.md`一致性校验；
+>审核代码逻辑、依赖与`README.md`的匹配情况；
+>针对`PROJECT_BUILD_LOG.md`逐项检查是否真正完成；
+>输出`REVIEW_REPORT.md`，必要时修订目标项目。
+* **输出**：`REVIEW_REPORT.md`、修订后的目标项目。
+* **WHO**：Reviewer智能体。
+* **满足条件**：`REVIEW_REPORT.md`所有条目审核通过，目标项目文档与代码的一致性和完整性相匹配。
+
+### 3.1.5 Stage 5 — venv环境与部署
+```mermaid
+flowchart LR
+    %% ================= Stage 4 =================
+    I5["📥 输入文件:
+    - 目标项目(含README/代码/配置)
+    - CLAUDE.md
+    - tech.md
+    - VENV_CONFIG.md
+    - DEBUG_CODE.md
+    - DOCKER_CONFIG.md"]
+
+    O5["📤 输出文件:
+    - venv.md
+    - CLAUDE.md
+    - tech.md
+    - VENV_CONFIG.md
+    - DEBUG_CODE.md
+    - DOCKER_CONFIG.md"]
+
+    subgraph S5["Stage 5 — venv环境与部署"]
+        direction TB
+        W5["WHO:
+        - Ops智能体"]
+
+        A5["DO WHAT:
+        - 读取 README.md  VENV_CONFIG.md
+        - 生成 venv.md
+        - 复制规范文件到目标目录"]
+
+        V5["满足条件:
+        - venv.md 正确
+        - 规范文件副本齐全"]
+
+        W5 --> A5 --> V5
+    end
+
+    I5 --> S5 --> O5
 
 ```
 * **输入**：完整的目标项目(含`README.md`、代码、配置文件等)、框架规范文件（`CLAUDE.md`、`VENV_CONFIG.md`、`DEBUG_CODE.md`、`DOCKER_CONFIG.md`等）。
@@ -306,7 +355,7 @@ flowchart LR
     IN --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
 
-### 3.2.1 Stage 1 — CLAUDE 校验与本地规范定制
+### 3.2.1 Stage 1 — CLAUDE 校验与本地规范定制(可选)
 ```mermaid
 flowchart LR
     %% ================= Stage 1 =================
@@ -319,8 +368,8 @@ flowchart LR
       · DOCKER_CONFIG.md"]
 
     O1["📤 输出文件:
-    - CLAUDE.local.md (如有定制)
-    - CLAUDE.inherited.md (如确认继承)"]
+    - CLAUDE.local.md (可选)
+    - CLAUDE.inherited.md (可选)"]
 
     subgraph S1["Stage 1 — CLAUDE校验与本地规范定制"]
         direction TB
@@ -365,12 +414,13 @@ flowchart LR
     I["📥 输入文件:
     - venv.md
     - README.md
+    - requirements-gpu.txt
     - requirements-cpu.txt"]
 
     O["📤 输出文件:
-    - env_check_report.json
-    - data/mini/
-    - mini_dataset.md"]
+    - env_check_report.md报告
+    - data/mini/ 数据集
+    - mini_dataset.md使用说明"]
 
     subgraph S["Stage — 环境准备与数据抽样"]
         direction TB
@@ -379,14 +429,14 @@ flowchart LR
         - Dataset智能体"]
 
         A["DO WHAT:
-        - 执行 python -m venv debug-cpu
-        - pip install -r requirements-cpu.txt
-        - Dataset智能体按规范抽样构建 mini数据集
-        - 生成 data/mini/metadata.json（样本数、类别分布、hash）"]
+        - 创建venv环境
+        - 安装requirements
+        - 抽样构建 mini数据集，创建notebook做可视化
+        - 生成mini数据集使用说明"]
 
         V["满足条件:
-        - env_check_report.json 包含 python_version、packages_installed
-        - mini 数据可被 scripts/train.py --data data/mini --epochs 1 加载"]
+        - env_check_report.md 中的指标
+        - 能notebook可视化"]
 
         W --> A --> V
     end
@@ -395,11 +445,13 @@ flowchart LR
 
 
 ```
-* **输入**：`venv.md`、`README.md`、`requirements-cpu.txt`。
-* **DO WHAT**：执行 `python -m venv debug-cpu`，`pip install -r requirements-cpu.txt`；Data 智能体按规范抽样构建 `data/mini/` 并生成 `data/mini/metadata.json`（样本数、类别分布、hash）。
-* **输出**：`env_check_report.json`（Python、包版本、可用 GPU 信息）、`data/mini/`（mini 数据）与 `mini_dataset.md`（使用说明）。
+* **输入**：`venv.md`、`README.md`、`requirements-cpu.txt`、`requirements-gpu.txt`。
+* **DO WHAT**：
+    >执行 `python -m venv debug-cpu`，`pip install -r requirements-cpu.txt` 或者执行 `python -m venv debug-gpu`，`pip install -r requirements-gpu.txt`（要求用户二选一）；
+    >Dataset 智能体按`venv.md`中规范抽样构建 mini数据集 并生成 `data/mini/`（样本数据、样本数、样本类别和分布等），创建notebook做可视化。
+* **输出**：`env_check_report.md`（Python、包版本、可用 GPU 信息）、`data/mini/`（mini 数据集）与 `mini_dataset.md`（mini数据集使用说明和指标）。
 * **WHO**：Ops 智能体 + Dataset 智能体
-* **满足条件**：`env_check_report.json` 包含 `python_version`、`packages_installed`；mini 数据可被 `scripts/train.py --data data/mini --epochs 1` 加载。
+* **满足条件**：`env_check_report.md` 包含 `python_version`、`packages_installed`等环境安装和配置报告；mini 数据可被scripts目录下的notebook可视化。
 
 ### 3.2.3 Stage 3 — 1-epoch 验证与自动 bugfix
 ```mermaid
@@ -408,30 +460,25 @@ flowchart LR
     I["📥 输入文件:
     - scripts/train.py
     - data/mini/
-    - DEBUG_CODE.md
-    - DEBUG.md"]
+    - DEBUG_CODE.md"]
 
     O["📤 输出文件:
     - bugfix_report.md
-    - 测试日志
-    - 最终训练输出 (checkpoint / 模型摘要)"]
+    - 训练输出 checkpoint模型文件"]
 
     subgraph S["Stage X — 快速训练与补丁修复"]
         direction TB
         W["WHO:
-        - Validator智能体 (检测)
-        - Coder智能体 (修复)"]
+        - Coder智能体"]
 
         A["DO WHAT:
-        - 执行 1-epoch 快速训练 (`--fast_dev_run` 或 `--epochs 1`)
-        - Validator 自动采集错误、性能异常与日志
-        - 生成补丁建议 (patch suggestions)
-        - Coder 或人工应用补丁并再次测试直至通过"]
+        - 执行 1-epoch 快速训练
+        - 自动bugfix
+        - 生成bugfix报告"]
 
         V["满足条件:
-        - 1-epoch 运行成功（无崩溃）
-        - 关键单元测试通过
-        - bugfix_report.md 中所有关键错误标记已修复"]
+        - 1-epoch 成功
+        - bugfix_report.md 中所有错误已修复"]
 
         W --> A --> V
     end
@@ -440,10 +487,12 @@ flowchart LR
 
 ```
 * **输入**：`scripts/train.py`, `data/mini/`, `DEBUG_CODE.md`, `DEBUG.md`。
-* **DO WHAT**：执行 1-epoch 快速训练（`--fast_dev_run` 或 `--epochs 1`）；Validator 自动采集错误、性能异常与日志，生成补丁建议（patch suggestions）；Coder 智能体或人工应用补丁并再次测试直至通过。
-* **输出**：`bugfix_report.md`（问题清单、补丁摘要、最后测试结果）、测试日志与最终训练输出（checkpoint 或模型摘要）。
-* **WHO**：Validator（检测） + Coder（修复）。
-* **满足条件**：1-epoch 运行成功（无崩溃），关键单元测试通过，`bugfix_report.md` 中所有“关键错误”标记为已修复。
+* **DO WHAT**：
+    > 根据`DEBUG_CODE.md`规范,执行`scripts/train.py`, 1-epoch 快速训练（`--fast_dev_run` 或 `--epochs 1`）；
+    > Coder智能体自动采集错误信息和修复bug，生成（或更新）bugfix报告；并再次测试直至通过。
+* **输出**：`bugfix_report.md`（问题清单、bug摘要、bug修复日志、测试结果）、最终训练输出checkpoint模型文件。
+* **WHO**：Coder智能体。
+* **满足条件**：1-epoch 运行成功，`bugfix_report.md` 中所有“关键错误”标记为已修复。
 
 ### 3.2.4 Stage 4 — 全量训练策略输出
 ```mermaid
@@ -451,7 +500,6 @@ flowchart LR
     %% ================= Stage X =================
     I["📥 输入文件:
     - bugfix_report.md
-    - 训练日志
     - tech.md"]
 
     O["📤 输出文件:
@@ -461,19 +509,17 @@ flowchart LR
     subgraph S["Stage X — 训练指导生成"]
         direction TB
         W["WHO:
-        - Train 智能体"]
+        - Coder 智能体"]
 
         A["DO WHAT:
-        - 生成 full_train_guidance.md
-        - 包含 batch_size、learning_rate schedule、epoch 数
-        - checkpoint 策略
-        - 数据增强策略
-        - 分布式训练建议
-        - 训练监控点"]
+        - 生成 full_train_guidance.md"]
 
         V["满足条件:
-        - full_train_guidance.md 包含明确参数范围与部署步骤
-        - 与 tech.md 中资源估计一致"]
+        - 指导文件包含：
+          参数与性能估计、
+          训练脚本、
+          训练过程可视化监控
+        - 与 tech.md 规范一致"]
 
         W --> A --> V
     end
@@ -481,11 +527,11 @@ flowchart LR
     I --> S --> O
 
 ```
-* **输入**：`bugfix_report.md`、训练日志、`tech.md`。
-* **DO WHAT**：生成 `full_train_guidance.md`，包括推荐的 batch\_size、learning\_rate schedule、epoch 数、checkpoint 策略、数据增强策略、分布式训练建议与监控点。
-* **输出**：`full_train_guidance.md`（可直接用于 GPU 环境）与训练准备 checklist。
-* **WHO**：Train 智能体。
-* **满足条件**：`full_train_guidance.md` 包含明确的参数范围与部署步骤，且与 `tech.md` 中的资源估计一致。
+* **输入**：`bugfix_report.md`、技术选型文档-`tech.md`。
+* **DO WHAT**：根据`tech.md`生成全量训练指导文档 `full_train_guidance.md`，包括推荐的 batch\_size、learning\_rate schedule、epoch 数、checkpoint 策略、数据增强策略、分布式训练建议与监控点、各种性能配置的训练脚本示例。
+* **输出**：全量训练指导文档-`full_train_guidance.md`（可直接用于 GPU 分布式训练环境）。
+* **WHO**：Coder 智能体。
+* **满足条件**：全量训练指导文档-`full_train_guidance.md` 包含明确的参数范围与部署步骤，且与 `tech.md` 中的资源估计一致。
 
 ---
 
@@ -505,60 +551,266 @@ flowchart LR
     IN --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
 
-### 3.3.1 Stage 1 — 运行时环境检测与准备
+### 3.3.1 Stage 1 — Docker环境检测与准备
+```mermaid
+flowchart LR
+    %% ================= Stage 2 =================
+    I["📥 输入文件:
+    - 本地/远端节点信息
+    - DOCKER_CONFIG.md"]
 
+    O["📤 输出文件:
+    - docker_env_report.md"]
+
+    subgraph S["Stage 2 — Docker 环境检测与准备"]
+        direction TB
+        W["WHO:
+        - Ops 智能体
+        - 用户确认安装"]
+
+        A["DO WHAT:
+        - 检测 docker / docker-compose 并安装
+        - 检测 GPU可用以及性能"]
+
+        V["满足条件:
+        - docker_env_report.md 符合作业需求
+        - GPU 镜像需 nvidia-docker 支持"]
+
+        W --> A --> V
+    end
+
+    I --> S --> O
+
+```
 * **输入**：本地/远端节点信息、`DOCKER_CONFIG.md`。
-* **活动**：检测 `docker` / `docker-compose` 是否存在并满足版本要求（脚本：`docker --version`、`docker-compose --version`）；若缺失，给出平台化安装步骤并在用户确认下执行安装命令（或提供交互指南）。检测 GPU passthrough 能力（NVIDIA Docker 支持）。
-* **输出**：`docker_env_report.json`（docker\_version、compose\_version、gpu\_passthrough）。
-* **责任方**：Ops（主导），用户确认安装。
-* **满足条件**：`docker_env_report.json` 显示符合作业的必要条件（例如 GPU 镜像需 `nvidia-docker` 支持）。
+* **DO WHAT**：
+>检测 `docker` / `docker-compose` 是否存在并满足版本要求（脚本：`docker --version`、`docker-compose --version`）；若缺失，给出平台化安装步骤并在用户确认下执行安装命令（或提供交互指南）。
+>根据`DOCKER_CONFIG.md`,检测 GPU passthrough 能力（NVIDIA Docker 支持）。
+* **输出**：`docker_env_report.md`（docker\_version、compose\_version、gpu\_passthrough）。
+* **WHO**：Ops智能体，用户确认安装。
+* **满足条件**：`docker_env_report.md` 显示符合作业的必要条件（例如 GPU 镜像需 `nvidia-docker` 支持）。
 
 ### 3.3.2 Stage 2 — 镜像构建与容器校验
+```mermaid
+flowchart LR
+    %% ================= Stage 2 =================
+    I["📥 输入文件:
+    - Dockerfile
+    - requirements.txt
+    - 模型权重 (提示用户输入)"]
 
-* **输入**：`Dockerfile`（CPU/GPU 变体由 `DOCKER_CONFIG.md` 生成）、`requirements.txt`、模型权重（或占位）。
-* **活动**：构建镜像（`docker build -t my_project:gpu-v1 .`）；运行镜像内校验脚本（例如 `python -c "import torch; print(torch.cuda.is_available())"`）；生成 `container_env_check.log`。
+    O["📤 输出文件:
+    - 构建的镜像 (tag)"]
+
+    subgraph S["Stage 2 — 镜像构建与容器校验"]
+        direction TB
+        W["WHO:
+        - Ops智能体"]
+
+        A["DO WHAT:
+        - 构建镜像
+        - 运行镜像内校验脚本 
+        - 生成 container_env_check.log"]
+
+        V["满足条件:
+        - container_env_check.log必须包含 cuda_available: true"]
+
+        W --> A --> V
+    end
+
+    I --> S --> O
+
+```
+* **输入**：`Dockerfile`（CPU/GPU 变体由 `DOCKER_CONFIG.md` 生成）、docker环境的python依赖`requirements.txt`、模型权重文件（提示用户输入）。
+* **DO WHAT**：
+>构建镜像（`docker build -t my_project:gpu-v1 .`）；
+>运行镜像内校验脚本（例如 `python -c "import torch; print(torch.cuda.is_available())"`）；生成 `container_env_check.log`。
 * **输出**：构建的镜像（tag），`container_env_check.log`。
-* **责任方**：Ops + Validator。
+* **WHO**：Ops智能体。
 * **满足条件**：若为 GPU 镜像，`container_env_check.log` 必须显示 `cuda_available: true`；镜像体积、层次结构符合规范（例如依赖层最小化）。
 
-### 3.3.3 Stage 3 — 部署启动与 API 健康检查
+### 3.3.3 Stage 3 — 部署启动与 API、Docs、健康与性能检查
+```mermaid
+flowchart LR
+    %% ================= Stage 3 =================
+    I["📥 输入文件:
+    - 镜像
+    - deploy/docker文件夹"]
 
-* **输入**：镜像、`docker-compose.yml`、目标服务端口、健康检查脚本与 smoke tests。
-* **活动**：执行 `docker-compose up -d`；运行健康检查 `/health`、API 调用（推理样例 curl）与性能采样；收集 latency、throughput、memory usage；若检测到致命失败，自动触发回滚或进入故障诊断模式（生成 issue 并暂停流量）。
+    O["📤 输出文件:
+    - deploy_report.md
+    - 或 docker_error_report.md"]
+
+    subgraph S["Stage 3 — 部署启动与 API 健康检查"]
+        direction TB
+        W["WHO:
+        - Ops 智能体"]
+
+        A["DO WHAT:
+        - 执行 docker-compose up -d
+        - 运行 /health 健康检查
+        - API 调用测试 (推理样例 curl)
+        - 性能验证
+        - 如失败，撰写报告docker_error_report.md"]
+
+        V["满足条件:
+        - /health 返回 OK
+        - curl推理测试通过
+        - 冒烟测试通过
+        - 关键 SLAs (延迟、吞吐) 未超过阈值"]
+
+        W --> A --> V
+    end
+
+    I --> S --> O
+
+```
+* **输入**：构建的镜像、`deploy/docker/`文件夹，包含：`docker-compose.yml`、Dockerfile。
+* **DO WHAT**：
+>执行 `docker-compose up -d`；
+>运行健康检查 `/health`、文档检查`/docs`
+>API 调用（推理样例 curl）与性能采样；进行冒烟测试，收集 latency、throughput、memory usage；
+>若检测到致命失败，生成 issue 并停止docker容器，撰写报告`docker_error_report_N.md`。
+>若成功，撰写报告`deploy_report.md`，将测试结果(含SLAs)更新到`README.md`
 * **输出**：`deploy_report.md`（部署时间、服务端点、健康检查结果、smoke tests 结果、resource metrics）。
-* **责任方**：Ops（部署） + Validator（测试）。
+* **WHO**：Ops智能体。
 * **满足条件**：`/health` 返回 OK，smoke test 通过，关键 SLAs（延迟、吞吐）未超过阈值。
 
-### 3.3.4 Stage 4 — 监控 / 回滚 / 规范演进
+### 3.3.4 Stage 4 — Docker运行监控 / 需求回顾
+```mermaid
+flowchart LR
+    %% ================= Stage 4 =================
+    I["📥 输入文件:
+    - docker容器
+    - tech.md
+    - deploy_report.md
+    - README.md"]
 
-* **输入**：运行服务指标流、`DOCKER_CONFIG.md` 中监控项（延迟、吞吐、GPU 利用率）、规范演进策略。
-* **活动**：配置监控（Prometheus/Grafana 指标、告警规则）、设置规范漂移检测（生产指标触发 Spec 漂移器），定义回滚策略（蓝绿或 Canary）。当监控告警或规范漂移被检测到时，触发跟踪链（Spec → commit → CI report → deploy report），并自动生成 remediation 建议或启动智体修复流程。
-* **输出**：`monitoring_config`（dashboards、alerts）、`deploy_report.md`（含运行历史）、规范演进记录（Spec 版本变更日志）。
-* **责任方**：Ops（主导）、Planner（规范演进评估）、Validator（事件复现与回归测试）。
-* **满足条件**：可通过仪表盘追踪主要 KPI；在任一关键 SLA 违约时，系统能在预定时间内自动或半自动触发回滚/降级策略。
+    O["📤 输出文件:
+    - README.md
+    - docker_running_report.md"]
+
+    subgraph S["Stage 4 — Docker运行监控 / 需求回顾"]
+        direction TB
+        W["WHO:
+        - Tester智能体
+        - Planner智能体"]
+
+        A["DO WHAT:
+        - 配置监控（Prometheus/Grafana 指标、告警规则）
+        - 设置规范漂移检测（生产指标触发 Spec 漂移器）
+        - 回顾原始需求条目，更新目标项目的README.md"]
+
+        V["满足条件:
+        - 可通过仪表盘追踪主要 KPI
+        - README.md中需求完全实现，API或者功能正常"]
+
+        W --> A --> V
+    end
+
+    I --> S --> O
+
+```
+* **输入**：运行的docker容器、`deploy_report.md`、`tech.md` 和`README.md`
+* **活动**：
+> 配置监控（Prometheus/Grafana 指标、告警规则）、设置规范漂移检测（生产指标触发 Spec 漂移器），定义回滚策略（蓝绿或 Canary）
+> 回顾`README.md`中原始需求条目，并根据运行结果，监控结果更新`README.md`。
+* **输出**：`docker_running_report.md`；更新`README.md`。
+* **责任方**：Tester智能体, Planning智能体。
+* **满足条件**：可通过监控仪表盘追踪指标；`README.md`中需求完全实现，API或者功能正常，性能指标正常，测试结果汇总完整。
+
+---
+## 3.4 各阶段智能体功能与职责汇总
+```mermaid
+flowchart TD
+
+    %% ================= 框架项目 =================
+    subgraph F1["框架项目"]
+
+        S1_who["智能体: Planner规划智能体 + 用户"]
+        S1_desc["Stage1 — 需求分析与规范理解: 解析自然语言需求，抽取目标/SLA/约束，生成澄清问题"]
+        S2_who["智能体: Coder编程智能体"]
+        S2_desc["Stage2 — 技术选型与数据集选择: 候选模型选择，数据集计划，资源评估"]
+        S3_who["智能体: Planner规划智能体 + Coder编程智能体"]
+        S3_desc["Stage3 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，填充实现"]
+        S4_who["智能体: Ops运维智能体"]
+        S4_desc["Stage4 — venv环境与部署: 生成 venv.md，复制规范文件"]
+
+        S1_who --> S1_desc
+        S2_who --> S2_desc
+        S3_who --> S3_desc
+        S4_who --> S4_desc
+
+    end
+
+    %% ================= 目标项目 =================
+    subgraph F2["目标项目"]
+
+        S5_who["智能体: Planner规划智能体 + 用户"]
+        S5_desc["Stage1 — CLAUDE校验与本地规范定制: 审核/定制 CLAUDE.md，生成本地或继承版"]
+        S6_who["智能体: Ops运维智能体 + Dataset数据智能体"]
+        S6_desc["Stage2 — 环境构建与 mini 数据集准备: 安装依赖，抽样生成 mini 数据集并可视化"]
+        S7_who["智能体: Coder编程智能体"]
+        S7_desc["Stage3 — 1-epoch 验证与自动 bugfix: 执行快速训练并自动修复错误"]
+        S8_who["智能体: Coder编程智能体"]
+        S8_desc["Stage4 — 全量训练策略输出: 生成 full_train_guidance.md, 包含训练脚本与参数"]
+
+        S5_who --> S5_desc
+        S6_who --> S6_desc
+        S7_who --> S7_desc
+        S8_who --> S8_desc
+
+    end
+
+    %% ================= 生产部署 =================
+    subgraph F3["生产部署"]
+
+        S9_who["智能体: Ops运维智能体 + 用户"]
+        S9_desc["Stage1 — Docker环境检测与准备: 检测/安装 Docker & GPU, 输出环境报告"]
+        S10_who["智能体: Ops运维智能体"]
+        S10_desc["Stage2 — 镜像构建与容器校验: 构建镜像并校验 CUDA/GPU 可用性"]
+        S11_who["智能体: Ops运维智能体"]
+        S11_desc["Stage3 — 部署启动与 API 健康检查: docker-compose 启动, 健康检查, 性能验证"]
+        S12_who["智能体: Planner规划智能体 + Tester测试智能体"]
+        S12_desc["Stage4 — 运行监控与需求回顾: 配置监控与告警, 回顾需求, 更新 README"]
+
+        S9_who --> S9_desc
+        S10_who --> S10_desc
+        S11_who --> S11_desc
+        S12_who --> S12_desc
+
+    end
+
+    F1 --> F2 --> F3
+
+```
+
+
+## 3.5 各阶段通用产物映射（便于追溯）
+
+| 模块           | 阶段                             | 产物                                                   | 说明                                        |
+| ------------ | ------------------------------ | ---------------------------------------------------- | ----------------------------------------- |
+| **3.1 框架项目** | Stage 1 — 需求分析与规范理解            | `requirements.md`                                    | 需求文档，包含目标、SLA、约束、澄清问题及评分                  |
+|              | Stage 2 — 技术选型与数据集选择           | `tech.md`                                            | 技术选型文档，包含候选模型、数据集、资源估算、对比表                |
+|              | Stage 3 — 任务拆解与代码生成            | `project/`、`PROJECT_BUILD_LOG.md`                    | 生成并执行任务清单、<br>完整项目（含代码、配置、文档）、<br/>任务执行记录 |
+|              | Stage 4 — 代码与配置审核              | `REVIEW_REPORT.md`                    | 输出审核报告，所有条目通过      |
+|              | Stage 5 — venv环境与部署            | `venv.md`                                            | 虚拟环境规范文件<br>需要拷贝到目标项目的规范文件副本              |
+| **3.2 目标项目** | Stage 1 — CLAUDE 校验与本地规范定制     | `CLAUDE.local.md` 或 `CLAUDE.inherited.md`            | 本地规范文件，记录定制化规则或继承                         |
+|              | Stage 2 — 环境构建与 mini 数据集准备     | `env_check_report.md`、`data/mini/`、`mini_dataset.md` | 环境检查报告，mini 数据集及说明                        |
+|              | Stage 3 — 1-epoch 验证与自动 bugfix | `bugfix_report.md`、checkpoint 模型文件                   | Bug 修复报告与快速训练模型                           |
+|              | Stage 4 — 全量训练策略输出             | `full_train_guidance.md`、`训练准备 checklist`            | 全量训练指导与准备清单                               |
+| **3.3 生产部署** | Stage 1 — Docker环境检测与准备        | `docker_env_report.md`                               | Docker 运行环境检测报告                           |
+|              | Stage 2 — 镜像构建与容器校验            | 镜像（tag）、`container_env_check.log`                    | 构建镜像及容器校验日志                               |
+|              | Stage 3 — 部署启动与 API 健康检查       | `deploy_report.md` 或 `docker_error_report.md`        | 部署报告或错误报告                                 |
+|              | Stage 4 — Docker运行监控 / 需求回顾    | `docker_running_report.md`、更新后的 `README.md`          | 运行监控报告与需求回顾更新                             |
 
 ---
 
-## 3.4 各阶段通用产物映射（便于追溯）
-
-* `requirements.md` ← Stage 3.1.1（需求）
-* `tech.md` ← Stage 3.1.2（技术）
-* `task.md` ← Stage 3.1.3（任务）
-* Stage 3.1.3（代码骨架）
-* `venv.md`, `requirements-cpu.txt` ← Stage 3.1.4（环境）
-* Stage 3.1.4 / 3.2.2（数据）
-* Stage 3.2.2（环境）
-* Stage 3.2.3（修复）
-* `full_train_guidance.md` ← Stage 3.2.4（训练策略）
-* Stage 3.3（部署与监控）
-
----
-
-## 3.5 每个阶段的“最小可交付验收准则（DoD）”
+## 3.6 每个阶段的“最小可交付验收准则（DoD）”
 
 为保证流程可自动化验证，建议为每个阶段定义最小可交付准则（示例）：
 
-* **框架项目 Stage 完成（3.1）**：`requirements.md`, `tech.md`, `task.md`, `code_skeleton` 均存在且 `scripts/train.py --dry-run` 无致命错误。
+* **框架项目 Stage 完成（3.1）**：`requirements.md`, `tech.md`, `code_skeleton` 均存在且 `scripts/train.py --dry-run` 无致命错误。
 * **目标项目 Stage 完成（3.2）**：`env_check_report.json` 存在且 `scripts/train.py --data data/mini --epochs 1` 完成；`bugfix_report.md` 全部关键问题已关闭。
 * **生产部署 Stage 完成（3.3）**：容器镜像可运行、`/health` 返回 OK、smoke tests 通过且监控告警规则已部署。
 
@@ -569,7 +821,7 @@ flowchart LR
 
 * 将自然语言需求转为结构化 Spec（CREATE.md）是整个流程的起点，也是保证可追溯性的关键。
 * 三阶段 Spec（需求→技术→验证）确保设计与实现的每一步均可被验证、审计与回滚。
-* 通过角色化的自主智能体协作（planner, coder, validator, ops），可以实现高度自动化的从需求到部署的流水线，同时保留人为审核点以控制风险。
+* 通过角色化的自主智能体协作（planner, coder, tester, ops），可以实现高度自动化的从需求到部署的流水线，同时保留人为审核点以控制风险。
 * 推荐实践：在高不确定性阶段先采用短迭代的 vibe 实验，确认关键指标后引入 Spec 驱动流程以实现生产化与可维护性。
 
 ---
