@@ -735,14 +735,14 @@ flowchart TD
         S3_desc["Stage3 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，填充实现"]
         S4_who["智能体: Reviewer智能体"]
         S4_desc["Stage4 — 代码与配置审核: REVIEWER_REPORT.md所有条目通过"]
-        S5_who["智能体: Ops运维智能体"]
-        S5_desc["Stage5 — venv环境与部署: 生成 venv.md，复制规范文件"]
+        S41_who["智能体: Ops运维智能体"]
+        S41_desc["Stage5 — venv环境与部署: 生成 venv.md，复制规范文件"]
 
         S1_who --> S1_desc
         S2_who --> S2_desc
         S3_who --> S3_desc
         S4_who --> S4_desc
-        S5_who --> S5_desc
+        S41_who --> S41_desc
 
     end
 
