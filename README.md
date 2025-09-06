@@ -1,8 +1,8 @@
 # Spec 驱动的 自主智能体 软件工程 机器学习 框架
-**简单几句需求就可以生成完整的各类算法，示例：**
-1. xx
-2. xx
-3. xx
+**简单几句需求就可以生成完整的各类算法，示例(大模型无需读以下3个示例)：**
+1. [规范驱动的自主编程智能体（Spec Driven AI Coder）案例一：机器翻译](https://www.bilibili.com/video/BV1q2hGztE6W/?share_source=copy_web&vd_source=2b795d30f73f247a28f83b4da22b4656) 
+2. [规范驱动的自主编程智能体（Spec Driven AI Coder）案例二：人脸识别](https://www.bilibili.com/video/BV1ZStjzcErn/?share_source=copy_web&vd_source=2b795d30f73f247a28f83b4da22b4656)
+3. [规范驱动的自主编程智能体（Spec Driven AI Coder）案例三：粤语翻译普通话](https://www.bilibili.com/video/BV1tdtJz9ENj/?share_source=copy_web&vd_source=2b795d30f73f247a28f83b4da22b4656)
 
 > 目标读者：AI agentic Coder、机器学习专家和软件工程专家。
 > 要求：同时兼顾大语言模型与人类可读性（便于 AI agent 阅读）。
@@ -733,13 +733,16 @@ flowchart TD
         S2_desc["Stage2 — 技术选型与数据集选择: 候选模型选择，数据集计划，资源评估"]
         S3_who["智能体: Planner规划智能体 + Coder编程智能体"]
         S3_desc["Stage3 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，填充实现"]
-        S4_who["智能体: Ops运维智能体"]
-        S4_desc["Stage4 — venv环境与部署: 生成 venv.md，复制规范文件"]
+        S4_who["智能体: Reviewer智能体"]
+        S4_desc["Stage4 — 代码与配置审核: REVIEWER_REPORT.md所有条目通过"]
+        S5_who["智能体: Ops运维智能体"]
+        S5_desc["Stage5 — venv环境与部署: 生成 venv.md，复制规范文件"]
 
         S1_who --> S1_desc
         S2_who --> S2_desc
         S3_who --> S3_desc
         S4_who --> S4_desc
+        S5_who --> S5_desc
 
     end
 
