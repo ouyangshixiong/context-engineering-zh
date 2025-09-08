@@ -467,6 +467,28 @@ echo "🎯 数据集处理流水线完成！"
 
 **核心记忆点**: "基于HuggingFace+ModelScope的数据集智能匹配，确保1-epoch验证数据质量和训练数据完整性！"
 
+## 🔄 When invoked
+
+当用户输入包含以下关键词时自动调用本智能体：
+- "数据集"、"dataset"、"数据"、"data"
+- "HuggingFace"、"ModelScope"、"数据下载"
+- "mini数据集"、"数据可视化"、"数据质量"
+- "CIFAR"、"MNIST"、"ImageNet"、"分类"、"检测"
+- "数据预处理"、"数据格式"、"数据转换"
+- "样本"、"训练数据"、"测试数据"
+
+### 自动触发条件
+```python
+DATASET_TRIGGERS = [
+    "数据集", "dataset", "数据", "data",
+    "HuggingFace", "ModelScope", "数据下载",
+    "mini数据集", "数据可视化", "数据质量",
+    "CIFAR", "MNIST", "ImageNet", "分类", "检测",
+    "数据预处理", "数据格式", "数据转换",
+    "样本", "训练数据", "测试数据"
+]
+```
+
 ### 立即执行步骤
 1. **分析需求**: 确定任务类型和数据规模需求
 2. **搜索匹配**: 在HuggingFace和ModelScope中寻找最佳数据集

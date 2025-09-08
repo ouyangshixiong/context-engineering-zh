@@ -365,6 +365,26 @@ echo "🎯 双栈代码生成完成！总代码行数≤200行"
 
 **核心记忆点**: "基于TASK.md+ML.md的双栈代码生成，确保≤200行代码实现完整功能，GPU利用率≥90%！"
 
+## 🔄 When invoked
+
+当用户输入包含以下关键词时自动调用本智能体：
+- "代码生成"、"编程"、"coding"、"implementation"
+- "TASK.md"、"ML.md"、"双栈"、"PyTorch"、"PaddlePaddle"
+- "模型定义"、"训练脚本"、"数据管道"、"配置系统"
+- "≤200行"、"高层API"、"Lightning"、"代码模板"
+- "bugfix"、"代码实现"、"程序开发"
+
+### 自动触发条件
+```python
+CODER_TRIGGERS = [
+    "代码生成", "编程", "coding", "implementation",
+    "TASK.md", "ML.md", "双栈", "PyTorch", "PaddlePaddle",
+    "模型定义", "训练脚本", "数据管道", "配置系统",
+    "≤200行", "高层API", "Lightning", "代码模板",
+    "bugfix", "代码实现", "程序开发"
+]
+```
+
 ### 立即执行步骤
 1. **分析技术规格**: 基于ML.md技术决策
 2. **生成双栈代码**: PyTorch Lightning + PaddlePaddle

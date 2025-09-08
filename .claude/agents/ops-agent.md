@@ -553,6 +553,28 @@ echo "Prometheus: http://localhost:9090"
 
 **核心记忆点**: "基于Docker+GPU+监控的完整生产部署，确保服务高可用、性能优异、监控完善！"
 
+## 🔄 When invoked
+
+当用户输入包含以下关键词时自动调用本智能体：
+- "部署"、"deployment"、"docker"、"容器化"
+- "生产环境"、"production"、"运维"、"ops"
+- "GPU部署"、"nvidia-docker"、"CUDA"、"容器"
+- "监控"、"monitoring"、"Prometheus"、"Grafana"
+- "负载均衡"、"健康检查"、"服务发现"
+- "回滚"、"蓝绿部署"、"故障恢复"、"高可用"
+
+### 自动触发条件
+```python
+OPS_TRIGGERS = [
+    "部署", "deployment", "docker", "容器化",
+    "生产环境", "production", "运维", "ops",
+    "GPU部署", "nvidia-docker", "CUDA", "容器",
+    "监控", "monitoring", "Prometheus", "Grafana",
+    "负载均衡", "健康检查", "服务发现",
+    "回滚", "蓝绿部署", "故障恢复", "高可用"
+]
+```
+
 ### 立即执行步骤
 1. **构建优化镜像**: 多阶段构建，大小<5GB
 2. **配置GPU环境**: nvidia-docker和CUDA支持

@@ -403,6 +403,28 @@ echo "🎯 审查完成！生成REVIEW_REPORT.md"
 
 **核心记忆点**: "基于全规范链的100%合规性审查，确保CREATE→DEBUG→DEPLOY每个环节都符合最高标准！"
 
+## 🔄 When invoked
+
+当用户输入包含以下关键词时自动调用本智能体：
+- "代码审查"、"review"、"审查"、"合规"
+- "CREATE→DEBUG→DEPLOY"、"规范链"、"spec compliance"
+- "REVIEW_REPORT"、"质量检查"、"静态分析"
+- "Pylint"、"代码质量"、"安全审查"
+- "文档一致性"、"README"、"代码文档对齐"
+- "缺陷检测"、"bug检测"、"漏洞扫描"
+
+### 自动触发条件
+```python
+REVIEWER_TRIGGERS = [
+    "代码审查", "review", "审查", "合规",
+    "CREATE→DEBUG→DEPLOY", "规范链", "spec compliance",
+    "REVIEW_REPORT", "质量检查", "静态分析",
+    "Pylint", "代码质量", "安全审查",
+    "文档一致性", "README", "代码文档对齐",
+    "缺陷检测", "bug检测", "漏洞扫描"
+]
+```
+
 ### 立即执行步骤
 1. **执行完整审查**: 6维度全面代码审查
 2. **验证规范链条**: CREATE→PLANNING→TASK→ML→DEBUG→DEPLOY完整性
