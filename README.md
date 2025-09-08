@@ -205,6 +205,7 @@ flowchart LR
 flowchart LR
     %% ================= Stage 3 =================
     I3["📥 输入文件:
+    - task.md
     - tech.md
     - requirements.md
     - ML.md(API/代码骨架部分)
@@ -235,14 +236,14 @@ flowchart LR
 
     I3 --> S3 --> O3
 ```
-* **输入**：`tech.md`、`requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
+* **输入**：`task.md`、`tech.md`、`requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
 * **活动**：
-    >Planner智能体生成以 checkbox 形式的 task清单（每项明确输入/输出/验收测试/估时）；
-    >按`ML.md`、`OmegaConf_README.md`规范内容生成项目代码骨架,包含目标项目的`README.md`；
-    >Coder智能体逐项执行task生成代码和配置文件，并填充代码骨架；
-    >Planner智能体逐项验证task执行情况，验证和复核。总结并更新目标项目的`README.md`
+    >Planner智能体读取`task.md`、`tech.md`、`ML.md`、`OmegaConf_README.md`规范，构建task清单；
+    >Coder智能体读取`tech.md`、`ML.md`、`OmegaConf_README.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
+    >Coder智能体记录任务执行结果，生成`PROJECT_BUILD_LOG.md`。
+    >Planner智能体逐项验证task执行情况，验证和复核。总结结果并更新目标项目的`README.md`
 * **输出**：`{xx}_project/`（目标项目,包含：代码骨架，用真实项目名称代替`{xx}_project/`），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录）。
-* **责任方**：Planner智能体（生成task清单，验收和复核task）, Coder智能体（执行清单，包括生成代码、记录任务执行结果）。
+* **责任方**：Planner智能体（生成task清单，验收和复核task）, Coder智能体（执行清单，包括生成代码骨架、填充代码、生成配置文件、记录任务执行结果）。
 * **满足条件**：代码骨架填充完整，例如包含可运行的训练脚本和推理脚本。PROJECT_BUILD_LOG.md逐项复核都通过。
 
 ### 3.1.4 Stage 4 — 代码与配置审核
@@ -486,7 +487,7 @@ flowchart LR
     I --> S --> O
 
 ```
-* **输入**：`scripts/train.py`, `data/mini/`, `DEBUG_CODE.md`, `DEBUG.md`。
+* **输入**：`scripts/train.py`, `data/mini/`, `DEBUG_CODE.md`。
 * **DO WHAT**：
     > 根据`DEBUG_CODE.md`规范,执行`scripts/train.py`, 1-epoch 快速训练（`--fast_dev_run` 或 `--epochs 1`）；
     > Coder智能体自动采集错误信息和修复bug，生成（或更新）bugfix报告；并再次测试直至通过。
