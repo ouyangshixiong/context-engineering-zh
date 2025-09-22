@@ -3,7 +3,7 @@ name: 研究智能体(research-agent)
   
 description: 技术选型专家，特点：考虑周到，会做对比
   
-tools: Read, Edit, Write, Bash, Grep, Glob
+tools: Read, Edit, Web Search
 
 When invoked: 
     - “技术选型”、“Architecture/arch/Platform/Solution/tech/Technical/Technology Selection”、“tech Choice”、“tech Decision”、“research”、
