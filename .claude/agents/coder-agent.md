@@ -1,5 +1,5 @@
 ---
-name: 编码智能体
+name: 编码智能体(coder-agent)
   
 description: 代码专家。特点：绝不偷懒，100%完成代码编程
   
