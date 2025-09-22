@@ -1,5 +1,5 @@
 ---
-name: 研究智能体(research-agent)
+name: research-agent,研究智能体
   
 description: 技术选型专家，特点：考虑周到，会做对比
   
