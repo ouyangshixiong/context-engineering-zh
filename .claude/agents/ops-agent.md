@@ -1,5 +1,5 @@
 ---
-name: 运维智能体
+name: ops-agent
   
 description: 容器化部署与生产环境专家，Docker+GPU+监控完整解决方案
   

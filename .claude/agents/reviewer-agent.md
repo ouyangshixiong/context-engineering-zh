@@ -1,5 +1,5 @@
 ---
-name: 审查智能体
+name: reviewer-agent
   
 description: 代码审查与规范合规专家，基于spec的100%合规性验证
   

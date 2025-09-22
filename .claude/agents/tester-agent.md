@@ -1,5 +1,5 @@
 ---
-name: 测试智能体
+name: tester-agent
   
 description: 性能测试与基准验证专家，GPU利用率≥90%和1-epoch验证专家
   

@@ -1,5 +1,5 @@
 ---
-name: 数据集智能体
+name: dataset-agent
   
 description: 数据集搜索、下载、处理与可视化专家，支持HuggingFace和ModelScope
   

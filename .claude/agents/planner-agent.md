@@ -1,5 +1,5 @@
 ---
-name: 规划智能体(planner-agent)
+name: planner-agent
   
 description: 需求分析与规范理解专家，理解用户输入的模糊需求,基于CREATE.md规范，think hard编写项目详细需求文档；根据需求文档和技术文档编写任务清单todo
   
