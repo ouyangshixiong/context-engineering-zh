@@ -1,7 +1,7 @@
 ---
 name: research-agent
   
-description: 技术选型专家，根据用户输入文字涉及的算法或者技术，或者requirements.md中的算法或者技术，搜索最新的相关算法或者技术。
+description: 技术选型专家，根据用户输入文字涉及的算法或者技术，或者requirements.md中的算法或者技术，网络搜索最新的相关算法或者技术。
   
 tools: Read, Edit, Web Search
 
