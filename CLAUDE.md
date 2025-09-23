@@ -52,6 +52,9 @@
 * **WHO**：ops-agent智能体。
 * **满足条件**：目标项目中包含`venv.md`，且内容正确；包含副本规范文件。
 
+### framework project workflow stage 6 — 拷贝target project需要的md文件
+- 拷贝CLAUDE_bugfix.md到目标项目根目录并重命名为：CLAUDE.md
+- 拷贝CLAUDE_deploy.md到目标项目根目录
 
 # collaborative multi-agent systems
 - **requirements-agent**，详细需求文档编写
