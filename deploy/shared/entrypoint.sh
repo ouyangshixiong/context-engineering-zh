@@ -12,9 +12,9 @@ pip --version
 
 # 检查ML库加载
 echo "🔍 检查ML库加载状态..."
-python -c "import torch; print(f'PyTorch版本: {torch.__version__}')" 2>/dev/null || echo "⚠️  PyTorch未安装"
-python -c "import paddle; print(f'PaddlePaddle版本: {paddle.__version__}')" 2>/dev/null || echo "⚠️  PaddlePaddle未安装"
-python -c "import numpy; print(f'NumPy版本: {numpy.__version__}')" 2>/dev/null || echo "⚠️  NumPy未安装"
+python -c "import torch; print(f'✅ PyTorch版本: {torch.__version__}'); print(f'   类型: {'CPU' if 'cpu' in torch.__version__ else 'GPU'}版本')" 2>/dev/null || echo "⚠️  PyTorch未安装"
+python -c "import paddle; print(f'✅ PaddlePaddle版本: {paddle.__version__}')" 2>/dev/null || echo "⚠️  PaddlePaddle未安装"
+python -c "import numpy; print(f'✅ NumPy版本: {numpy.__version__}')" 2>/dev/null || echo "⚠️  NumPy未安装"
 
 # 检查GPU可用性（如果适用）
 if python -c "import torch; print(f'CUDA可用: {torch.cuda.is_available()}')" 2>/dev/null; then

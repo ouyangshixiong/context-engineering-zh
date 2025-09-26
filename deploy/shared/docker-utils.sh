@@ -115,6 +115,10 @@ import torch
 import paddle
 print('✅ PyTorch版本:', torch.__version__)
 print('✅ PaddlePaddle版本:', paddle.__version__)
+if 'cpu' in torch.__version__:
+    print('💻 确认CPU版本安装成功')
+else:
+    print('🎯 GPU版本已安装')
 if torch.cuda.is_available():
     print('✅ CUDA可用，GPU数量:', torch.cuda.device_count())
 else:

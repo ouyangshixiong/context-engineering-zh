@@ -1,426 +1,106 @@
-# 🐳 GPU生产环境配置指南
+# DOCKER_CONFIG.md - 生产部署技术规范
 
-> 专为高性能训练设计的Docker GPU环境，支持PyTorch和PaddlePaddle
+> 基于README.md 3.3节，容器化部署与GPU生产环境
 
-## 🎯 环境概述
+## 部署矩阵
 
-| 组件 | 版本 | 用途 | 备注 |
-|------|------|------|------|
-| CUDA | 12.6 | GPU计算 | 最新稳定版 |
-| PyTorch | 2.6.0+cu126 | 深度学习框架 | GPU加速 |
-| PaddlePaddle | 2.6.0+gpu | 深度学习框架 | GPU加速 |
-| 内存需求 | ≥ 8GB | 运行要求 | 支持batch_size=64 |
-| GPU需求 | ≥ 8GB显存 | 训练要求 | RTX 3060以上 |
+| 组件 | 版本 | 规格要求 | 验证标准 | README.md引用 |
+|------|------|----------|----------|---------------|
+| CUDA | 12.6 | GPU runtime | nvidia-smi通过 | 3.3.1节 |
+| PyTorch | 2.4.1+cu12.6 | GPU生产版 | torch.cuda可用 | 3.3.2节 |
+| PaddlePaddle | 2.6.0+gpu | GPU生产版 | paddle.is_compiled_with_cuda | 3.3.2节 |
+| GPU显存 | ≥6GB | RTX3060+ | 内存检测通过 | 3.3节 |
 
-## 🚀 一键部署
-
-### 方案1: Docker Compose（推荐）
+## 一键部署
 
 ```bash
-# 启动GPU环境
-docker-compose -f deploy/gpu/docker-compose.yml up -d
+# 构建+运行
+docker-compose -f deploy/docker-compose.yml up -d
 
-# 验证环境
-docker exec yolov10 python -c "import torch; print(f'GPU数量: {torch.cuda.device_count()}')"
+# 验证
+docker exec ml-project python -c "
+import torch, paddle
+print(f'PyTorch: {torch.__version__}')
+print(f'CUDA: {torch.cuda.is_available()}')
+print(f'Paddle: {paddle.__version__}')
+"
 ```
 
-### 方案2: Docker命令行
+## Dockerfile规范
 
-```bash
-# 构建镜像
-docker build -t yolov10-gpu -f deploy/gpu/Dockerfile .
-
-# 运行容器
-docker run --gpus all -it --name yolov10 \
-  -v $(pwd):/workspace \
-  -p 8888:8888 -p 6006:6006 \
-  yolov10-gpu bash
-```
-
-## 📋 详细配置步骤
-
-### 1. 系统要求检查
-
-```bash
-# 检查NVIDIA驱动
-nvidia-smi
-# 期望输出: CUDA Version: 12.6
-
-# 检查Docker
-docker --version
-# 期望: Docker version 20.10+
-
-# 检查NVIDIA Docker
-docker run --rm --gpus all nvidia/cuda:12.6.0-base-ubuntu20.04 nvidia-smi
-```
-
-### 2. Dockerfile配置
-
-#### 基础Dockerfile
 ```dockerfile
-FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
-
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    git wget unzip htop vim \
-    && rm -rf /var/lib/apt/lists/*
-
-# 设置工作目录
+FROM nvidia/cuda:12.6.0-cudnn9-runtime-ubuntu22.04
 WORKDIR /workspace
-
-# 安装Python依赖
 COPY requirements-gpu.txt .
-RUN pip install --no-cache-dir -r requirements-gpu.txt
-
-# 复制项目文件
-COPY . .
-
-# 设置环境变量
-ENV PYTHONPATH=/workspace
-ENV CUDA_VISIBLE_DEVICES=0,1,2,3
-
-# 暴露端口
-EXPOSE 8888 6006
-
-CMD ["python", "scripts/train.py"]
-```
-
-#### PaddlePaddle Dockerfile
-```dockerfile
-FROM paddlepaddle/paddle:2.6.0-gpu-cuda12.6-cudnn9
-
-# 安装额外依赖
-RUN pip install --no-cache-dir \
-    pytorch-lightning==2.0.0 \
-    omegaconf==2.3.0 \
-    torchmetrics==0.11.0 \
-    wandb==0.15.0 \
-    tensorboard==2.13.0
-
-WORKDIR /workspace
+RUN pip3 install --no-cache-dir -r requirements-gpu.txt
 COPY . .
 ENV PYTHONPATH=/workspace
-
-CMD ["python", "scripts/train.py"]
+ENV CUDA_VISIBLE_DEVICES=auto
+EXPOSE 8888 6006 8000
+CMD ["python", "scripts/serve.py"]
 ```
 
-### 3. Docker Compose配置
+## Compose配置
 
-#### docker-compose.yml
 ```yaml
 version: '3.8'
 services:
-  yolov10:
-    build:
-      context: .
-      dockerfile: deploy/gpu/Dockerfile
-    container_name: yolov10
+  ml-project:
+    build: .
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-      - CUDA_VISIBLE_DEVICES=0,1,2,3
     volumes:
       - ./:/workspace
       - ./data:/workspace/data
       - ./logs:/workspace/logs
     ports:
-      - "8888:8888"  # Jupyter
-      - "6006:6006"  # TensorBoard
-    command: >
-      bash -c "
-        echo '=== GPU信息 ===' &&
-        nvidia-smi &&
-        echo '=== 环境验证 ===' &&
-        python -c 'import torch; print(f\"PyTorch: {torch.__version__}\"); print(f\"GPU: {torch.cuda.device_count()}\")' &&
-        echo '=== 启动训练 ===' &&
-        python scripts/train.py model=yolov10n data=coco128 trainer.max_epochs=10
-      "
+      - "8888:8888"
+      - "6006:6006"
+      - "8000:8000"
 ```
 
-### 4. 环境验证脚本
+## 性能基准
 
-#### 创建验证脚本
-```bash
-cat > validate_gpu.py << 'EOF'
-import torch
-import paddle
-import subprocess
-import os
+| GPU型号 | 显存 | Epoch时间 | GPU利用率 | Batch大小 |
+|---------|------|-----------|-----------|-----------|
+| RTX3060 | 12GB | ~45分钟 | >90% | 32 |
+| RTX4090 | 24GB | ~25分钟 | >90% | 64 |
+| A100 | 40GB | ~15分钟 | >90% | 128 |
 
-print("=== GPU环境验证 ===")
+## 验证清单
 
-# 检查CUDA可用性
-print(f"PyTorch CUDA可用: {torch.cuda.is_available()}")
-print(f"PaddlePaddle GPU可用: {paddle.is_compiled_with_cuda()}")
+- [ ] nvidia-smi检测通过
+- [ ] 镜像构建成功
+- [ ] 容器启动正常
+- [ ] GPU识别正确
+- [ ] 多GPU支持验证
+- [ ] GPU利用率>90%
 
-# 检查GPU信息
-if torch.cuda.is_available():
-    print(f"GPU数量: {torch.cuda.device_count()}")
-    for i in range(torch.cuda.device_count()):
-        props = torch.cuda.get_device_properties(i)
-        print(f"GPU {i}: {props.name}, {props.total_memory/1024**3:.1f}GB")
+## 技术约束
 
-# 检查nvidia-smi
-try:
-    result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
-    print("✅ nvidia-smi 可用")
-except FileNotFoundError:
-    print("❌ nvidia-smi 不可用")
+- **环境要求**: Docker 20.10+, nvidia-docker2
+- **内存管理**: 自动GPU内存分配
+- **性能标准**: GPU利用率>90%
+- **部署时间**: 5分钟完成
+- **监控端口**: 8888/6006/8000
 
-print("=== 环境验证完成 ===")
-EOF
-```
-
-## 🧪 GPU性能测试
-
-### 1. 基础性能测试
+## 多GPU配置
 
 ```bash
-# 运行GPU性能测试
-docker exec yolov10 python -c "
-import torch
-import time
-
-# 测试GPU计算性能
-size = 8192
-a = torch.randn(size, size, device='cuda')
-b = torch.randn(size, size, device='cuda')
-
-start = time.time()
-c = torch.matmul(a, b)
-torch.cuda.synchronize()
-end = time.time()
-
-print(f'GPU矩阵乘法: {size}x{size} 用时 {end-start:.2f}s')
-print(f'GPU内存: {torch.cuda.memory_allocated()/1024**3:.1f}GB')
-"
-```
-
-### 2. 训练性能基准
-
-```bash
-# 单GPU训练测试
-docker exec yolov10 python scripts/train.py \
-  model=yolov10n \
-  data=coco128 \
-  trainer.max_epochs=3 \
-  trainer.accelerator=gpu \
-  trainer.devices=1 \
-  trainer.precision=16
-
-# 多GPU训练测试  
-docker exec yolov10 python scripts/train.py \
-  model=yolov10n \
-  data=coco128 \
-  trainer.max_epochs=3 \
-  trainer.accelerator=gpu \
-  trainer.devices=4 \
-  trainer.strategy=ddp \
-  trainer.precision=16
-```
-
-### 3. 性能监控
-
-```bash
-# 实时监控GPU使用率
-watch -n 1 nvidia-smi
-
-# 监控容器资源
-docker stats yolov10
-
-# 查看训练日志
-docker exec yolov10 tail -f logs/lightning_logs/version_0/metrics.csv
-```
-
-## 🔧 高级配置
-
-### 1. 多GPU配置
-
-#### 环境变量设置
-```bash
-# Docker运行时设置
-docker run --gpus '"device=0,1,2,3"' -it yolov10-gpu bash
-
-# 容器内设置
+# 4GPU训练
+docker run --gpus '"device=0,1,2,3"' -it ml-project bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export NCCL_DEBUG=INFO
 ```
 
-#### 训练参数优化
-```bash
-# 多GPU训练配置
-python scripts/train.py \
-  model=yolov10n \
-  data=coco2017 \
-  trainer.max_epochs=300 \
-  trainer.accelerator=gpu \
-  trainer.devices=4 \
-  trainer.strategy=ddp \
-  trainer.precision=16 \
-  trainer.gradient_clip_val=0.1 \
-  trainer.accumulate_grad_batches=4
-```
+## 错误处理
 
-### 2. 内存优化
-
-#### CUDA内存管理
-```python
-# 在训练脚本中添加
-import torch
-
-# 内存优化设置
-torch.cuda.empty_cache()
-torch.backends.cudnn.benchmark = True
-
-# 监控内存使用
-if torch.cuda.is_available():
-    print(f'GPU内存: {torch.cuda.memory_allocated()/1024**3:.1f}GB')
-    print(f'GPU缓存: {torch.cuda.memory_reserved()/1024**3:.1f}GB')
-```
-
-### 3. 性能调优
-
-#### 训练加速配置
-```yaml
-# configs/trainer/gpu_speed.yaml
-trainer:
-  accelerator: gpu
-  devices: auto
-  precision: 16
-  strategy: ddp
-  gradient_clip_val: 0.1
-  accumulate_grad_batches: 4
-  sync_batchnorm: true
-  benchmark: true
-```
-
-## 📊 性能基准
-
-### 硬件性能对比
-| GPU型号 | 显存 | COCO训练时间 | 内存使用 | 推荐batch_size |
-|---------|------|--------------|----------|----------------|
-| RTX 3060 | 12GB | ~45分钟/epoch | 8GB | 32 |
-| RTX 3080 | 10GB | ~35分钟/epoch | 8GB | 32 |
-| RTX 4090 | 24GB | ~25分钟/epoch | 12GB | 64 |
-| A100 | 40GB | ~15分钟/epoch | 20GB | 128 |
-
-### 多GPU性能
-| GPU数量 | 速度提升 | 内存使用 | 同步开销 |
-|---------|----------|----------|----------|
-| 1x | 1x | 8GB | 0% |
-| 2x | 1.8x | 16GB | 10% |
-| 4x | 3.2x | 32GB | 20% |
-| 8x | 6.0x | 64GB | 25% |
-
-## 🚨 常见问题解决
-
-### 问题1: CUDA版本不匹配
-```bash
-# 错误信息: CUDA version mismatch
-# 解决方案：
-docker run --rm --gpus all nvidia/cuda:12.6.0-base-ubuntu20.04 nvidia-smi
-# 确认CUDA版本一致
-```
-
-### 问题2: GPU内存不足
-```bash
-# 错误信息: CUDA out of memory
-# 解决方案：
-# 1. 减小batch_size
-# 2. 启用梯度累积
-# 3. 使用混合精度
-python scripts/train.py \
-  model=yolov10n \
-  data=coco2017 \
-  trainer.precision=16 \
-  data.batch_size=16
-```
-
-### 问题3: NCCL通信错误
-```bash
-# 错误信息: NCCL error
-# 解决方案：
-export NCCL_DEBUG=INFO
-export NCCL_P2P_DISABLE=1
-export NCCL_IB_DISABLE=1
-```
-
-### 问题4: Docker权限问题
-```bash
-# 错误信息: permission denied
-# 解决方案：
-sudo usermod -aG docker $USER
-sudo systemctl restart docker
-docker run hello-world
-```
-
-## 🔄 环境管理
-
-### 容器管理命令
-```bash
-# 启动容器
-docker-compose -f deploy/gpu/docker-compose.yml up -d
-
-# 进入容器
-docker exec -it yolov10 bash
-
-# 停止容器
-docker-compose -f deploy/gpu/docker-compose.yml down
-
-# 查看日志
-docker logs -f yolov10
-
-# 清理容器
-docker system prune -f
-```
-
-### 镜像管理
-```bash
-# 构建镜像
-docker build -t yolov10-gpu -f deploy/gpu/Dockerfile .
-
-# 标记镜像
-docker tag yolov10-gpu your-registry/yolov10:latest
-
-# 推送镜像
-docker push your-registry/yolov10:latest
-
-# 拉取镜像
-docker pull your-registry/yolov10:latest
-```
-
-## 📋 配置检查清单
-
-### 系统要求
-- [ ] NVIDIA驱动 ≥ 535.00
-- [ ] Docker ≥ 20.10
-- [ ] nvidia-docker2 已安装
-- [ ] CUDA 12.6 兼容
-
-### 配置验证
-- [ ] GPU检测成功
-- [ ] 镜像构建成功
-- [ ] 容器启动正常
-- [ ] 多GPU识别正确
-- [ ] 内存分配合理
-
-### 性能验证
-- [ ] 单GPU训练正常
-- [ ] 多GPU训练正常
-- [ ] 混合精度工作
-- [ ] 性能符合预期
-
-## 🎯 下一步
-
-完成GPU环境配置后：
-1. 查看 [DEPLOY.md](./DEPLOY.md) 进行生产部署
-2. 更新 [PROJECT_BUILD_LOG.md](./PROJECT_BUILD_LOG.md)
-3. 配置CI/CD流水线
-
-**完整流程**：
-- **规划阶段**：CREATE.md → INITIAL.md（需求规格）
-- **验证阶段**：VENV_CONFIG.md → DEBUG_CODE.md → DOCKER_CONFIG.md
-- **部署阶段**：DEPLOY.md → PROJECT_BUILD_LOG.md
+| 错误类型 | 症状 | 解决方案 |
+|----------|------|----------|
+| CUDA OOM | 内存不足 | batch_size减半 |
+| NCCL错误 | 通信失败 | export NCCL_P2P_DISABLE=1 |
+| 权限问题 | docker拒绝 | sudo usermod -aG docker $USER |
 
 ---
-**配置时间**: ~15分钟 | **验证时间**: ~10分钟 | **总计**: ~25分钟
+**部署时间**: 5分钟 | **GPU利用率**: >90% | **容器化**: 100%

@@ -25,12 +25,13 @@ RUN pip install --no-cache-dir -r cnn-visual-tutorial/requirements.txt || true
 
 # 安装CPU版本的PyTorch和PaddlePaddle
 RUN pip install --no-cache-dir \
-    torch==2.6.0+cpu \
-    torchvision==0.21.0+cpu \
+torch==2.4.1+cpu \
+    torchvision==0.19.1+cpu \
+    torchaudio==2.4.1+cpu \
     -f https://download.pytorch.org/whl/torch_stable.html
 
 RUN pip install --no-cache-dir \
-    paddlepaddle==3.1.0
+    paddlepaddle==2.6.0
 
 # 复制应用代码
 COPY . .
