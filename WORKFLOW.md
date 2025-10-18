@@ -9,21 +9,25 @@
 
 ### 步骤 Stage 1 — 需求分析与规范理解
 * **输入**：`CREATE.md`（框架规范），自然语言需求（用户提供，通常简短/模糊）。
-* **WHO**：planner-agent智能体（主导），用户（回答并澄清问题）。
-* **DO WAHT**：planner-agent智能体解析自然语言，抽取目标、SLA、约束这些条目；为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）。
-* **满足条件**：`requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略。
-* **输出**：`requirements.md`（结构化 YAML 或 Markdown，关键段落举例：项目名：英文，用作目标项目目录、问题：逐条陈述、SLA、约束条件、兼容性、需用户澄清的疑难问题、所有条目和澄清问题的打分0~1分）。
+* **WHO**：requirements-plugin 命令（主导），requirements-agent（需求分析），research-agent（技术调研），用户（回答并澄清问题）。
+* **DO WHAT**：
+  > 使用 `/requirements-plugin:需求分析` 命令启动需求分析流程；
+  > requirements-agent 解析自然语言，抽取目标、SLA、约束这些条目，进行15分钟深度思考；
+  > 如包含技术关键词，research-agent 进行技术调研并生成技术报告；
+  > 为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）。
+* **满足条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略；技术可行性验证通过。
+* **输出**：`requirements/requirements.md`（结构化需求文档），`requirements/research-report.md`（技术调研报告，如有技术关键词）。
 
 ### 步骤 Stage 2 — 技术选型与数据集选择
-* **输入**：`requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
+* **输入**：`requirements/requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
 * **DO WHAT**：
->阅读`requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
+>阅读`requirements/requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
 * **输出**：`tech.md`（包含 2个候选AI模型、相匹配的数据集、模型的各种约束条件、AI算法优劣势对比表格）。
 * **WHO**：coder-agent智能体。
 * **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与约束。
 
 ### 步骤 Stage 3 — 任务拆解与代码生成
-* **输入**：`task.md`、`tech.md`、`requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
+* **输入**：`task.md`、`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
 * **活动**：
     >planner-agent智能体读取`task.md`、`tech.md`、`ML.md`、`OmegaConf_README.md`规范，构建任务清单todo；
     >coder-agent智能体读取`tech.md`、`ML.md`、`OmegaConf_README.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
