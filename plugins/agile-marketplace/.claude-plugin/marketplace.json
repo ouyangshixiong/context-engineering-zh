@@ -1,0 +1,13 @@
+{
+"name": "agile-marketplace",
+"owner": {
+"name": "ouyangshixiong"
+},
+"plugins": [
+{
+  "name": "requirements-plugin",
+  "source": "./requirements-plugin",
+  "description": "software requirements workflows and analysis; software dev workflows; software testing workflows； software operation workflows. "
+}
+]
+}
