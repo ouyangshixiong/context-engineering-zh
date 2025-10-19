@@ -31,9 +31,10 @@
 * **满足条件**：全量训练指导文档-`full_train_guidance.md` 包含明确的参数范围与部署步骤，且与 `tech.md` 中的资源估计一致。
 
 # collaborative multi-agent systems
+- **requirements-agent**，需求变更（change request/requirement update）
 - **coder-agent**，编写代码
-- **reviewer-agent**，代码完整性检查，代码质量评审，对齐需求（requirement）
-- **ops-agent**,创建python venv环境，创建docker环境（CPU或者GPU）
+- **reviewer-agent**，代码完整性检查，代码质量评审，对齐需求（requirements.md）和需求变更（requirement_update_number.md）
+- **ops-agent**,创建python venv环境；创建docker环境（CPU或者GPU）
 - **tester-agent**，代码测试、功能测试和模块测试 
 - **dataset-agent**，找到ML算法对应的最适合的开源数据集；为1-epoch训练抽取小数据集；数据采样和可视化
 

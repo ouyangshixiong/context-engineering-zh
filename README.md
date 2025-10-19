@@ -119,7 +119,7 @@ flowchart LR
     S3[Stage 3: 任务拆解与代码生成]
     S4[Stage 4: venv环境与部署]
     IN[输入: 框架规范markdown文件集 + 简短自然语言需求]
-    OUT[输出: 目标项目初始包（requirements.md, tech.md, code skeleton, venv.md, mini dataset）]
+    OUT[输出: 目标项目初始包（requirements/, tech.md, code skeleton, venv.md, mini dataset）]
 
     IN --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
@@ -134,41 +134,49 @@ flowchart LR
     - 自然语言需求"]
 
     O1["输出:
-    requirements.md"]
+    - requirements/requirements.md
+    - requirements/research-report.md"]
 
     subgraph S1["Stage 1 — 需求分析与规范理解"]
         W1["WHO:
-        - requirements智能体
+        - requirements-plugin 命令
+        - requirements-agent
+        - research-agent
         - 用户"]
 
         A1["DO WHAT:
-        - 解析自然语言
-        - 抽取目标/SLA/约束条目
-        - 给条目打分
-        - 生成需澄清问题
-        - 人工补充"]
+        - 使用 /requirements-plugin:需求分析 命令
+        - 解析自然语言需求
+        - 技术关键词识别与调研
+        - 深度需求分析与澄清
+        - 生成结构化需求文档"]
 
         V1["满足条件:
         - 所有条目/问题分数 > 0.6
-        - 明确澄清项与补充"]
-        
+        - 明确澄清项与补充
+        - 技术可行性验证通过"]
+
         W1 --> A1 --> V1
     end
 
     I1 --> S1 --> O1
 ```
 * **输入**：`CREATE.md`（框架规范），自然语言需求（用户提供，通常简短/模糊）。
-* **WHO**：requirements智能体（主导），用户（回答并澄清问题）。
-* **DO WAHT**：requirements智能体解析自然语言，抽取目标、SLA、约束这些条目；为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）。
-* **满足条件**：`requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略。
-* **输出**：`requirements.md`（结构化 YAML 或 Markdown，关键段落举例：项目名：英文，用作目标项目目录、问题：逐条陈述、SLA、约束条件、兼容性、需用户澄清的疑难问题、所有条目和澄清问题的打分0~1分）。
+* **WHO**：requirements-plugin 命令（主导），requirements-agent（需求分析），research-agent（技术调研），用户（回答并澄清问题）。
+* **DO WHAT**：
+  > 使用 `/requirements-plugin:需求分析` 命令启动需求分析流程；
+  > requirements-agent 解析自然语言，抽取目标、SLA、约束这些条目，进行15分钟深度思考；
+  > 如包含技术关键词，research-agent 进行技术调研并生成技术报告；
+  > 为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）。
+* **满足条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略；技术可行性验证通过。
+* **输出**：`requirements/requirements.md`（结构化需求文档），`requirements/research-report.md`（技术调研报告，如有技术关键词）。
 
 ### 3.1.2 Stage 2 — 技术选型与数据集选择
 ```mermaid
 flowchart LR
     %% ================= Stage 2 =================
     I2["📥 输入文件:
-    - requirements.md
+    - requirements/requirements.md
     - ML.md(技术/架构指导部分)"]
 
     O2["📤 输出文件:
@@ -194,9 +202,9 @@ flowchart LR
 
     I2 --> S2 --> O2
 ```
-* **输入**：`requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
+* **输入**：`requirements/requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
 * **DO WHAT**：
->阅读`requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
+>阅读`requirements/requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
 * **输出**：`tech.md`（包含 2个候选AI模型、相匹配的数据集、模型的各种约束条件、AI算法优劣势对比表格）。
 * **WHO**：Coder智能体。
 * **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与约束。
@@ -208,7 +216,7 @@ flowchart LR
     I3["📥 输入文件:
     - task.md
     - tech.md
-    - requirements.md
+    - requirements/requirements.md
     - ML.md(API/代码骨架部分)
     - OmegaConf_README.md"]
 
@@ -237,7 +245,7 @@ flowchart LR
 
     I3 --> S3 --> O3
 ```
-* **输入**：`task.md`、`tech.md`、`requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
+* **输入**：`task.md`、`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
 * **活动**：
     >Planner智能体读取`task.md`、`tech.md`、`ML.md`、`OmegaConf_README.md`规范，构建task清单；
     >Coder智能体读取`tech.md`、`ML.md`、`OmegaConf_README.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
@@ -677,8 +685,8 @@ flowchart TD
     %% ================= 框架项目 =================
     subgraph F1["框架项目"]
 
-        S1_who["智能体: Planner规划智能体 + 用户"]
-        S1_desc["Stage1 — 需求分析与规范理解: 解析自然语言需求，抽取目标/SLA/约束，生成澄清问题"]
+        S1_who["智能体: requirements-plugin + requirements-agent + research-agent"]
+        S1_desc["Stage1 — 需求分析与规范理解: 使用插件命令进行需求分析，技术调研，生成结构化需求文档"]
         S2_who["智能体: Coder编程智能体"]
         S2_desc["Stage2 — 技术选型与数据集选择: 候选模型选择，数据集计划，资源评估"]
         S3_who["智能体: Planner规划智能体 + Coder编程智能体"]
@@ -740,7 +748,7 @@ flowchart TD
 
 | 模块           | 阶段                             | 产物                                                   | 说明                                        |
 | ------------ | ------------------------------ | ---------------------------------------------------- | ----------------------------------------- |
-| **3.1 框架项目** | Stage 1 — 需求分析与规范理解            | `requirements.md`                                    | 需求文档，包含目标、SLA、约束、澄清问题及评分                  |
+| **3.1 框架项目** | Stage 1 — 需求分析与规范理解            | `requirements/requirements.md`<br>`requirements/research-report.md` | 需求文档，包含目标、SLA、约束、澄清问题及评分<br>技术调研报告（如有技术关键词） |
 |              | Stage 2 — 技术选型与数据集选择           | `tech.md`                                            | 技术选型文档，包含候选模型、数据集、资源估算、对比表                |
 |              | Stage 3 — 任务拆解与代码生成            | `project/`、`PROJECT_BUILD_LOG.md`                    | 生成并执行任务清单、<br>完整项目（含代码、配置、文档）、<br/>任务执行记录 |
 |              | Stage 4 — 代码与配置审核              | `REVIEW_REPORT.md`                    | 输出审核报告，所有条目通过      |
