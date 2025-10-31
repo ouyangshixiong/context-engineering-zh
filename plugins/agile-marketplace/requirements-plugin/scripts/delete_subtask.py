@@ -10,7 +10,7 @@ TOKEN = ""
 def delete_subtask(subtask_key: str):
     """
     删除指定 Sub-task
-    subtask_key: Sub-task Key（如 CMT-4）
+    subtask_key: Sub-task Key（如 CMT-4，注意这是JIRA系统生成的Key，不是REQ编号）
     """
     url = f"https://{JIRA_DOMAIN}/rest/api/3/issue/{subtask_key}"
     auth = HTTPBasicAuth(EMAIL, TOKEN)
@@ -24,5 +24,6 @@ def delete_subtask(subtask_key: str):
 
 if __name__ == "__main__":
     # 示例：删除刚创建的 Sub-task
-    subtask_key = "CMT-4"
+    # 注意：这里使用实际的JIRA Issue Key，不是REQ编号
+    subtask_key = "CMT-4"  # 实际的JIRA Key，不是REQ-CMT-5-1
     delete_subtask(subtask_key)

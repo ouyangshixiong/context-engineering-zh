@@ -1,9 +1,14 @@
 {
-"name": "agile-marketplace",
+"name": "waterfall-marketplace",
 "owner": {
 "name": "ouyangshixiong"
 },
 "plugins": [
+{
+  "name": "pm-plugin",
+  "source": "./pm-plugin",
+  "description": " software task breakdown, criteria, baseline, traceability, functional decomposition "
+},
 {
   "name": "requirements-plugin",
   "source": "./requirements-plugin",
