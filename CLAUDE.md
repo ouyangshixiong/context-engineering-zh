@@ -7,11 +7,11 @@
 
 ## 2. framework project(current dir) workflow stages:
 ### framework project workflow stage 1 — 需求分析与规范理解
-* **输入**：`CREATE.md`（框架规范），自然语言需求（用户提供，通常简短/模糊）。
-* **WHO**：requirements-plugin 命令（主导），requirements-agent（需求分析），research-agent（技术调研），用户（回答并澄清问题）。
+* **输入**：框架规范文件集，自然语言需求（用户提供，通常简短/模糊）。
+* **WHO**：requirements-plugin 命令（主导），requirements-plugin（需求分析），research-agent（技术调研，来自requirements-plugin），用户（回答并澄清问题）。
 * **DO WHAT**：
   > 使用 `/requirements-plugin:需求分析` 命令启动需求分析流程；
-  > requirements-agent 解析自然语言，抽取目标、SLA、约束这些条目，进行15分钟深度思考；
+  > requirements-plugin 解析自然语言，抽取目标、SLA、约束这些条目，进行15分钟深度思考；
   > 如包含技术关键词，research-agent 进行技术调研并生成技术报告；
   > 为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）。
 * **满足条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略；技术可行性验证通过。
@@ -61,8 +61,8 @@
 - 拷贝CLAUDE_deploy.md到目标项目根目录
 
 # collaborative multi-agent systems
-- **requirements-agent**，详细需求文档编写
-- **research-agent**，技术选型
+- **requirements-plugin**，详细需求文档编写
+- **research-agent**，技术选型（来自requirements-plugin）
 - **coder-agent**，编写代码
 - **reviewer-agent**，代码完整性检查，代码质量评审，对齐需求（requirement）
 - **planner-agent**，根据需求和技术选型编排计划（plan），生成任务清单todo
