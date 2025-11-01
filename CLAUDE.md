@@ -26,10 +26,10 @@
 * **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与约束。
 
 ### framework project workflow stage 3 — 任务拆解与代码生成
-* **输入**：`task.md`、`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`。
+* **输入**：`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）。
 * **活动**：
-    >planner-agent智能体读取`task.md`、`tech.md`、`ML.md`、`OmegaConf_README.md`规范，构建任务清单todo；
-    >coder-agent智能体读取`tech.md`、`ML.md`、`OmegaConf_README.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
+    >planner-agent智能体读取`tech.md`、`ML.md`规范，构建任务清单todo；
+    >coder-agent智能体读取`tech.md`、`ML.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
     >coder-agent智能体记录任务执行结果，生成`PROJECT_BUILD_LOG.md`。
     >planner-agent智能体逐项验证task执行情况，验证和复核。总结结果并更新目标项目的`README.md`
 * **输出**：`{xx}_project/`（目标项目,包含：代码骨架，用真实项目名称代替`{xx}_project/`），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录）。

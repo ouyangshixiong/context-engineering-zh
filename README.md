@@ -15,27 +15,24 @@
 
 ## 目录
 
-1. 概念与理论基础
+1. 上下文概念与软件工程理论基础
 2. 模式对比：氛围（vibe）编程 vs Spec 驱动
 3. 框架与开发流程（图文并茂，使用指定模板格式，详尽填充）
 
    * 框架项目：两阶段
    * 目标项目：两阶段
    * 生产部署：两阶段
-4. 结语：可操作性与审计链
-5. 插件生态系统：敏捷与瀑布双模式支持
+4. Prerequisites
+5. 支持敏捷与瀑布双模型的插件系统
 
-   * 插件架构概览
-   * 敏捷市场（agile-marketplace）
-   * 瀑布市场（waterfall-marketplace）
-   * JIRA集成能力
-   * 多智能体协作优势
+   * agile-marketplace
+   * waterfall-marketplace
    * 使用示例与工作流
-   * 实际应用价值总结
+
 
 ---
 
-# 1. 概念与理论基础
+# 1. 上下文概念与软件工程理论基础
 
 ## 1.1 问题陈述与方法论定位
 
@@ -129,18 +126,16 @@
 flowchart LR
     S1[Stage 1: 需求分析与规范理解
     插件驱动]
-    S2[Stage 2: 技术选型与数据集选择
-    智能体协作]
-    S3[Stage 3: 任务拆解与代码生成
+    S2[Stage 2: 任务拆解与代码生成
     分钟级交付]
-    S4[Stage 4: 代码与配置审核
+    S3[Stage 3: 代码与配置审核
     质量保证]
-    S5[Stage 5: venv环境与部署
+    S4[Stage 4: venv环境与部署
     环境准备]
     IN[输入: 框架规范markdown文件集 + 简短自然语言需求]
     OUT[输出: 目标项目初始包（requirements/, tech.md, code skeleton, venv.md, mini dataset）]
 
-    IN --> S1 --> S2 --> S3 --> S4 --> S5 --> OUT
+    IN --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
 
 ### 3.1.1 Stage 1 — 需求分析与规范理解
@@ -149,20 +144,20 @@ flowchart LR
 
     %% ================= Stage 1 =================
     I1["输入:
-    - 框架规范文件集
-    - 自然语言需求
-    - 插件配置"]
+    - 框架规范文件集（requirements）
+    - 简单文字输入
+    - Waterfall/Agile插件"]
 
     O1["输出:
-    - requirements/requirements.md
-    - requirements/research-report.md
-    - JIRA Epic/Story结构"]
+    - research-report.md
+    - requirements.md
+    - 需求更新
+    - JIRA Epic/Story"]
 
     subgraph S1["Stage 1 — 需求分析与规范理解"]
         W1["WHO:
-        - requirements-plugin 命令
         - requirements-plugin (需求分析)
-        - research-agent (来自requirements-plugin)
+        - research-agent (或tech-agent)
         - Product Owner Agent
         - Scrum Master Agent
         - 用户"]
@@ -176,8 +171,7 @@ flowchart LR
         - 创建JIRA Epic/Story结构"]
 
         V1["满足条件:
-        - 所有条目/问题分数 > 0.6
-        - 明确澄清项与补充
+        - 明确澄清需求项与需求补充
         - 技术可行性验证通过
         - JIRA结构完整创建"]
 
@@ -197,62 +191,23 @@ flowchart LR
 * **满足条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略；技术可行性验证通过；JIRA Epic/Story结构完整创建。
 * **输出**：`requirements/requirements.md`（结构化需求文档），`requirements/research-report.md`（技术调研报告，如有技术关键词），JIRA Epic/Story结构。
 
-### 3.1.2 Stage 2 — 技术选型与数据集选择
+
+### 3.1.2 Stage 2 — 任务拆解与代码生成
 ```mermaid
 flowchart LR
     %% ================= Stage 2 =================
     I2["📥 输入文件:
-    - requirements/requirements.md
-    - ML.md(技术/架构指导部分)"]
-
-    O2["📤 输出文件:
-    tech.md"]
-
-    subgraph S2["Stage 2 — 技术选型与数据集选择"]
-        direction TB
-        W2["WHO:
-        - Coder智能体"]
-
-        A2["DO WHAT:
-        - 候选模型（2个）
-        - 数据集计划(mini/full)
-        - 预估资源需求
-        - 算法对比表"]
-
-        V2["满足条件:
-        - 至少2个候选模型
-        "]
-        
-        W2 --> A2 --> V2
-    end
-
-    I2 --> S2 --> O2
-```
-* **输入**：`requirements/requirements.md`、`ML.md`（文件中的技术/架构指导部分）。
-* **DO WHAT**：
->阅读`requirements/requirements.md`、`ML.md`架构指导，并负责搜索需求对应的候选模型,训练数据集（与算法相匹配的mini dataset 与 full dataset）,预估资源要求（模型参数量、显存大小、训练时长）和性能预期,生成算法对比表格。
-* **输出**：`tech.md`（包含 2个候选AI模型、相匹配的数据集、模型的各种约束条件、AI算法优劣势对比表格）。
-* **WHO**：Coder智能体。
-* **满足条件**：至少 2 个候选模型，且为每个模型给出数据集需求与约束。
-
-### 3.1.3 Stage 3 — 任务拆解与代码生成
-```mermaid
-flowchart LR
-    %% ================= Stage 3 =================
-    I3["📥 输入文件:
-    - task.md
     - tech.md
     - requirements/requirements.md
     - ML.md(API/代码骨架部分)
-    - OmegaConf_README.md
     - JIRA Story结构"]
 
-    O3["📤 输出文件:
+    O2["📤 输出文件:
     - project/（包含README.md）
     - PROJECT_BUILD_LOG.md
     - 分钟级交付功能模块"]
 
-    subgraph S3["Stage 3 — 任务拆解与代码生成"]
+    subgraph S2["Stage 2 — 任务拆解与代码生成"]
         direction TB
         W3["WHO:
         - Coder智能体
@@ -276,12 +231,12 @@ flowchart LR
         W3 --> A3 --> V3
     end
 
-    I3 --> S3 --> O3
+    I2 --> S2 --> O2
 ```
-* **输入**：`task.md`、`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、`OmegaConf_README.md`、JIRA Story结构。
+* **输入**：`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、JIRA Story结构。
 * **活动**：
-    >Planner智能体读取`task.md`、`tech.md`、`ML.md`、`OmegaConf_README.md`规范，构建task清单；
-    >Coder智能体读取`tech.md`、`ML.md`、`OmegaConf_README.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
+    >Planner智能体读取`tech.md`、`ML.md`规范，构建task清单；
+    >Coder智能体读取`tech.md`、`ML.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
     >使用 `/sprint-plugin:instant-sprint` 命令对关键功能模块进行分钟级交付（5-8分钟完成需求到验证）；
     >Development Team Agent 负责代码生成，Quality Agent 负责质量验证；
     >Coder智能体记录任务执行结果，生成`PROJECT_BUILD_LOG.md`。
@@ -290,18 +245,18 @@ flowchart LR
 * **责任方**：Planner智能体（生成task清单，验收和复核task）, Coder智能体（执行清单，包括生成代码骨架、填充代码、生成配置文件、记录任务执行结果），sprint-plugin（分钟级交付），Development Team Agent（代码生成），Quality Agent（质量验证）。
 * **满足条件**：代码骨架填充完整，例如包含可运行的训练脚本和推理脚本。PROJECT_BUILD_LOG.md逐项复核都通过。关键功能模块通过分钟级交付完成。
 
-### 3.1.4 Stage 4 — 代码与配置审核
+### 3.1.3 Stage 3 — 代码与配置审核
 ```mermaid
 flowchart LR
-    %% ================= Stage 4 =================
-    I4["📥 输入文件:
+    %% ================= Stage 3 =================
+    I3["📥 输入文件:
     - 目标项目(含README/代码/配置)
     - PROJECT_BUILD_LOG.md"]
 
-    O4["📤 输出文件:
+    O3["📤 输出文件:
     - REVIEW_REPORT.md"]
 
-    subgraph S4["Stage 4 — 代码与配置审核"]
+    subgraph S3["Stage 3 — 代码与配置审核"]
         direction TB
         W4["WHO:
         - Reviewer智能体"]
@@ -318,7 +273,7 @@ flowchart LR
         W4 --> A4 --> V4
     end
 
-    I4 --> S4 --> O4
+    I3 --> S3 --> O3
 
 ```
 * **输入**：：目标项目（包含`README.md`、代码、配置文件）、PROJECT_BUILD_LOG.md。
@@ -332,11 +287,11 @@ flowchart LR
 * **WHO**：Reviewer智能体。
 * **满足条件**：`REVIEW_REPORT.md`所有条目审核通过，目标项目文档与代码的一致性和完整性相匹配。
 
-### 3.1.5 Stage 5 — venv环境与部署
+### 3.1.4 Stage 4 — venv环境与部署
 ```mermaid
 flowchart LR
     %% ================= Stage 4 =================
-    I5["📥 输入文件:
+    I4["📥 输入文件:
     - 目标项目(含README/代码/配置)
     - CLAUDE.md
     - tech.md
@@ -344,7 +299,7 @@ flowchart LR
     - DEBUG_CODE.md
     - DOCKER_CONFIG.md"]
 
-    O5["📤 输出文件:
+    O4["📤 输出文件:
     - venv.md
     - CLAUDE.md
     - tech.md
@@ -352,7 +307,7 @@ flowchart LR
     - DEBUG_CODE.md
     - DOCKER_CONFIG.md"]
 
-    subgraph S5["Stage 5 — venv环境与部署"]
+    subgraph S4["Stage 4 — venv环境与部署"]
         direction TB
         W5["WHO:
         - Ops智能体"]
@@ -369,7 +324,7 @@ flowchart LR
         W5 --> A5 --> V5
     end
 
-    I5 --> S5 --> O5
+    I4 --> S4 --> O4
 
 ```
 * **输入**：完整的目标项目(含`README.md`、代码、配置文件等)、框架规范文件（`CLAUDE.md`、`VENV_CONFIG.md`、`DEBUG_CODE.md`、`DOCKER_CONFIG.md`等）。
@@ -722,20 +677,17 @@ flowchart TD
 
         S1_who["智能体: requirements-plugin + research-agent (来自requirements-plugin) + Product Owner Agent + Scrum Master Agent"]
         S1_desc["Stage1 — 需求分析与规范理解: 多智能体协作需求分析，技术调研，业务价值提炼，生成结构化需求文档和JIRA结构"]
-        S2_who["智能体: Coder编程智能体"]
-        S2_desc["Stage2 — 技术选型与数据集选择: 候选模型选择，数据集计划，资源评估"]
-        S3_who["智能体: Planner规划智能体 + Coder编程智能体 + sprint-plugin + Development Team Agent + Quality Agent"]
-        S3_desc["Stage3 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，分钟级交付关键功能模块"]
-        S4_who["智能体: Reviewer智能体"]
-        S4_desc["Stage4 — 代码与配置审核: REVIEWER_REPORT.md所有条目通过"]
-        S41_who["智能体: Ops运维智能体"]
-        S41_desc["Stage5 — venv环境与部署: 生成 venv.md，复制规范文件"]
+        S2_who["智能体: Planner规划智能体 + Coder编程智能体 + sprint-plugin + Development Team Agent + Quality Agent"]
+        S2_desc["Stage2 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，分钟级交付关键功能模块"]
+        S3_who["智能体: Reviewer智能体"]
+        S3_desc["Stage3 — 代码与配置审核: REVIEWER_REPORT.md所有条目通过"]
+        S4_who["智能体: Ops运维智能体"]
+        S4_desc["Stage4 — venv环境与部署: 生成 venv.md，复制规范文件"]
 
         S1_who --> S1_desc
         S2_who --> S2_desc
         S3_who --> S3_desc
         S4_who --> S4_desc
-        S41_who --> S41_desc
 
     end
 
@@ -784,10 +736,9 @@ flowchart TD
 | 模块           | 阶段                             | 产物                                                   | 说明                                        |
 | ------------ | ------------------------------ | ---------------------------------------------------- | ----------------------------------------- |
 | **3.1 框架项目** | Stage 1 — 需求分析与规范理解            | `requirements/requirements.md`<br>`requirements/research-report.md`<br>JIRA Epic/Story结构 | 需求文档，包含目标、SLA、约束、澄清问题及评分<br>技术调研报告（如有技术关键词）<br>JIRA项目管理结构 |
-|              | Stage 2 — 技术选型与数据集选择           | `tech.md`                                            | 技术选型文档，包含候选模型、数据集、资源估算、对比表                |
-|              | Stage 3 — 任务拆解与代码生成            | `project/`、`PROJECT_BUILD_LOG.md`<br>分钟级交付功能模块                    | 生成并执行任务清单、<br>完整项目（含代码、配置、文档）、<br/>任务执行记录、<br/>分钟级交付的关键功能模块 |
-|              | Stage 4 — 代码与配置审核              | `REVIEW_REPORT.md`                    | 输出审核报告，所有条目通过      |
-|              | Stage 5 — venv环境与部署            | `venv.md`                                            | 虚拟环境规范文件<br>需要拷贝到目标项目的规范文件副本              |
+|              | Stage 2 — 任务拆解与代码生成            | `project/`、`PROJECT_BUILD_LOG.md`<br>分钟级交付功能模块                    | 生成并执行任务清单、<br>完整项目（含代码、配置、文档）、<br/>任务执行记录、<br/>分钟级交付的关键功能模块 |
+|              | Stage 3 — 代码与配置审核              | `REVIEW_REPORT.md`                    | 输出审核报告，所有条目通过      |
+|              | Stage 4 — venv环境与部署            | `venv.md`                                            | 虚拟环境规范文件<br>需要拷贝到目标项目的规范文件副本              |
 | **3.2 目标项目** | Stage 1 — 环境构建与 mini 数据集准备     | `env_check_report.md`、`data/mini/`、`mini_dataset.md`            | 环境检查报告，mini 数据集及说明                         |
 |              | Stage 2 — 1-epoch 验证与自动 bugfix | `bugfix_report.md`、checkpoint 模型文件                   | Bug 修复报告与快速训练模型                           |
 |              | Stage 3 — 全量训练策略输出             | `full_train_guidance.md`、`训练准备 checklist`            | 全量训练指导与准备清单                               |
@@ -802,40 +753,28 @@ flowchart TD
 
 为保证流程可自动化验证，建议为每个阶段定义最小可交付准则（示例）：
 
-* **框架项目 Stage 完成（3.1）**：`requirements.md`, `tech.md`, `code_skeleton` 均存在且 `scripts/train.py --dry-run` 无致命错误；JIRA Epic/Story结构完整创建；关键功能模块通过分钟级交付完成。
+* **框架项目 Stage 完成（3.1）**：`requirements.md`, `code_skeleton` 均存在且 `scripts/train.py --dry-run` 无致命错误；JIRA Epic/Story结构完整创建；关键功能模块通过分钟级交付完成。
 * **目标项目 Stage 完成（3.2）**：`env_check_report.json` 存在且 `scripts/train.py --data data/mini --epochs 1` 完成；`bugfix_report.md` 全部关键问题已关闭；可使用 `/sprint-plugin:quick-feedback` 进行快速迭代优化。
 * **生产部署 Stage 完成（3.3）**：容器镜像可运行、`/health` 返回 OK、smoke tests 通过且监控告警规则已部署。
 
 
-# 4. 结语：可操作性与审计链
+# 4. Prerequisites
+* **Claude Code** Claude Code需要支持Plugin版本
+* **Agentic AI Backend** 使用Kimi K2、Deepseek Chat(推荐)作为backend
+* **安装marketplace** 例如使用Agile模式开发，使用命令`/plugin marketplace add ./agile-marketplace` 安装插件`requirements-plugin`和`sprint-plugin`
+* **管理插件** 在Claude Code命令行中，可以用`/plugin`命令管理插件
 
-本 README 旨在提供既可由人类工程师阅读，又可直接被自主智能体解析为行动指令的双重语义层次——即“可读的规范文档 + 结构化的操作步骤”。要点回顾：
-
-* 将自然语言需求转为结构化 Spec 是整个流程的起点，也是保证可追溯性的关键。
-* 三阶段 Spec（需求→技术→验证）确保设计与实现的每一步均可被验证、审计与回滚。
-* 通过角色化的自主智能体协作（planner, coder, tester, ops），可以实现高度自动化的从需求到部署的流水线，同时保留人为审核点以控制风险。
-* 推荐实践：在高不确定性阶段先采用短迭代的 vibe 实验，确认关键指标后引入 Spec 驱动流程以实现生产化与可维护性。
 
 ---
 
-# 5. 插件生态系统：敏捷与瀑布双模式支持
+# 5. 支持敏捷与瀑布双模型的插件系统
 
-基于 ClaudeCode Plugin 能力，框架实现了完整的敏捷（Agile）和瀑布（Waterfall）双模式支持，通过插件化的多智能体协作系统提供分钟级的软件交付能力。
+基于 Claude Code Plugin 能力，框架实现了完整的敏捷（Agile）和瀑布（Waterfall）双模型支持，通过插件化的多智能体协作系统提供分钟级的软件交付能力。
 
-## 5.1 插件架构概览
 
-### 双模式市场
-- **agile-marketplace**: 敏捷开发模式插件集
-- **waterfall-marketplace**: 瀑布开发模式插件集
+## 5.1 agile-marketplace介绍
 
-### 核心插件分类
-- **requirements-plugin**: 需求管理插件
-- **sprint-plugin**: 敏捷迭代插件
-- **pm-plugin**: 项目管理插件
-
-## 5.2 敏捷市场（agile-marketplace）
-
-### 5.2.1 需求管理插件（requirements-plugin）
+### 5.1.1 需求管理插件（requirements-plugin）
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 多智能体协作需求分析工作流
@@ -853,21 +792,21 @@ flowchart TD
 - **Research Agent**: 技术关键词识别与调研
 - **Scrum Master Agent**: 敏捷流程协调与跟踪
 
-### 5.2.2 迭代插件（sprint-plugin）
+### 5.1.2 迭代插件（sprint-plugin）
 
 #### 可用命令
-- `/sprint-plugin:instant-sprint` - 分钟级即时迭代交付（5-8分钟）
-- `/sprint-plugin:quick-feedback` - 快速反馈循环（2-3分钟）
+- `/sprint-plugin:instant-sprint` - 基于Agile理论的即时交付
+- `/sprint-plugin:quick-feedback` - 基于Agile理论的快速循环
 
 #### 智能体角色
 - **Scrum Master Agent**: 需求澄清与Sprint管理
-- **Development Team Agent**: 分钟级代码生成（3-5分钟）
-- **Quality Agent**: 简化质量验证（1-2分钟）
+- **Development Team Agent**: 分钟级代码生成
+- **Quality Agent**: 简化质量验证
 
 
-## 5.3 瀑布市场（waterfall-marketplace）
+## 5.2 waterfall-marketplace介绍
 
-### 5.3.1 需求管理插件（requirements-plugin）
+### 5.2.1 需求管理插件（requirements-plugin）
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 瀑布模式需求分析
@@ -879,36 +818,21 @@ flowchart TD
 - `/requirements-plugin:删除子需求` - 删除子需求
 - `/requirements-plugin:需求变更` - 需求变更管理
 
-### 5.3.2 项目管理插件（pm-plugin）
+#### 智能体角色
+- **Requirements Agent**: 需求专家、业务专家
+- **Research Agent**: 技术关键词识别与调研
+
+### 5.2.2 项目管理插件（pm-plugin）
 
 #### 可用命令
 - `/pm-plugin:epic-stories-subtasks发现` - 发现Epic/Story/Subtask结构
 - `/pm-plugin:创建开发任务` - 将子需求转化为开发任务
 
-#### 开发任务编号规范
-- **格式**: `DEV-[SubtaskKey]-[序号]`
-- **示例**: `DEV-CMT-48-1`
-- **类型**: Subtask类型 + "implementation"标签
-- **链接**: 自动创建"Relates"链接到对应子需求
+#### 智能体角色
+- **Project Manager Agent**：项目经理
+- **Tech Agent**：技术专家，架构师，研发leader
 
-## 5.4 JIRA集成能力
-
-### 配置要求
-在 `plugins/jira.md` 中配置：
-```markdown
-JIRA_DOMAIN = ""
-EMAIL = ""
-API_TOKEN = ""
-```
-
-### API集成功能
-- **Sprint管理**: 创建、激活、关闭Sprint
-- **任务创建**: Epic/Story/Subtask自动创建
-- **状态跟踪**: 实时状态更新与进度评论
-- **链接管理**: 自动创建需求-任务关联关系
-
-
-## 5.6 使用示例
+## 5.3 使用示例
 
 ### 完整新功能开发流程
 
@@ -930,17 +854,12 @@ API_TOKEN = ""
 
 选择故事示例：
 "用户故事：添加商品到购物车"
-预期交付：5-8分钟完成购物车添加功能
+预期交付：快速完成购物车添加功能
 
 # 第五步：即时交付第二个故事
 /sprint-plugin:instant-sprint
 
 选择故事示例：
 "用户故事：修改购物车商品数量"
-预期交付：5-8分钟完成数量修改功能
+预期交付：快速完成数量修改功能
 ```
-
-
----
-
-如需我将上述 README 转化为仓库内的 README.md 文件（包含 mermaid 图、YAML 示例文件、以及可供 agent 直接消费的 Spec AST 模板），我可以直接生成完整 Markdown 文档并以适合的文件结构输出（包含示例 YAML 与任务清单）。
