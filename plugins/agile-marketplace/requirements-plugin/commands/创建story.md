@@ -10,7 +10,7 @@ description: 根据需求文档（requirements.md）的单一需求项,创建JIR
 1. 读取jira.md中的jira的JIRA_DOMAIN、user-email和auth-token，如果没有这个配置文件，提示用户输入JIRA_DOMAIN、user-email和auth-token并创建jira.md配置文件
 2. 获取项目中的所有epics，让用户选择或自动匹配对应的epic
 3. 获取所选epic的内部ID（epic_id）
-4. 将单一需求项格式化，模仿`scripts/create_story.py`创建jira的story，并正确关联epic_id
+4. 将单一需求项格式化，模仿`scripts/create_story.py`创建jira的story，并正确关联epic_id，例如parent字段关联epic.
 
 # example
 

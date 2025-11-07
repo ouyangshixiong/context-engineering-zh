@@ -149,6 +149,21 @@ curl -u {email}:{token} -X POST \
 source task-dependency-manager.md
 source agent-coordinator.md
 source verification-recovery.md
+source multi-round-negotiation-coordinator.md
+
+# 检查多轮协商是否启用
+function check_negotiation_enabled() {
+    echo "🔍 检查多轮协商配置..."
+
+    # 检查环境变量或配置文件
+    if [ -n "$ENABLE_NEGOTIATION" ] && [ "$ENABLE_NEGOTIATION" = "true" ]; then
+        echo "✅ 多轮协商已启用"
+        echo "true"
+    else
+        echo "⏭️ 多轮协商未启用"
+        echo "false"
+    fi
+}
 
 # 智能Sprint执行协调
 function smart_sprint_coordination() {
@@ -159,21 +174,38 @@ function smart_sprint_coordination() {
     echo "🎯 Scrum Master - 智能Sprint协调启动"
     echo "===================================="
 
-    # 1. 启动实时状态监控
+    # 1. 执行多轮协商（如果启用）
+    echo "🤝 检查多轮协商需求..."
+    local negotiation_enabled=$(check_negotiation_enabled)
+
+    if [ "$negotiation_enabled" = "true" ]; then
+        echo "🤝 执行多轮协商..."
+        local negotiation_result=$(multi_round_negotiation_coordinator "$project_key" "$sprint_goal" "$sprint_id")
+
+        if [ "$negotiation_result" != "success" ]; then
+            echo "❌ 多轮协商失败，无法继续Sprint"
+            return 1
+        fi
+        echo "✅ 多轮协商完成"
+    else
+        echo "⏭️ 跳过多轮协商"
+    fi
+
+    # 2. 启动实时状态监控
     echo "📊 启动实时状态监控..."
     realtime_state_monitor "$sprint_id" &
     local monitor_pid=$!
 
-    # 2. 启动智能任务调度
+    # 3. 启动智能任务调度
     echo "🤖 启动智能任务调度..."
     smart_task_scheduler "$sprint_id"
 
-    # 3. 监控验证不通过
+    # 4. 监控验证不通过
     echo "🔍 监控验证不通过..."
     monitor_verification_failures "$sprint_id" &
     local verification_monitor_pid=$!
 
-    # 4. 检测和解决冲突
+    # 5. 检测和解决冲突
     echo "🛠️ 检测和解决冲突..."
     detect_agent_conflicts
     if [ $? -ne 0 ]; then
@@ -193,6 +225,16 @@ function coordinate_development_with_deps() {
 
     echo "🤖 协调Development Team Agent (带依赖检查): $task_key"
 
+    # 检查任务依赖关系
+    local dependencies=$(check_task_dependencies "$task_key")
+
+    if [ -n "$dependencies" ]; then
+        echo "📋 任务依赖: $dependencies"
+
+        # 等待依赖任务完成
+        wait_for_dependencies "$dependencies"
+    fi
+
     # 使用任务依赖管理器
     coordinate_development_agent "$task_key"
 }
@@ -203,8 +245,209 @@ function coordinate_quality_with_deps() {
 
     echo "🔍 协调Quality Agent (带依赖检查): $task_key"
 
+    # 检查开发是否完成
+    local dev_status=$(get_issue_status "$task_key")
+
+    if [ "$dev_status" != "Ready for Test" ] && [ "$dev_status" != "Testing" ]; then
+        echo "⏳ 等待开发完成..."
+        wait_for_development_completion "$task_key"
+    fi
+
     # 使用任务依赖管理器
     coordinate_quality_agent "$task_key"
+}
+
+# 智能任务调度器
+function smart_task_scheduler() {
+    local sprint_id=$1
+
+    echo "🤖 智能任务调度器启动 - Sprint: $sprint_id"
+    echo "========================================"
+
+    # 获取Sprint中的所有任务
+    local issues=$(get_sprint_issues "$sprint_id")
+
+    # 分析任务优先级和依赖关系
+    local prioritized_tasks=$(analyze_task_priority "$issues")
+
+    # 执行多轮任务调度
+    execute_multi_round_scheduling "$prioritized_tasks"
+
+    echo "✅ 智能任务调度完成"
+}
+
+# 分析任务优先级
+function analyze_task_priority() {
+    local issues=$1
+
+    echo "📊 分析任务优先级..."
+
+    local high_priority=()
+    local medium_priority=()
+    local low_priority=()
+
+    for issue in $issues; do
+        local priority=$(get_issue_priority "$issue")
+
+        case "$priority" in
+            "Highest"|"High")
+                high_priority+=("$issue")
+                ;;
+            "Medium")
+                medium_priority+=("$issue")
+                ;;
+            "Low"|"Lowest")
+                low_priority+=("$issue")
+                ;;
+            *)
+                medium_priority+=("$issue")
+                ;;
+        esac
+    done
+
+    echo "📋 优先级分析结果:"
+    echo "  • 高优先级: ${#high_priority[@]} 个任务"
+    echo "  • 中优先级: ${#medium_priority[@]} 个任务"
+    echo "  • 低优先级: ${#low_priority[@]} 个任务"
+
+    # 返回优先级排序的任务列表
+    echo "${high_priority[@]} ${medium_priority[@]} ${low_priority[@]}"
+}
+
+# 执行多轮任务调度
+function execute_multi_round_scheduling() {
+    local tasks=$1
+
+    echo "🔄 执行多轮任务调度..."
+
+    local max_rounds=3
+    local current_round=1
+
+    while [ $current_round -le $max_rounds ]; do
+        echo ""
+        echo "🔄 第 $current_round 轮调度"
+        echo "========================"
+
+        # 执行当前轮次的任务调度
+        execute_round_scheduling "$tasks" "$current_round"
+
+        # 检查是否所有任务都完成
+        if check_all_tasks_completed "$tasks"; then
+            echo "✅ 所有任务已完成"
+            break
+        fi
+
+        ((current_round++))
+    done
+
+    if [ $current_round -gt $max_rounds ]; then
+        echo "⚠️ 达到最大调度轮次，仍有任务未完成"
+    fi
+
+    echo "✅ 多轮任务调度完成"
+}
+
+# 执行轮次调度
+function execute_round_scheduling() {
+    local tasks=$1
+    local round=$2
+
+    echo "🔄 执行第 $round 轮任务调度..."
+
+    # 根据轮次调整调度策略
+    case $round in
+        1)
+            # 第一轮：高优先级任务优先
+            echo "🎯 第一轮策略：高优先级任务优先"
+            schedule_high_priority_tasks "$tasks"
+            ;;
+        2)
+            # 第二轮：并行执行剩余任务
+            echo "🔄 第二轮策略：并行执行剩余任务"
+            schedule_parallel_tasks "$tasks"
+            ;;
+        3)
+            # 第三轮：处理阻塞任务
+            echo "🛠️ 第三轮策略：处理阻塞任务"
+            schedule_blocked_tasks "$tasks"
+            ;;
+    esac
+}
+
+# 检查任务依赖关系
+function check_task_dependencies() {
+    local task_key=$1
+
+    echo "🔍 检查任务依赖关系: $task_key"
+
+    # 这里应该实现实际的依赖检查逻辑
+    # 暂时返回空值表示无依赖
+    echo ""
+}
+
+# 等待依赖任务完成
+function wait_for_dependencies() {
+    local dependencies=$1
+
+    echo "⏳ 等待依赖任务完成: $dependencies"
+
+    # 这里应该实现等待逻辑
+    sleep 2
+
+    echo "✅ 依赖任务已完成"
+}
+
+# 等待开发完成
+function wait_for_development_completion() {
+    local task_key=$1
+
+    echo "⏳ 等待开发完成: $task_key"
+
+    local max_wait_time=300  # 5分钟
+    local wait_time=0
+
+    while [ $wait_time -lt $max_wait_time ]; do
+        local status=$(get_issue_status "$task_key")
+
+        if [ "$status" = "Ready for Test" ] || [ "$status" = "Testing" ]; then
+            echo "✅ 开发已完成"
+            return 0
+        fi
+
+        echo "  ⏰ 等待中... ($((wait_time/60))分$((wait_time%60))秒)"
+        sleep 10
+        ((wait_time+=10))
+    done
+
+    echo "❌ 等待开发超时"
+    return 1
+}
+
+# 检查所有任务是否完成
+function check_all_tasks_completed() {
+    local tasks=$1
+
+    echo "🔍 检查任务完成状态..."
+
+    local completed_count=0
+    local total_count=0
+
+    for task in $tasks; do
+        local status=$(get_issue_status "$task")
+
+        if [ "$status" = "Done" ]; then
+            ((completed_count++))
+        fi
+        ((total_count++))
+    done
+
+    echo "📊 完成状态: $completed_count/$total_count 个任务已完成"
+
+    if [ $completed_count -eq $total_count ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 ```
 

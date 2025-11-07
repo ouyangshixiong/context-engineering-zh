@@ -235,6 +235,246 @@ function coordinate_quality_agent() {
 }
 ```
 
+## 多轮任务调度
+
+### 1. 多轮调度管理器
+```bash
+# 多轮任务调度管理器
+function multi_round_scheduling_manager() {
+    local sprint_id=$1
+    local max_rounds=${2:-3}
+
+    echo "🔄 多轮任务调度管理器启动 - Sprint: $sprint_id"
+    echo "============================================"
+
+    local current_round=1
+    local all_tasks_completed=false
+
+    while [ $current_round -le $max_rounds ] && [ "$all_tasks_completed" = "false" ]; do
+        echo ""
+        echo "🔄 第 $current_round 轮调度"
+        echo "========================"
+
+        # 执行当前轮次调度
+        execute_scheduling_round "$sprint_id" "$current_round"
+
+        # 检查是否所有任务完成
+        all_tasks_completed=$(check_sprint_completion "$sprint_id")
+
+        if [ "$all_tasks_completed" = "true" ]; then
+            echo "✅ 所有任务已完成，结束调度"
+            break
+        fi
+
+        ((current_round++))
+    done
+
+    if [ "$all_tasks_completed" = "false" ]; then
+        echo "⚠️ 达到最大调度轮次 ($max_rounds)，仍有任务未完成"
+        handle_incomplete_tasks "$sprint_id"
+    fi
+
+    echo "✅ 多轮调度完成"
+}
+
+# 执行调度轮次
+function execute_scheduling_round() {
+    local sprint_id=$1
+    local round=$2
+
+    echo "🔄 执行第 $round 轮调度..."
+
+    # 根据轮次采用不同策略
+    case $round in
+        1)
+            echo "🎯 第一轮策略：高优先级任务优先"
+            schedule_high_priority_tasks "$sprint_id"
+            ;;
+        2)
+            echo "🔄 第二轮策略：并行执行剩余任务"
+            schedule_remaining_tasks "$sprint_id"
+            ;;
+        3)
+            echo "🛠️ 第三轮策略：处理阻塞任务"
+            schedule_blocked_tasks "$sprint_id"
+            ;;
+        *)
+            echo "⚡ 额外轮次：全面并行执行"
+            schedule_all_remaining_tasks "$sprint_id"
+            ;;
+    esac
+
+    # 等待当前轮次任务完成
+    wait_for_round_completion "$sprint_id"
+
+    echo "✅ 第 $round 轮调度完成"
+}
+
+# 调度高优先级任务
+function schedule_high_priority_tasks() {
+    local sprint_id=$1
+
+    echo "🎯 调度高优先级任务..."
+
+    # 获取高优先级任务
+    local high_priority_tasks=$(get_high_priority_tasks "$sprint_id")
+
+    if [ -n "$high_priority_tasks" ]; then
+        echo "📋 高优先级任务: $high_priority_tasks"
+
+        # 串行执行高优先级任务以确保质量
+        for task in $high_priority_tasks; do
+            echo "  🚀 执行高优先级任务: $task"
+            assign_task_to_agent "$task" "development"
+            assign_task_to_agent "$task" "quality"
+        done
+    else
+        echo "⏭️ 无高优先级任务"
+    fi
+}
+
+# 调度剩余任务
+function schedule_remaining_tasks() {
+    local sprint_id=$1
+
+    echo "🔄 调度剩余任务..."
+
+    # 获取未完成的任务
+    local remaining_tasks=$(get_remaining_tasks "$sprint_id")
+
+    if [ -n "$remaining_tasks" ]; then
+        echo "📋 剩余任务: $remaining_tasks"
+
+        # 并行执行剩余任务
+        local pids=()
+
+        for task in $remaining_tasks; do
+            (
+                echo "  🚀 并行执行任务: $task"
+                assign_task_to_agent "$task" "development"
+                assign_task_to_agent "$task" "quality"
+            ) &
+            pids+=($!)
+        done
+
+        # 等待所有并行任务完成
+        for pid in "${pids[@]}"; do
+            wait "$pid"
+        done
+    else
+        echo "⏭️ 无剩余任务"
+    fi
+}
+
+# 调度阻塞任务
+function schedule_blocked_tasks() {
+    local sprint_id=$1
+
+    echo "🛠️ 调度阻塞任务..."
+
+    # 获取阻塞任务
+    local blocked_tasks=$(get_blocked_tasks "$sprint_id")
+
+    if [ -n "$blocked_tasks" ]; then
+        echo "📋 阻塞任务: $blocked_tasks"
+
+        # 特殊处理阻塞任务
+        for task in $blocked_tasks; do
+            echo "  🛠️ 处理阻塞任务: $task"
+            handle_blocked_task "$task"
+        done
+    else
+        echo "⏭️ 无阻塞任务"
+    fi
+}
+
+# 获取高优先级任务
+function get_high_priority_tasks() {
+    local sprint_id=$1
+
+    echo "🔍 获取高优先级任务..."
+
+    # 这里应该实现实际的优先级判断逻辑
+    # 暂时返回空值
+    echo ""
+}
+
+# 获取剩余任务
+function get_remaining_tasks() {
+    local sprint_id=$1
+
+    echo "🔍 获取剩余任务..."
+
+    # 这里应该实现实际的剩余任务获取逻辑
+    # 暂时返回空值
+    echo ""
+}
+
+# 获取阻塞任务
+function get_blocked_tasks() {
+    local sprint_id=$1
+
+    echo "🔍 获取阻塞任务..."
+
+    # 这里应该实现实际的阻塞任务检测逻辑
+    # 暂时返回空值
+    echo ""
+}
+
+# 处理阻塞任务
+function handle_blocked_task() {
+    local task_key=$1
+
+    echo "🛠️ 处理阻塞任务: $task_key"
+
+    # 分析阻塞原因
+    local block_reason=$(analyze_block_reason "$task_key")
+
+    echo "📋 阻塞原因: $block_reason"
+
+    # 根据阻塞原因采取不同措施
+    case "$block_reason" in
+        "dependency")
+            echo "  🔗 解决依赖问题..."
+            resolve_dependency_issue "$task_key"
+            ;;
+        "technical")
+            echo "  🔧 解决技术问题..."
+            resolve_technical_issue "$task_key"
+            ;;
+        "resource")
+            echo "  👥 解决资源问题..."
+            resolve_resource_issue "$task_key"
+            ;;
+        *)
+            echo "  ❓ 未知阻塞原因，重新分配任务..."
+            reassign_task "$task_key"
+            ;;
+    esac
+}
+
+# 检查Sprint完成状态
+function check_sprint_completion() {
+    local sprint_id=$1
+
+    echo "🔍 检查Sprint完成状态..."
+
+    # 这里应该实现实际的完成状态检查逻辑
+    # 暂时返回false
+    echo "false"
+}
+
+# 处理未完成任务
+function handle_incomplete_tasks() {
+    local sprint_id=$1
+
+    echo "⚠️ 处理未完成任务..."
+
+    # 这里应该实现未完成任务的处理逻辑
+    echo "📋 未完成任务已记录，需要人工干预"
+}
+```
+
 ## 智能并行执行
 
 ### 1. 执行时间预估

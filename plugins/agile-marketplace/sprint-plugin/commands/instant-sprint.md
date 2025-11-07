@@ -30,6 +30,7 @@ source sprint-intelligence.md
 source parallel-execution-manager.md
 source monitoring-recovery-system.md
 source shared-utils.md
+source multi-round-negotiation-coordinator.md
 
 # 初始化配置
 load_environment_config
@@ -49,6 +50,8 @@ SPRINT_GOAL=""
 ENABLE_PARALLEL=true
 ENABLE_MONITOR=true
 FORCE_SYNC=true
+ENABLE_NEGOTIATION=true  # 启用多轮协商
+NEGOTIATION_TIMEOUT=300  # 协商超时时间（秒）
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -72,6 +75,14 @@ while [[ $# -gt 0 ]]; do
         --no-sync)
             FORCE_SYNC=false
             shift
+            ;;
+        --no-negotiation)
+            ENABLE_NEGOTIATION=false
+            shift
+            ;;
+        --negotiation-timeout)
+            NEGOTIATION_TIMEOUT="$2"
+            shift 2
             ;;
         -h|--help)
             show_help
@@ -104,6 +115,8 @@ function main() {
     echo "🔄 并行执行: $ENABLE_PARALLEL"
     echo "📊 实时监控: $ENABLE_MONITOR"
     echo "🔗 强制同步: $FORCE_SYNC"
+    echo "🤝 多轮协商: $ENABLE_NEGOTIATION"
+    echo "⏱️ 协商超时: ${NEGOTIATION_TIMEOUT}秒"
     echo ""
 
     # 阶段1: 环境准备和配置检测
@@ -156,6 +169,21 @@ function phase_environment_setup() {
 
     echo "✅ 故事创建成功: $story_key"
 
+    # 1.5 多轮协商（如果启用）
+    if [ "$ENABLE_NEGOTIATION" = "true" ]; then
+        echo "🤝 多轮协商流程..."
+        local negotiation_result=$(execute_negotiation_phase "$PROJECT_KEY" "$SPRINT_GOAL" "$story_key")
+
+        if [ "$negotiation_result" != "success" ]; then
+            echo "❌ 多轮协商失败"
+            exit 1
+        fi
+
+        echo "✅ 多轮协商完成"
+    else
+        echo "⏭️ 跳过多轮协商"
+    fi
+
     local phase_end=$(date +%s)
     local phase_duration=$((phase_end - phase_start))
     echo "⏱️ 阶段1完成: ${phase_duration}秒"
@@ -183,6 +211,34 @@ function scrum_master_requirement_clarification() {
     fi
 
     echo "$story_key"
+}
+
+# 协商阶段执行
+function execute_negotiation_phase() {
+    local project_key=$1
+    local sprint_goal=$2
+    local story_key=$3
+
+    echo "  🤝 执行多轮协商阶段"
+    echo "  =============================="
+
+    local negotiation_start=$(date +%s)
+
+    # 使用多轮协商协调器
+    local negotiation_result=$(multi_round_negotiation_coordinator "$project_key" "$sprint_goal" "$story_key")
+
+    local negotiation_end=$(date +%s)
+    local negotiation_duration=$((negotiation_end - negotiation_start))
+
+    echo "  ⏱️ 协商耗时: ${negotiation_duration}秒"
+
+    if [ "$negotiation_result" = "success" ]; then
+        echo "  ✅ 协商阶段完成"
+        echo "success"
+    else
+        echo "  ❌ 协商阶段失败"
+        echo "failed"
+    fi
 }
 
 # 阶段2: 智能Sprint决策和执行
@@ -468,6 +524,8 @@ Instant Sprint - 多智能体并行交付引擎
   --no-parallel          禁用并行执行
   --no-monitor          禁用实时监控
   --no-sync             禁用强制同步
+  --no-negotiation       禁用多轮协商
+  --negotiation-timeout <seconds> 协商超时时间 (默认: 300)
   --force-new            强制创建新Sprint（忽略现有Sprint）
   -h, --help            显示帮助信息
 
@@ -484,6 +542,12 @@ Instant Sprint - 多智能体并行交付引擎
   # 智能检测并继续现有Sprint
   instant-sprint "继续现有开发"
 
+  # 禁用多轮协商
+  instant-sprint "简单功能开发" --no-negotiation
+
+  # 自定义协商超时
+  instant-sprint "复杂功能开发" --negotiation-timeout 600
+
 特性:
   • 配置自动读取: 自动读取jira.md中的JIRA配置
   • 强制同步: 确保每个动作100%同步到JIRA
@@ -493,6 +557,8 @@ Instant Sprint - 多智能体并行交付引擎
   • 实时监控: 可视化同步状态
   • 智能Sprint决策: 自动检测并继续现有Sprint
   • API兼容性: 自动适配JIRA API版本变更
+  • 多轮协商: 智能体间深度协商和文档落地
+  • 冲突解决: 自动检测和解决智能体间冲突
 
 EOF
 }
@@ -543,6 +609,8 @@ instant-sprint "修复登录功能bug" --no-parallel
 🔄 并行执行: true
 📊 实时监控: true
 🔗 强制同步: true
+🤝 多轮协商: true
+⏱️ 协商超时: 300秒
 
 🔧 阶段1: 环境准备和配置检测 (45秒)
 --------------------------------
@@ -551,6 +619,30 @@ instant-sprint "修复登录功能bug" --no-parallel
 🔍 检测项目状态配置... ✅
 🗺️ 加载状态映射... ✅
 📝 需求澄清和故事创建... ✅ FC-123
+🤝 多轮协商流程...
+  🤝 执行多轮协商阶段
+  ==============================
+  📝 需求澄清协商开始
+  ==============================
+  🤖 协调Development Team Agent参与需求分析...
+  🔍 协调Quality Agent参与需求分析...
+  📄 生成需求澄清文档: negotiation/FC-123_requirements.md
+  ✅ 需求澄清协商完成
+  🔧 技术方案协商开始
+  ==============================
+  🤖 协调Development Team Agent提供技术方案...
+  🔍 协调Quality Agent评审技术方案...
+  📄 生成技术方案文档: negotiation/FC-123_technical_solution.md
+  ✅ 技术方案协商完成
+  📋 任务分解协商开始
+  ==============================
+  🤖 协调Development Team Agent分解开发任务...
+  🔍 协调Quality Agent分解测试任务...
+  📄 生成任务分解文档: negotiation/FC-123_task_breakdown.md
+  ✅ 任务分解协商完成
+  ⏱️ 协商耗时: 120秒
+  ✅ 协商阶段完成
+✅ 多轮协商完成
 
 ⚡ 阶段2: 并行执行引擎 (4分钟)
 --------------------------------
@@ -569,7 +661,7 @@ instant-sprint "修复登录功能bug" --no-parallel
 💡 改进建议...
 
 🎉 Instant Sprint 完成!
-⏱️ 总耗时: 325秒
+⏱️ 总耗时: 445秒
 ```
 
 instant-sprint命令集成了所有优化功能，提供了真正的多智能体并行执行、强制同步协议和实时监控能力。
