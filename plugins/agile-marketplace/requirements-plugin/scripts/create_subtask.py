@@ -82,7 +82,7 @@ def get_story_key(story_id):
 
 def get_next_subtask_number(story_key):
     """
-    获取下一个子需求序号
+    获取下一个任务序号
     """
     # 读取JIRA配置
     config = read_jira_config()
@@ -97,7 +97,7 @@ def get_next_subtask_number(story_key):
         print("❌ JIRA配置不完整，请检查jira.md文件")
         return 1
 
-    # 查询该Story下已有的子需求数量
+    # 查询该Story下已有的任务数量
     jql = f'parent = {story_key} AND issuetype = Subtask'
     url = f"https://{JIRA_DOMAIN}/rest/api/3/search/jql"
     auth = HTTPBasicAuth(EMAIL, API_TOKEN)
@@ -113,15 +113,15 @@ def get_next_subtask_number(story_key):
         subtasks = response.json()['issues']
         return len(subtasks) + 1
     else:
-        print(f"❌ 查询子需求失败: {response.status_code} - {response.text}")
+        print(f"❌ 查询任务失败: {response.status_code} - {response.text}")
         return 1
 
 def create_subtask(story_id, summary, description):
     """
-    创建 Sub-task（子需求）并挂在指定 Story 下
+    创建 Sub-task 并挂在指定 Story 下
     story_id: Story 的内部 ID（parent.id）
-    summary: 子需求标题
-    description: 子需求描述
+    summary: Sub-task 标题
+    description: Sub-task 描述
     """
     # 读取JIRA配置
     config = read_jira_config()
@@ -146,11 +146,11 @@ def create_subtask(story_id, summary, description):
     # 获取下一个序号
     subtask_number = get_next_subtask_number(story_key)
 
-    # 生成规范的需求编号
-    requirement_number = f"REQ-{story_key}-{subtask_number}"
+    # 生成规范的任务编号
+    task_number = f"TASK-{story_key}-{subtask_number}"
 
     # 在Summary中添加格式前缀
-    formatted_summary = f"[{requirement_number}] {summary}"
+    formatted_summary = f"[{task_number}] {summary}"
 
     url = f"https://{JIRA_DOMAIN}/rest/api/3/issue"
     auth = HTTPBasicAuth(EMAIL, API_TOKEN)
@@ -162,7 +162,7 @@ def create_subtask(story_id, summary, description):
             "issuetype": {"name": "Subtask"},  # 注意改为 Subtask
             "summary": formatted_summary,
             "parent": {"id": story_id},  # 挂在 Story 下
-            "labels": ["requirement", f"REQ-{story_key}"],  # 添加规范标签
+            "labels": ["development", f"TASK-{story_key}"],  # 添加规范标签
             "description": {
                 "type": "doc",
                 "version": 1,
@@ -177,7 +177,7 @@ def create_subtask(story_id, summary, description):
     if r.status_code == 201:
         created_key = r.json()['key']
         print(f"✅ Sub-task 创建成功: {created_key}")
-        print(f"📋 需求编号: {requirement_number}")
+        print(f"📋 Sub-task 编号: {task_number}")
     else:
         print(f"❌ 创建失败: {r.status_code} - {r.text}")
 

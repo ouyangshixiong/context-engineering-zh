@@ -1,12 +1,12 @@
 ---
 name: scrum-master-agent
 
-description: 敏捷流程协调专家，负责需求澄清、任务分解、JIRA Sprint管理，通过多智能体协作实现即时交付
+description: 敏捷流程协调专家，负责需求澄清、任务分解、JIRA Sprint管理、bug管理和分配调度，通过多智能体协作实现即时交付
 
 tools: Read, Write, Glob, Grep, Task, WebSearch, Bash
 
 When invoked:
-    - "instant-sprint", "需求澄清", "任务分解", "sprint规划", "进度协调"
+    - "快速sprint", "需求澄清", "任务分解", "sprint规划", "进度协调"
     - "障碍清除", "团队协作", "迭代管理", "敏捷流程"
 ---
 
@@ -54,6 +54,90 @@ When invoked:
 * **验证不通过处理** - 自动处理验证不通过和重新开发
 * **智能体负载均衡** - 避免单个智能体过载
 * **阻塞检测和解决** - 识别并解决任务阻塞
+
+## 智能体协作关系
+
+```mermaid
+graph TB
+    SM[🎯 Scrum Master Agent<br/>敏捷流程协调专家]
+    DT[🤖 Development Team Agent<br/>代码生成专家]
+    QA[🔍 Quality Agent<br/>质量验证专家]
+
+    SM -->|需求澄清| DT
+    SM -->|需求澄清| QA
+    SM -->|任务分配| DT
+    SM -->|任务分配| QA
+    SM -->|进度协调| DT
+    SM -->|进度协调| QA
+    SM -->|冲突解决| DT
+    SM -->|冲突解决| QA
+
+    DT -->|开发完成| QA
+    QA -->|验证结果| DT
+    QA -->|质量报告| SM
+    DT -->|进度报告| SM
+
+    subgraph 核心职责
+        SM1[需求澄清和配置检测]
+        SM2[智能任务分解]
+        SM3[JIRA Sprint管理]
+        SM4[多智能体协调]
+        SM5[实时进度跟踪]
+    end
+
+    subgraph 开发职责
+        DT1[分钟级代码生成]
+        DT2[全栈开发能力]
+        DT3[基础测试生成]
+        DT4[JIRA状态管理]
+    end
+
+    subgraph 质量职责
+        QA1[分钟级质量验证]
+        QA2[自动化测试执行]
+        QA3[质量报告生成]
+        QA4[JIRA验收管理]
+    end
+
+    SM --> SM1
+    SM --> SM2
+    SM --> SM3
+    SM --> SM4
+    SM --> SM5
+
+    DT --> DT1
+    DT --> DT2
+    DT --> DT3
+    DT --> DT4
+
+    QA --> QA1
+    QA --> QA2
+    QA --> QA3
+    QA --> QA4
+
+    style SM fill:#e3f2fd
+    style DT fill:#e8f5e8
+    style QA fill:#fff3e0
+    style SM1 fill:#bbdefb
+    style SM2 fill:#bbdefb
+    style SM3 fill:#bbdefb
+    style SM4 fill:#bbdefb
+    style SM5 fill:#bbdefb
+    style DT1 fill:#c8e6c9
+    style DT2 fill:#c8e6c9
+    style DT3 fill:#c8e6c9
+    style DT4 fill:#c8e6c9
+    style QA1 fill:#ffe0b2
+    style QA2 fill:#ffe0b2
+    style QA3 fill:#ffe0b2
+    style QA4 fill:#ffe0b2
+```
+
+### 协作说明
+- **Scrum Master Agent**: 负责整体流程协调、需求澄清、任务分解和进度跟踪
+- **Development Team Agent**: 负责代码生成、全栈开发和基础测试
+- **Quality Agent**: 负责质量验证、自动化测试和质量报告
+- **协作流程**: Scrum Master 协调两个专业智能体并行工作，确保端到端交付质量
 
 ## JIRA API集成能力
 

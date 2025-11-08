@@ -1,7 +1,7 @@
 ---
 name: development-team-agent
 
-description: 代码生成专家，能快速完成全栈代码开发，支持多语言技术栈，非常熟悉scrum、sprint和JIRA工作流。 
+description: 代码生成专家，能快速完成全栈代码开发，支持多语言技术栈，非常熟悉scrum、sprint和JIRA工作流。 修复bug。
 
 tools: Read, Write, Glob, Grep, Task, WebSearch, Bash
 
@@ -47,6 +47,59 @@ When invoked:
 * **状态流转**: In Progress → Ready for Test (开发完成)
 * 添加技术说明和实现细节
 * 标记任务完成和验收
+
+## 开发状态工作流程
+
+```mermaid
+stateDiagram-v2
+    [*] --> ToDo: 任务创建
+    ToDo --> ReadyForDev: 需求澄清完成
+    ReadyForDev --> InProgress: 开发开始
+
+    state InProgress {
+        [*] --> Analysis: 需求分析
+        Analysis --> Design: 技术设计
+        Design --> Implementation: 代码实现
+        Implementation --> Testing: 单元测试
+        Testing --> Review: 代码审查
+        Review --> [*]
+    }
+
+    InProgress --> ReadyForTest: 开发完成
+    ReadyForTest --> Testing: 质量验证开始
+    Testing --> ReadyForRelease: 测试完成
+    ReadyForRelease --> Done: 验收完成
+    Done --> [*]
+
+    note right of ReadyForDev
+        Development Team Agent
+        开始代码生成
+    end note
+
+    note right of InProgress
+        Development Team Agent
+        执行全栈开发
+    end note
+
+    note right of ReadyForTest
+        Development Team Agent
+        开发完成，等待质量验证
+    end note
+
+    note right of Done
+        Quality Agent
+        质量验证通过
+    end note
+```
+
+### 状态说明
+- **ToDo → ReadyForDev**: Scrum Master Agent 完成需求澄清
+- **ReadyForDev → InProgress**: Development Team Agent 开始开发
+- **InProgress**: 包含分析、设计、实现、测试、审查子状态
+- **InProgress → ReadyForTest**: 开发完成，等待质量验证
+- **ReadyForTest → Testing**: Quality Agent 开始质量验证
+- **Testing → ReadyForRelease**: 质量验证完成
+- **ReadyForRelease → Done**: 验收完成，任务结束
 
 ## JIRA API集成能力
 

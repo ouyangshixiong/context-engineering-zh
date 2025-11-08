@@ -6,6 +6,84 @@
 - 验证不通过检测和处理
 - 状态回退和重新开发协调
 
+## 监控恢复工作流程
+
+```mermaid
+flowchart TD
+    A[📊 监控恢复系统启动] --> B[📊 实时状态监控]
+    B --> C[🔍 检测任务阻塞]
+    C --> D{发现阻塞?}
+    D -->|是| E[🛠️ 处理任务阻塞]
+    D -->|否| F[🔍 检测验证结果]
+
+    F --> G{验证通过?}
+    G -->|是| H[✅ 验证通过，继续监控]
+    G -->|否| I[❌ 验证不通过处理]
+
+    I --> J[📊 智能错误分类]
+    J --> K[🔄 智能重试机制]
+    K --> L{重试成功?}
+    L -->|是| M[✅ 错误恢复成功]
+    L -->|否| N[🔄 执行状态回退]
+
+    N --> O[📋 问题分类和改进建议]
+    O --> P[💡 生成改进建议]
+    P --> Q[🔄 重新开发协调]
+    Q --> R[✅ 恢复流程完成]
+
+    subgraph 实时监控
+        B
+        C
+        D
+        F
+        G
+        H
+    end
+
+    subgraph 错误恢复
+        I
+        J
+        K
+        L
+        M
+    end
+
+    subgraph 状态回退
+        N
+        O
+        P
+        Q
+        R
+    end
+
+    subgraph 智能体协调
+        S[🤖 Development Team Agent]
+        T[🔍 Quality Agent]
+    end
+
+    E --> S
+    E --> T
+    Q --> S
+    Q --> T
+
+    M --> B
+    R --> B
+
+    style A fill:#e1f5fe
+    style H fill:#c8e6c9
+    style M fill:#c8e6c9
+    style R fill:#c8e6c9
+    style I fill:#ffcdd2
+    style N fill:#ffcdd2
+```
+
+### 流程说明
+- **实时监控**: 持续监控任务状态和验证结果
+- **错误恢复**: 智能分类错误类型并自动重试
+- **状态回退**: 验证不通过时自动回退状态并重新开发
+- **智能体协调**: 协调 Development Team Agent 和 Quality Agent 进行恢复
+- **循环监控**: 恢复完成后继续监控，确保系统稳定性
+
 ## 实时监控系统
 
 ### 1. 监控仪表板
