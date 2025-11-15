@@ -11,6 +11,7 @@
 ---
 
 ## ChangeLog
+* 20251116 修改日志：大幅调整了目录结构，增加specs目录强调基于specs规范的软件工程；优化了`sprint-plugin`；修正了`README.md`
 * 20251031 修改日志：基于ClaudeCode Plugin能力，实现了Waterfall和Agile模型，并集成了完整的插件生态系统。
 
 ## 目录
@@ -46,7 +47,7 @@
 
 ## 1.2 软件工程理论回顾
 
-#### 一、瀑布模型（Waterfall）
+### 一、瀑布模型（Waterfall）
 
 **核心思想**：线性阶段化：需求 → 设计 → 实现 → 测试 → 部署。
 每一阶段以文档化交付物为验收点，按序推进，阶段间变更受控。
@@ -54,27 +55,7 @@
 **缺点**：对需求变更适应性差；反馈周期长；不利于探索性工作，例如：机器学习（ML）算法编程。
 **适用情境**：需求稳定、法律/合规要求高（医疗、航空、金融）或外包/合同式交付。
 
----
-
-#### 二、V 模型（Verification & Validation）
-
-**核心思想**：在瀑布模型基础上改进，强调每个开发阶段应有对应的验证活动（设计对应单元测试、需求对应验收测试），形成“设计—验证”对偶关系。
-**优点**：测试与设计并行规划，提高可验证性与可追溯性；便于形成完整的验证矩阵。
-**缺点**：同样对快速变更不友好；需要较强的测试投入与早期规格明确性。
-**适用情境**：高安全/高可靠场景，且具有清晰可度量的规格要求。
-
----
-
-#### 三、Scrum（迭代增量式敏捷）
-
-**核心思想**：短周期（Sprint）迭代、跨职能团队、以产品 Backlog 驱动增量交付，强调频繁交付与客户反馈。
-**优点**：适应性强、能快速交付可运行增量并通过评审获得反馈；易于组织跨学科协作。
-**缺点**：对长期架构一致性与系统化文档化的自然驱动力较弱；对团队自律与产品职责要求高。
-**适用情境**：探索性项目、需求经常变化或需频繁验证用户反馈的产品化路线。
-
----
-
-#### 四、看板（Kanban）
+#### 看板（Kanban）
 
 **核心思想**：以流为中心管理工作项，限流（WIP）以降低切换成本，通过可视化与循环时间指标优化交付节奏。
 **优点**：对持续发布、运维与小粒度改动非常友好；可平滑化团队负载。
@@ -83,26 +64,32 @@
 
 ---
 
-#### 五、极限编程（XP）
+### 二、V 模型（Verification & Validation）
+
+**核心思想**：在瀑布模型基础上改进，强调每个开发阶段应有对应的验证活动（设计对应单元测试、需求对应验收测试），形成“设计—验证”对偶关系。
+**优点**：测试与设计并行规划，提高可验证性与可追溯性；便于形成完整的验证矩阵。
+**缺点**：同样对快速变更不友好；需要较强的测试投入与早期规格明确性。
+**适用情境**：高安全/高可靠场景，且具有清晰可度量的规格要求。
+
+---
+
+### 三、Scrum（迭代增量式敏捷）
+
+**核心思想**：短周期（Sprint）迭代、跨职能团队、以产品 Backlog 驱动增量交付，强调频繁交付与客户反馈。
+**优点**：适应性强、能快速交付可运行增量并通过评审获得反馈；易于组织跨学科协作。
+**缺点**：对长期架构一致性与系统化文档化的自然驱动力较弱；对团队自律与产品职责要求高。
+**适用情境**：探索性项目、需求经常变化或需频繁验证用户反馈的产品化路线。
+
+
+---
+
+### 四、极限编程（XP）
 
 **核心思想**：强调工程实践（TDD、结对编程、持续集成、持续重构、小步提交），用工程纪律降低变更风险并提升代码质量。
 **优点**：在高变更率环境下，通过严格实践保障质量，减少技术债务。
 **缺点**：对团队技能与文化要求高（需要习惯结对、重构与频繁测试）。
 **适用情境**：需要频繁重构、快速演化且对质量有严格要求的软件开发场景，尤其适合复杂、实验性强但需高质量产出的工程。
 
-## 1.3 多角色自主智能体角色分工与自治体制
-
-框架定义一组自主智能体（requirements，planner, coder, tester, ops），它们基于统一的规范（Spec）文档进行协作：
-
-* **requirements（需求智能体）**：将模糊需求形式化为可执行 Spec，做约束分析、资源估算和架构选择。
-* **Planner（规划智能体）**：将需求和技术规范转换为任务清单todos。
-* **Coder（编码智能体）**：依据 Spec 生成实现、封装可复用组件并进行性能优化。
-* **Dataset（数据集智能体）**： 为ML算法模型在1-epoch阶段和全量数据阶段，搜索，下载，读取，可视化和使用对应的数据集。例如：Huggingface、ModelScope支持的各种数据集。
-* **Reviewer（代码审查智能体）**：依据 Spec 审查代码是否完全满足需求，给出评价。
-* **Tester（测试智能体）**：对实现进行各类测试、性能基准并生成报告。
-* **Ops（运维智能体）**：负责部署清单、监控配置、蓝绿/回滚策略与持续演进。
-
-这种角色化的智能体分工对应软件工程中的“职责分离”原则，并通过 Spec 将决策与实现显式绑定，形成“决策可追溯—实现可验证—部署可回退”的闭环。
 
 ---
 
@@ -111,8 +98,53 @@
 **论述要点**：
 
 * 氛围编程的核心竞争力是速度和创意自由，适合未知问题的探索期；但其隐含假设、随意性和临时性实现会导致难以迁移到生产。
-* Spec 驱动将“需求—实现—验证”映射为可被自主编程智能体理解和执行的规范文件，这使得智能体协作变得可控、实现过程可审计，结果可验证，且利于降低长期维护成本。
+* Spec 驱动将"需求—实现—验证"映射为可被自主编程智能体理解和执行的规范文件，这使得智能体协作变得可控、实现过程可审计，结果可验证，且利于降低长期维护成本。
 
+## 2.1 Spec 驱动的具体实现
+
+### Specs 目录结构
+框架通过标准化的 `specs/` 目录结构实现规范的统一管理：
+
+```
+specs/
+├── machine-learning-specs/      # 机器学习技术栈规范
+│               
+├── venv-specs/                  # GPU调试环境规范
+│         
+├── deployment-specs/            # Docker部署规范
+│       
+├── bugfix-specs/                # 调试代码规范
+│
+└── config-file-specs/           # 配置文件规范
+ 
+```
+
+### 核心规范文件说明
+
+#### ML.md - 机器学习技术栈规范
+- **技术选型决策矩阵**：PyTorch/PaddlePaddle双栈支持
+- **两阶段环境配置**：VENV调试（GPU验证）vs DOCKER部署（纯CPU生产）
+- **版本兼容性矩阵**：精确的框架版本匹配与CUDA自动适配
+- **性能基准验证**：GPU利用率>90%，CPU环境优化部署
+
+#### VENV_CONFIG.md - GPU调试环境规范
+- **环境矩阵**：Python 3.9-3.10、PyTorch 2.4.1、PaddlePaddle 2.6.0
+- **一键安装**：自动适配CUDA版本的依赖安装
+- **Mini数据集**：COCO128等调试用小型数据集
+- **1-epoch验证**：快速训练验证与GPU利用率监控
+
+#### DOCKER_CONFIG.md - 部署规范
+- **镜像选择指南**：python:3.10-slim轻量级部署
+- **CPU优化策略**：纯CPU生产环境配置
+- **性能基准**：容器启动时间<5秒，镜像大小<200MB
+
+### Specs 驱动的优势
+
+1. **可执行性**：所有规范文件都是可被智能体理解和执行的
+2. **一致性**：确保从开发到部署的环境一致性
+3. **可追溯性**：每个决策都有对应的规范文件支持
+4. **自动化**：智能体基于规范自动执行相应任务
+5. **可验证性**：每个阶段都有明确的验证标准
 
 ---
 
@@ -774,16 +806,44 @@ flowchart TD
 
 ## 5.1 agile-marketplace介绍
 
+agile-marketplace包含两个核心插件，支持基于JIRA team-managed scrum sprint模式的敏捷软件开发流程。
+
 ### 5.1.1 需求管理插件（requirements-plugin）
+
+#### 目录结构
+```
+agile-marketplace/requirements-plugin/
+├── agents/
+│   ├── product-owner-agent.md      # 业务价值提炼与优先级管理
+│   ├── requirements-agent.md       # 结构化需求文档生成
+│   ├── research-agent.md           # 技术关键词识别与调研
+│   └── scrum-master-agent.md       # 敏捷流程协调与跟踪
+├── commands/
+│   ├── 需求分析.md                 # 多智能体协作需求分析工作流
+│   ├── 创建epic.md                 # 从需求文档创建JIRA Epic
+│   ├── 创建story.md                # 从需求文档创建JIRA Story
+│   ├── 分解story.md                # 将Story分解为可执行Sub-tasks
+│   ├── 删除epic.md                 # 删除JIRA Epic
+│   ├── 删除story.md                # 删除JIRA Story
+│   ├── 删除task.md                 # 删除JIRA Sub-task
+│   └── 需求变更.md                 # 需求变更管理
+└── scripts/
+    ├── create_epic_from_requirements.py
+    ├── create_story.py
+    ├── create_subtask.py
+    ├── delete_epic.py
+    ├── delete_story.py
+    └── delete_subtask.py
+```
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 多智能体协作需求分析工作流
 - `/requirements-plugin:创建epic` - 从需求文档创建JIRA Epic
 - `/requirements-plugin:创建story` - 从需求文档创建JIRA Story
-- `/requirements-plugin:创建子需求` - 从Story创建子需求
+- `/requirements-plugin:分解story` - 将Story分解为可执行Sub-tasks
 - `/requirements-plugin:删除epic` - 删除JIRA Epic
 - `/requirements-plugin:删除story` - 删除JIRA Story
-- `/requirements-plugin:删除子需求` - 删除子需求
+- `/requirements-plugin:删除task` - 删除JIRA Sub-task
 - `/requirements-plugin:需求变更` - 需求变更管理
 
 #### 智能体角色
@@ -794,19 +854,76 @@ flowchart TD
 
 ### 5.1.2 迭代插件（sprint-plugin）
 
+#### 目录结构
+```
+agile-marketplace/sprint-plugin/
+├── agents/
+│   ├── scrum-master-agent.md       # 需求澄清、Sprint管理、智能体协调
+│   ├── development-team-agent.md   # 分钟级代码生成、功能实现
+│   └── quality-agent.md            # 质量验证、测试执行、验收标准验证
+├── commands/
+│   └── 快速sprint.md               # 基于Agile理论的即时交付工作流
+└── utils/
+    ├── acceptance-criteria-validator.md
+    ├── core-sync-engine.md
+    ├── discussion-file-manager.md
+    ├── jira-integration-system.md
+    ├── jira-team-constraints.md
+    ├── monitoring-recovery-system.md
+    ├── multi-round-negotiation-coordinator.md
+    ├── parallel-execution-manager.md
+    ├── shared-utils.md
+    ├── sprint-intelligence.md
+    ├── sprint-story-validator.md
+    ├── story-decomposition-principles.md
+    └── user-input-parser.md
+```
+
 #### 可用命令
-- `/sprint-plugin:instant-sprint` - 基于Agile理论的即时交付
-- `/sprint-plugin:quick-feedback` - 基于Agile理论的快速循环
+- `/sprint-plugin:快速sprint` - 基于Agile理论的即时交付工作流，支持5-8分钟端到端交付
 
 #### 智能体角色
-- **Scrum Master Agent**: 需求澄清与Sprint管理
-- **Development Team Agent**: 分钟级代码生成
-- **Quality Agent**: 简化质量验证
+- **Scrum Master Agent**: 需求澄清、Sprint管理、智能体协调
+- **Development Team Agent**: 分钟级代码生成、功能实现
+- **Quality Agent**: 质量验证、测试执行、验收标准验证
+
+#### 核心特性
+- **分钟级交付**: 5-8分钟完成端到端软件交付
+- **多智能体并行协作**: Development Team和Quality Agent并行执行
+- **强制同步协议**: 100% JIRA状态同步
+- **智能状态检测**: 自动识别项目状态配置
+- **Story状态验证**: Sprint关闭前强制验证所有Story状态
 
 
 ## 5.2 waterfall-marketplace介绍
 
+waterfall-marketplace包含两个核心插件，支持基于瀑布模型的项目管理流程。
+
 ### 5.2.1 需求管理插件（requirements-plugin）
+
+#### 目录结构
+```
+waterfall-marketplace/requirements-plugin/
+├── agents/
+│   ├── requirements-agent.md      # 需求专家、业务专家
+│   └── research-agent.md          # 技术关键词识别与调研
+├── commands/
+│   ├── 需求分析.md                # 瀑布模式需求分析
+│   ├── 创建epic.md                # 创建长期规划Epic
+│   ├── 创建story.md               # 创建功能需求Story
+│   ├── 创建子需求.md              # 创建子需求Subtask
+│   ├── 删除epic.md                # 删除Epic
+│   ├── 删除story.md               # 删除Story
+│   ├── 删除子需求.md              # 删除子需求
+│   └── 需求变更.md                # 需求变更管理
+└── scripts/
+    ├── create_epic_from_requirements.py
+    ├── create_story.py
+    ├── create_subtask.py
+    ├── delete_epic.py
+    ├── delete_story.py
+    └── delete_subtask.py
+```
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 瀑布模式需求分析
@@ -823,6 +940,23 @@ flowchart TD
 - **Research Agent**: 技术关键词识别与调研
 
 ### 5.2.2 项目管理插件（pm-plugin）
+
+#### 目录结构
+```
+waterfall-marketplace/pm-plugin/
+├── agents/
+│   ├── project-manager-agent.md   # 项目经理
+│   └── tech-agent.md              # 技术专家，架构师，研发leader
+├── commands/
+│   ├── epic-stories-subtasks发现.md  # 发现Epic/Story/Subtask结构
+│   └── 创建开发任务.md            # 将子需求转化为开发任务
+└── scripts/
+    ├── analyze_story_context.py
+    ├── create_development_tasks.py
+    ├── create_issue_links.py
+    ├── enrich_subtasks_content.py
+    └── validate_decomposition_quality.py
+```
 
 #### 可用命令
 - `/pm-plugin:epic-stories-subtasks发现` - 发现Epic/Story/Subtask结构
