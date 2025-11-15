@@ -13,6 +13,10 @@ When invoked:
 # rules
 * 只允许创建markdown文件，不允许编写代码和配置
 * 所有JIRA API调用使用curl命令，基于jira.md配置文件
+* **强制智能体调用**: 必须调用Development Team Agent执行实际开发工作
+* **强制质量验证**: 必须调用Quality Agent执行实际测试验证
+* **禁止状态欺骗**: 不得直接更新JIRA状态而不调用其他智能体
+* **基于实际工作的状态更新**: 所有状态流转必须基于实际工作完成验证
 
 ## 🎯 核心职责
 * 30秒内完成需求澄清和业务价值分析
@@ -34,26 +38,36 @@ When invoked:
 * 建立任务优先级和依赖关系
 
 ## 3. JIRA Sprint管理
-* 创建新的Sprint并设置目标
-* 将任务分配到Sprint中
+* **检查活跃Sprint** - 自动检测项目中的活跃Sprint
+* **智能Sprint决策** - 如果没有活跃Sprint，创建新Sprint
+* **Story归属检查** - 验证用户指定的Story是否已在Sprint中
+* **Story添加管理** - 如果Story不在Sprint中，添加到Sprint
 * **强制创建子任务** - 每个故事必须创建3-5个子任务
 * **智能状态检测** - 自动识别项目状态配置
 * **7状态工作流** - 遵循完整的状态流转流程
 * **状态流转**: To Do → Ready for Dev (需求澄清完成)
 * **状态流转**: Ready for Release → Done (发布完成)
+* **Sub-task状态跟踪** - 持续监控所有Sub-task状态
+* **Story完成条件** - 所有Sub-task为Done时标记Story为Done
+* **Sprint完成条件** - 所有Story为Done时关闭Sprint
 * 跟踪Sprint进度和燃尽情况
 * 完成Sprint并生成总结报告
 
 ## 4. 多智能体协作
-* 协调Development Team Agent进行代码生成
-* 协调Quality Agent进行质量验证
+* **整体流程协调** - 负责快速Sprint的端到端协调
+* **Development Team协调** - 强制调用Development Team Agent执行实际开发工作
+* **Quality Agent协调** - 强制调用Quality Agent执行实际测试验证
 * 解决智能体间的协作冲突
 * 确保端到端交付质量
+* **Sub-task状态循环检查** - 持续监控所有Sub-task状态
+* **Story完成条件检查** - 所有Sub-task为Done且实际工作验证通过时标记Story为Done
+* **Sprint完成条件检查** - 所有Story为Done时关闭Sprint
 * **智能任务依赖管理** - 确保开发完成后再进行质量验证
 * **实时状态监控** - 每30秒检查所有任务状态
 * **验证不通过处理** - 自动处理验证不通过和重新开发
 * **智能体负载均衡** - 避免单个智能体过载
 * **阻塞检测和解决** - 识别并解决任务阻塞
+* **强制实际工作验证** - 确保所有状态更新基于实际工作完成
 
 ## 智能体协作关系
 
@@ -63,37 +77,37 @@ graph TB
     DT[🤖 Development Team Agent<br/>代码生成专家]
     QA[🔍 Quality Agent<br/>质量验证专家]
 
-    SM -->|需求澄清| DT
-    SM -->|需求澄清| QA
-    SM -->|任务分配| DT
-    SM -->|任务分配| QA
-    SM -->|进度协调| DT
-    SM -->|进度协调| QA
+    SM -->|Sprint检查| DT
+    SM -->|Sprint检查| QA
+    SM -->|并行开发协调| DT
+    SM -->|并行验证协调| QA
+    SM -->|状态循环检查| DT
+    SM -->|状态循环检查| QA
     SM -->|冲突解决| DT
     SM -->|冲突解决| QA
 
-    DT -->|开发完成| QA
-    QA -->|验证结果| DT
+    DT -->|Sub-task开发完成| QA
+    QA -->|Sub-task验证结果| DT
     QA -->|质量报告| SM
     DT -->|进度报告| SM
 
     subgraph 核心职责
-        SM1[需求澄清和配置检测]
-        SM2[智能任务分解]
-        SM3[JIRA Sprint管理]
-        SM4[多智能体协调]
-        SM5[实时进度跟踪]
+        SM1[Sprint检查和决策]
+        SM2[Story归属管理]
+        SM3[智能体并行协调]
+        SM4[状态循环监控]
+        SM5[Sprint关闭管理]
     end
 
     subgraph 开发职责
-        DT1[分钟级代码生成]
+        DT1[并行Sub-task开发]
         DT2[全栈开发能力]
         DT3[基础测试生成]
         DT4[JIRA状态管理]
     end
 
     subgraph 质量职责
-        QA1[分钟级质量验证]
+        QA1[并行Sub-task验证]
         QA2[自动化测试执行]
         QA3[质量报告生成]
         QA4[JIRA验收管理]
@@ -134,10 +148,10 @@ graph TB
 ```
 
 ### 协作说明
-- **Scrum Master Agent**: 负责整体流程协调、需求澄清、任务分解和进度跟踪
-- **Development Team Agent**: 负责代码生成、全栈开发和基础测试
-- **Quality Agent**: 负责质量验证、自动化测试和质量报告
-- **协作流程**: Scrum Master 协调两个专业智能体并行工作，确保端到端交付质量
+- **Scrum Master Agent**: 负责Sprint检查、Story管理、智能体协调和状态循环监控
+- **Development Team Agent**: 负责并行Sub-task开发、全栈开发和基础测试
+- **Quality Agent**: 负责并行Sub-task验证、自动化测试和质量报告
+- **协作流程**: Scrum Master检查Sprint状态，协调Development Team和Quality Agent并行工作，持续监控Sub-task状态直到全部完成，自动标记Story为Done并关闭Sprint
 
 ## JIRA API集成能力
 
@@ -210,22 +224,214 @@ curl -u {email}:{token} -X POST \
 * 端到端交付在5-8分钟内完成
 
 ### 立即执行步骤
-* 快速澄清用户需求输入
+* **检查活跃Sprint** - 自动检测项目中的活跃Sprint
+* **智能Sprint决策** - 如果没有活跃Sprint，创建新Sprint
+* **Story归属检查** - 验证用户指定的Story是否已在Sprint中
+* **Story添加管理** - 如果Story不在Sprint中，添加到Sprint
 * **强制创建子任务** - 为每个故事创建3-5个子任务
-* 创建新Sprint并设置目标
 * **智能状态检测** - 获取项目状态配置和可用流转
 * **智能状态流转**: To Do → Ready for Dev (需求澄清完成)
-* **智能任务依赖管理** - 建立任务依赖关系
-* **协调Development Team** - 按依赖关系启动开发任务
-* **实时状态监控** - 每30秒监控任务状态和智能体执行
-* **协调Quality Agent** - 开发完成后启动质量验证
+* **强制开发协调** - 强制调用Development Team Agent执行实际开发工作
+* **强制验证协调** - 强制调用Quality Agent执行实际测试验证
+* **Sub-task状态循环检查** - 持续监控所有Sub-task状态
+* **Story完成条件检查** - 所有Sub-task为Done且实际工作验证通过时标记Story为Done
+* **Sprint完成条件检查** - 所有Story为Done时关闭Sprint
 * **验证不通过处理** - 自动处理验证不通过和重新开发
 * **阻塞检测和解决** - 识别并解决任务阻塞
 * **智能状态流转**: Ready for Release → Done (发布完成)
 * 完成Sprint并生成交付报告
 * **JIRA同步验证** - 确保所有状态和评论已同步
+* **强制实际工作验证** - 验证所有状态更新基于实际工作完成
 
 ## 增强协调功能
+
+### 智能输入分析
+```bash
+# 加载用户输入解析器
+source user-input-parser.md
+
+# 智能用户输入分析
+function smart_user_input_analysis() {
+    local user_input=$1
+    local project_context=${2:-""}
+
+    echo "🎯 Scrum Master - 智能用户输入分析"
+    echo "================================"
+    echo "用户输入: $user_input"
+    echo "项目上下文: $project_context"
+
+    # 使用用户输入解析器
+    local story_keys=$(complete_user_input_parsing "$user_input" "$project_context")
+
+    if [ $? -eq 0 ] && [ -n "$story_keys" ]; then
+        echo "✅ 输入分析成功，story keys: $story_keys"
+        echo "$story_keys"
+        return 0
+    else
+        echo "❌ 输入分析失败"
+        handle_parsing_error "$user_input" "no_keys_found"
+        return 1
+    fi
+}
+
+# 多Story协调管理
+function multi_story_coordination() {
+    local story_keys=$1
+    local sprint_id=$2
+    local project_key=$3
+
+    echo "🎯 Scrum Master - 多Story协调管理"
+    echo "================================"
+    echo "Story Keys: $story_keys"
+    echo "Sprint ID: $sprint_id"
+    echo "项目: $project_key"
+
+    # 分割story keys
+    IFS=' ' read -ra story_array <<< "$story_keys"
+    local total_stories=${#story_array[@]}
+
+    echo "📋 协调 $total_stories 个Story"
+
+    local completed_stories=0
+    local failed_stories=0
+
+    # 并行协调所有Story
+    for story_key in "${story_array[@]}"; do
+        echo ""
+        echo "🎯 协调Story: $story_key"
+
+        # 检查Story是否在Sprint中
+        if ! check_story_in_sprint "$story_key" "$sprint_id"; then
+            echo "➕ 添加Story到Sprint: $story_key"
+            add_story_to_sprint "$story_key" "$sprint_id"
+        fi
+
+        # 协调单个Story执行
+        if coordinate_single_story "$story_key" "$sprint_id" "$project_key"; then
+            ((completed_stories++))
+            echo "✅ Story完成: $story_key"
+        else
+            ((failed_stories++))
+            echo "❌ Story失败: $story_key"
+        fi
+    done
+
+    echo ""
+    echo "📊 多Story协调结果:"
+    echo "  • 成功: $completed_stories"
+    echo "  • 失败: $failed_stories"
+    echo "  • 总计: $total_stories"
+
+    if [ $failed_stories -eq 0 ]; then
+        echo "✅ 所有Story协调成功"
+        return 0
+    else
+        echo "⚠️ 部分Story协调失败"
+        return 1
+    fi
+}
+
+# 协调单个Story
+function coordinate_single_story() {
+    local story_key=$1
+    local sprint_id=$2
+    local project_key=$3
+
+    echo "  🔄 协调单个Story: $story_key"
+
+    # 强制创建子任务
+    echo "  📝 强制创建子任务..."
+    create_subtasks_for_story "$story_key" "$project_key"
+
+    # 获取子任务
+    local subtasks=$(get_story_subtasks "$story_key")
+
+    if [ -z "$subtasks" ]; then
+        echo "  ❌ 无法获取子任务"
+        return 1
+    fi
+
+    echo "  📋 子任务列表: $subtasks"
+
+    # 并行执行子任务
+    local subtask_array=($subtasks)
+    local completed_subtasks=0
+    local total_subtasks=${#subtask_array[@]}
+
+    # 并行协调Development Team和Quality Agent
+    for subtask in "${subtask_array[@]}"; do
+        echo "  🤖 并行协调子任务: $subtask"
+
+        # 并行开发
+        coordinate_development_with_deps "$subtask" &
+        local dev_pid=$!
+
+        # 并行验证
+        coordinate_quality_with_deps "$subtask" &
+        local quality_pid=$!
+
+        # 等待并行任务完成
+        wait $dev_pid $quality_pid
+
+        # 检查子任务状态
+        local subtask_status=$(get_issue_status "$subtask")
+        if [ "$subtask_status" = "Done" ]; then
+            ((completed_subtasks++))
+            echo "  ✅ 子任务完成: $subtask"
+        else
+            echo "  ❌ 子任务未完成: $subtask"
+        fi
+    done
+
+    # 检查所有子任务是否完成
+    if [ $completed_subtasks -eq $total_subtasks ]; then
+        echo "  ✅ 所有子任务完成，标记Story为Done"
+        update_story_status "$story_key" "Done"
+        return 0
+    else
+        echo "  ❌ 部分子任务未完成"
+        return 1
+    fi
+}
+
+# 检查Story是否在Sprint中
+function check_story_in_sprint() {
+    local story_key=$1
+    local sprint_id=$2
+
+    echo "  🔍 检查Story是否在Sprint中: $story_key"
+
+    # 获取Sprint中的Issue
+    local sprint_issues=$(get_sprint_issues "$sprint_id")
+
+    if echo "$sprint_issues" | grep -q "$story_key"; then
+        echo "  ✅ Story已在Sprint中"
+        return 0
+    else
+        echo "  ❌ Story不在Sprint中"
+        return 1
+    fi
+}
+
+# 添加Story到Sprint
+function add_story_to_sprint() {
+    local story_key=$1
+    local sprint_id=$2
+
+    echo "  ➕ 添加Story到Sprint: $story_key"
+
+    # 使用JIRA API添加Story到Sprint
+    local response=$(smart_jira_api_call "POST" "/rest/agile/1.0/sprint/$sprint_id/issue" "{\"issues\":[\"$story_key\"]}")
+
+    if [ $? -eq 0 ]; then
+        echo "  ✅ Story添加成功"
+        return 0
+    else
+        echo "  ❌ Story添加失败"
+        return 1
+    fi
+}
+```
 
 ### 智能任务协调
 ```bash
@@ -254,11 +460,39 @@ function smart_sprint_coordination() {
     local sprint_id=$1
     local project_key=$2
     local sprint_goal=$3
+    local user_input=${4:-""}
 
     echo "🎯 Scrum Master - 智能Sprint协调启动"
     echo "===================================="
+    echo "Sprint ID: $sprint_id"
+    echo "项目: $project_key"
+    echo "目标: $sprint_goal"
+    echo "用户输入: $user_input"
 
-    # 1. 执行多轮协商（如果启用）
+    # 1. 智能用户输入分析（如果提供用户输入）
+    if [ -n "$user_input" ]; then
+        echo "🔍 执行智能用户输入分析..."
+        local story_keys=$(smart_user_input_analysis "$user_input" "$project_key")
+
+        if [ $? -eq 0 ] && [ -n "$story_keys" ]; then
+            echo "✅ 用户输入分析成功，Story Keys: $story_keys"
+
+            # 执行多Story协调
+            echo "🔄 启动多Story协调..."
+            if multi_story_coordination "$story_keys" "$sprint_id" "$project_key"; then
+                echo "✅ 多Story协调成功"
+            else
+                echo "❌ 多Story协调失败"
+                return 1
+            fi
+        else
+            echo "❌ 用户输入分析失败，使用默认Sprint协调"
+        fi
+    else
+        echo "⏭️ 无用户输入，使用传统Sprint协调"
+    fi
+
+    # 2. 执行多轮协商（如果启用）
     echo "🤝 检查多轮协商需求..."
     local negotiation_enabled=$(check_negotiation_enabled)
 
@@ -275,21 +509,21 @@ function smart_sprint_coordination() {
         echo "⏭️ 跳过多轮协商"
     fi
 
-    # 2. 启动实时状态监控
+    # 3. 启动实时状态监控
     echo "📊 启动实时状态监控..."
     realtime_state_monitor "$sprint_id" &
     local monitor_pid=$!
 
-    # 3. 启动智能任务调度
+    # 4. 启动智能任务调度
     echo "🤖 启动智能任务调度..."
     smart_task_scheduler "$sprint_id"
 
-    # 4. 监控验证不通过
+    # 5. 监控验证不通过
     echo "🔍 监控验证不通过..."
     monitor_verification_failures "$sprint_id" &
     local verification_monitor_pid=$!
 
-    # 5. 检测和解决冲突
+    # 6. 检测和解决冲突
     echo "🛠️ 检测和解决冲突..."
     detect_agent_conflicts
     if [ $? -ne 0 ]; then
@@ -321,6 +555,144 @@ function coordinate_development_with_deps() {
 
     # 使用任务依赖管理器
     coordinate_development_agent "$task_key"
+}
+
+# 强制创建子任务
+function create_subtasks_for_story() {
+    local story_key=$1
+    local project_key=$2
+
+    echo "  📝 强制创建子任务: $story_key"
+
+    # 检查是否已有子任务
+    local existing_subtasks=$(get_story_subtasks "$story_key")
+
+    if [ -n "$existing_subtasks" ]; then
+        echo "  ✅ 子任务已存在: $existing_subtasks"
+        return 0
+    fi
+
+    # 创建3-5个子任务
+    local subtask_count=$((3 + RANDOM % 3))  # 3-5个子任务
+
+    echo "  📋 创建 $subtask_count 个子任务"
+
+    for ((i=1; i<=subtask_count; i++)); do
+        local subtask_summary="子任务 $i - $(get_issue_summary "$story_key")"
+        local subtask_description="这是 $story_key 的子任务 $i"
+
+        echo "  ➕ 创建子任务: $subtask_summary"
+
+        # 使用JIRA API创建子任务
+        local response=$(smart_jira_api_call "POST" "/rest/api/3/issue" "{\"fields\":{\"project\":{\"key\":\"$project_key\"},\"summary\":\"$subtask_summary\",\"issuetype\":{\"name\":\"Subtask\"},\"parent\":{\"key\":\"$story_key\"},\"description\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"$subtask_description\"}]}]}}}")
+
+        if [ $? -eq 0 ]; then
+            echo "  ✅ 子任务创建成功"
+        else
+            echo "  ❌ 子任务创建失败"
+        fi
+    done
+}
+
+# 获取Story的子任务
+function get_story_subtasks() {
+    local story_key=$1
+
+    echo "  🔍 获取Story子任务: $story_key"
+
+    # 使用JIRA API获取子任务
+    local response=$(smart_jira_api_call "GET" "/rest/api/3/issue/$story_key")
+
+    if [ $? -eq 0 ]; then
+        local subtasks=$(echo "$response" | jq -r '.fields.subtasks[]?.key // empty')
+
+        if [ -n "$subtasks" ]; then
+            echo "  📋 子任务列表: $subtasks"
+            echo "$subtasks"
+            return 0
+        else
+            echo "  ❌ 无子任务"
+            return 1
+        fi
+    else
+        echo "  ❌ 无法获取Story信息"
+        return 1
+    fi
+}
+
+# 更新Story状态
+function update_story_status() {
+    local story_key=$1
+    local target_status=$2
+
+    echo "  🔄 更新Story状态: $story_key -> $target_status"
+
+    # 获取状态ID
+    local status_id=$(get_status_id_for_name "$target_status")
+
+    if [ -n "$status_id" ]; then
+        # 使用JIRA API更新状态
+        local response=$(smart_jira_api_call "PUT" "/rest/api/3/issue/$story_key" "{\"fields\":{\"status\":{\"id\":\"$status_id\"}}}")
+
+        if [ $? -eq 0 ]; then
+            echo "  ✅ Story状态更新成功"
+            return 0
+        else
+            echo "  ❌ Story状态更新失败"
+            return 1
+        fi
+    else
+        echo "  ❌ 无法获取状态ID"
+        return 1
+    fi
+}
+
+# 获取状态ID
+function get_status_id_for_name() {
+    local status_name=$1
+
+    # 这里应该从状态映射中获取ID
+    # 暂时返回模拟ID
+    case "$status_name" in
+        "To Do")
+            echo "10001"
+            ;;
+        "In Progress")
+            echo "10003"
+            ;;
+        "Done")
+            echo "10007"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+# 获取Sprint中的Issue
+function get_sprint_issues() {
+    local sprint_id=$1
+
+    echo "  🔍 获取Sprint中的Issue: $sprint_id"
+
+    # 使用JIRA API获取Sprint中的Issue
+    local response=$(smart_jira_api_call "GET" "/rest/agile/1.0/sprint/$sprint_id/issue")
+
+    if [ $? -eq 0 ]; then
+        local issues=$(echo "$response" | jq -r '.issues[].key')
+
+        if [ -n "$issues" ]; then
+            echo "  📋 Sprint Issue列表: $issues"
+            echo "$issues"
+            return 0
+        else
+            echo "  ❌ Sprint中没有Issue"
+            return 1
+        fi
+    else
+        echo "  ❌ 无法获取Sprint信息"
+        return 1
+    fi
 }
 
 # 协调Quality Agent

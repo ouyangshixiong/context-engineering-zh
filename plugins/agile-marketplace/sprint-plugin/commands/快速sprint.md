@@ -18,6 +18,7 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 - **验收标准驱动**: 基于Given-When-Then的质量保证
 - **三可原则分解**: 独立执行、自动化验证、回滚隔离
 - **智能状态检测**: 自动识别项目状态配置
+- **Story状态验证**: Sprint关闭前强制验证所有Story状态
 
 ### 智能协作系统
 - **多轮协商**: 智能体间深度协商和文档落地
@@ -29,37 +30,30 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 
 ```mermaid
 flowchart TD
-    A[🚀 快速Sprint 启动] --> B[🔧 阶段1: 环境准备和配置检测]
-    B --> C{多轮协商启用?}
-    C -->|是| D[🤝 执行多轮协商流程]
-    C -->|否| E[⏭️ 跳过多轮协商]
-    D --> F[⚡ 阶段2: 智能Sprint决策和执行]
-    E --> F
-
-    F --> G{智能Sprint决策}
-    G -->|继续现有Sprint| H[🔄 继续模式并行执行]
-    G -->|创建新Sprint| I[🚀 创建新Sprint模式]
-
-    H --> J[🤖 Development Team Agent 并行开发]
-    H --> K[🔍 Quality Agent 并行验证]
-
-    I --> L[📊 启动实时监控]
-    I --> M[🔄 并行执行引擎]
-    M --> J
-    M --> K
-
-    J --> N[📋 阶段3: 结果汇总和验证]
-    K --> N
-
-    N --> O[📄 生成交付报告]
-    N --> P[🔍 同步验证]
-    N --> Q[📊 性能统计]
-    N --> R[💡 改进建议]
-
-    O --> S[🎉 快速Sprint 完成]
-    P --> S
-    Q --> S
-    R --> S
+    A[🚀 快速Sprint启动] --> B[🔍 智能用户输入分析]
+    B --> C[📋 解析Story Keys]
+    C --> D[🔍 检查活跃Sprint]
+    D --> E{有活跃Sprint?}
+    E -->|否| F[📝 创建新Sprint]
+    E -->|是| G[📋 获取Sprint详情]
+    F --> H[✅ Sprint创建成功]
+    G --> H
+    H --> I[🔄 多Story协调管理]
+    I --> J{所有Story处理完成?}
+    J -->|否| K[🎯 协调单个Story]
+    K --> L[🤖 Development Team开发]
+    K --> M[🔍 Quality Agent验证]
+    L --> N[🔄 检查Sub-task状态]
+    M --> N
+    N --> O{所有Sub-task为Done?}
+    O -->|否| K
+    O -->|是| P[✅ 标记Story为Done]
+    P --> J
+    J -->|是| Q[🔍 Story状态验证]
+    Q --> R{验证通过?}
+    R -->|否| S[❌ 验证失败报告]
+    R -->|是| T[🏁 关闭Sprint]
+    T --> U[📊 生成交付报告]
 ```
 
 ### 时间分配优化
@@ -79,15 +73,14 @@ sequenceDiagram
     participant J as JIRA
     participant SM as Scrum Master Agent
 
-    U->>C: 快速sprint "目标"
+    U->>C: 快速sprint "完成story LR-4 LR-5"
     C->>J: 验证连接
     J-->>C: 连接成功
     C->>J: 检测状态配置
     J-->>C: 状态映射
-    C->>SM: 需求澄清
-    SM->>J: 创建Story
-    J-->>SM: Story Key
-    SM->>C: 返回Story Key
+    C->>SM: 智能用户输入分析
+    SM->>SM: 解析Story Keys
+    SM->>C: 返回Story Keys
     C-->>U: 环境准备完成
 ```
 
@@ -95,139 +88,190 @@ sequenceDiagram
 - ✅ **配置读取**: 自动读取JIRA配置信息
 - ✅ **连接验证**: 验证JIRA API连接状态
 - ✅ **状态检测**: 自动识别项目状态配置
-- ✅ **需求澄清**: Scrum Master Agent创建故事
+- ✅ **智能输入分析**: Scrum Master Agent解析用户输入中的Story Keys
+- ✅ **多Story识别**: 支持多个Story的并行处理
 - ✅ **多轮协商**: 智能体间深度协商（可选）
 
 **输出成果:**
-- 📄 JIRA Story创建
-- 📋 需求澄清文档
-- 🔧 技术方案文档
+- 📄 解析的Story Keys列表
+- 📋 多Story协调计划
+- 🔧 并行执行策略
 - 📊 任务分解文档
 
-### 阶段2: 智能Sprint决策和执行
+### 阶段2: Sprint检查和Story管理
 
 ```mermaid
 flowchart TD
-    A[📋 准备执行] --> B{智能Sprint决策}
-    B -->|继续现有Sprint| C[🔄 继续模式并行执行]
-    B -->|创建新Sprint| D[🚀 创建新Sprint模式]
-
-    C --> E[📥 获取现有Issues]
-    E --> F[🔍 验证Issues类型]
-    F --> G[⚡ 并行执行引擎]
-
-    D --> H[📝 创建Sprint]
-    H --> I[📥 获取要加入的Issues]
-    I --> J[🔍 JIRA团队版类型检查]
-    J --> K{类型检查结果}
-    K -->|通过| L[✅ 类型检查通过]
-    K -->|失败| M[❌ 类型检查失败]
-    L --> N[📊 添加Issues到Sprint]
-    N --> O[🔍 验证Sprint分配]
-    O --> P[✅ Sprint准备就绪]
-    P --> G
-
-    G --> Q[🤖 Development Team Agent]
-    G --> R[🔍 Quality Agent]
-    Q --> S[📊 实时监控]
-    R --> S
-    S --> T[✅ 阶段2完成]
-
-    M --> U[🔄 重新选择Issues]
-    U --> I
+    A[📋 Sprint检查准备] --> B[🔍 检查活跃Sprint]
+    B --> C{有活跃Sprint?}
+    C -->|否| D[📝 创建新Sprint]
+    C -->|是| E[📋 获取Sprint详情]
+    D --> F[✅ Sprint创建成功]
+    E --> F
+    F --> G[🔍 检查Story归属]
+    G --> H{Story在Sprint中?}
+    H -->|否| I[➕ 添加Story到Sprint]
+    H -->|是| J[✅ Story已在Sprint]
+    I --> K[✅ Story添加成功]
+    J --> K
+    K --> L[🎯 阶段2完成]
 ```
 
-**智能决策引擎:**
-- 🎯 **继续现有Sprint**: 自动检测并继续执行现有Sprint
-- 🚀 **创建新Sprint**: 创建新Sprint并添加合规Issues
-- 🔍 **类型检查**: 确保只允许Story和Task类型
-- ⚡ **并行执行**: Development Team Agent和Quality Agent并行工作
+**Sprint检查机制:**
+- 🔍 **活跃Sprint检查**: 自动检测项目中的活跃Sprint
+- 📝 **新Sprint创建**: 如果没有活跃Sprint，创建新Sprint
+- 📋 **Sprint详情获取**: 获取现有Sprint的详细信息
+- 🔍 **Story归属检查**: 验证用户指定的Story是否已在Sprint中
+- ➕ **Story添加**: 如果Story不在Sprint中，添加到Sprint
 
-**JIRA团队版约束:**
-- ✅ **允许类型**: Story, Task
-- ❌ **禁止类型**: Sub-task, Epic, Bug, Improvement, New Feature
-- 🔍 **自动验证**: 系统自动检查Issue类型合规性
+**智能决策逻辑:**
+- 🎯 **继续现有Sprint**: 使用现有活跃Sprint继续执行
+- 🚀 **创建新Sprint**: 创建新Sprint并设置合理的时间范围
+- ✅ **Story管理**: 确保目标Story在Sprint中
+- 🔄 **状态跟踪**: 持续监控Story和Sub-task状态
 
-### 阶段3: 结果汇总和验证
+### 阶段3: 智能体协调和状态跟踪
 
 ```mermaid
 flowchart TD
-    A[🏁 Sprint完成] --> B[📄 生成交付报告]
-    A --> C[🔍 同步验证]
-    A --> D[📊 性能统计]
-    A --> E[💡 改进建议]
-    A --> F{回顾机制启用?}
-
-    F -->|是| G[📊 生成回顾报告]
-    F -->|否| H[⏭️ 跳过回顾]
-
-    B --> I[✅ 结果汇总完成]
-    C --> I
-    D --> I
-    E --> I
-    G --> I
-    H --> I
+    A[🎯 Scrum Master协调] --> B[🤖 Development Team开发]
+    A --> C[🔍 Quality Agent验证]
+    B --> D[🔄 检查Sub-task状态]
+    C --> D
+    D --> E{所有Sub-task为Done?}
+    E -->|否| A
+    E -->|是| F[✅ 标记Story为Done]
+    F --> G{所有Story为Done?}
+    G -->|否| A
+    G -->|是| H[🔍 Story状态验证]
+    H --> I{验证通过?}
+    I -->|否| J[❌ 验证失败报告]
+    I -->|是| K[🏁 关闭Sprint]
+    K --> L[📄 生成交付报告]
+    L --> M[✅ 阶段3完成]
 ```
 
-**验证活动:**
-- 📄 **交付报告**: 生成完整的交付成果报告
-- 🔍 **同步验证**: 验证所有状态同步操作
-- 📊 **性能统计**: 分析执行效率和成功率
-- 💡 **改进建议**: 基于执行数据生成优化建议
-- 📊 **回顾机制**: 自动生成回顾报告（可选）
+**智能体协调机制:**
+- 🎯 **Scrum Master协调**: 由Scrum Master Agent负责整体协调
+- 🤖 **Development Team开发**: 并行执行所有Sub-task的开发工作
+- 🔍 **Quality Agent验证**: 并行执行所有Sub-task的质量验证
+- 🔄 **状态检查循环**: 持续检查Sub-task状态直到全部完成
+- ✅ **Story完成条件**: 所有Sub-task为Done时标记Story为Done
+- 🔍 **Story状态验证**: 验证所有Story状态确保可以关闭Sprint
+- 🏁 **Sprint完成条件**: 所有Story为Done且验证通过时关闭Sprint
+
+**状态流转逻辑:**
+- 🔄 **循环检查**: 持续监控Sub-task状态，直到全部完成
+- ✅ **基于实际工作的标记**: Sub-task全部完成且实际工作验证通过时标记Story为Done
+- 🔍 **状态验证**: 验证所有Story状态确保Sprint可以安全关闭
+- 🏁 **智能关闭**: Story全部完成且验证通过时自动关闭Sprint
+- 📊 **报告生成**: 生成完整的交付成果报告
+
+## 🎯 基于Agile理论的智能体强制分工
+
+### 核心原则
+根据Scrum敏捷开发最佳实践，智能体必须执行实际工作，禁止直接状态更新：
+
+**强制执行规则:**
+- 🚫 **禁止状态欺骗**: Scrum Master Agent不得直接更新JIRA状态而不调用其他智能体
+- ✅ **强制实际开发**: Development Team Agent必须执行所有开发工作（代码生成、功能实现）
+- ✅ **强制实际测试**: Quality Agent必须执行所有测试验证工作（测试执行、质量保证）
+- 🔍 **强制验证机制**: 所有状态更新必须基于实际工作完成验证
+
+### 智能体职责边界
+
+```mermaid
+flowchart TD
+    A[🎯 Scrum Master Agent] --> B[📋 需求澄清和任务分解]
+    A --> C[🔄 智能体协调和状态监控]
+    A --> D[✅ 基于实际工作的状态更新]
+
+    E[🤖 Development Team Agent] --> F[💻 实际代码开发]
+    E --> G[🔧 功能实现]
+    E --> H[📝 基础测试生成]
+
+    I[🔍 Quality Agent] --> J[🧪 实际测试执行]
+    I --> K[✅ 质量验证]
+    I --> L[📊 测试报告生成]
+
+    F --> D
+    G --> D
+    H --> D
+    J --> D
+    K --> D
+    L --> D
+```
+
+**验证机制:**
+- 🔍 **工作成果验证**: 所有状态更新必须基于实际工作成果
+- 📋 **代码提交检查**: Development Team Agent必须提交实际代码
+- 🧪 **测试执行验证**: Quality Agent必须执行实际测试
+- ✅ **质量门禁**: 只有通过质量验证的状态才能流转
 
 ## 🎯 核心功能详解
 
-### 1. 用户输入与上下文搜索
+### 1. 智能用户输入分析和多Story管理
 
 ```mermaid
 flowchart TD
-    A[🚀 快速Sprint 启动] --> B{用户提供具体任务?}
-    B -->|是| C[🎯 使用用户指定任务]
-    B -->|否| D[🔍 自动搜索上下文任务]
-    D --> E[📋 搜索当前项目Backlog]
-    E --> F[🔍 基于关键词匹配]
-    F --> G[📊 显示任务列表供选择]
-    G --> H[👤 用户选择任务]
-    H --> I[✅ 确认选择的任务]
-    C --> I
-    I --> J[⚡ 继续Sprint执行]
+    A[🚀 快速Sprint启动] --> B[🔍 智能用户输入分析]
+    B --> C[📋 解析Story Keys]
+    C --> D[🔍 检查活跃Sprint]
+    D --> E{有活跃Sprint?}
+    E -->|否| F[📝 创建新Sprint]
+    E -->|是| G[📋 获取Sprint详情]
+    F --> H[✅ Sprint创建成功]
+    G --> H
+    H --> I[🔄 多Story协调管理]
+    I --> J{所有Story处理完成?}
+    J -->|否| K[🎯 协调单个Story]
+    K --> L[📝 创建子任务]
+    L --> M[🤖 并行开发]
+    L --> N[🔍 并行验证]
+    M --> O[✅ 标记Story为Done]
+    N --> O
+    O --> J
+    J -->|是| P[✅ 多Story协调完成]
 ```
 
-**智能搜索能力:**
-- 🔍 **自动上下文搜索**: 基于当前项目环境自动搜索相关任务
-- 📋 **Backlog分析**: 分析项目Backlog中的待办任务
-- 🎯 **关键词匹配**: 基于用户目标智能匹配相关任务
-- 👤 **用户确认**: 提供任务列表供用户选择确认
+**多Story管理能力:**
+- 🔍 **智能输入分析**: 自动解析用户输入中的Story Keys
+- 📋 **多Story识别**: 支持"完成story LR-4 LR-5"等格式
+- 🔄 **多Story协调**: 并行协调多个Story的执行
+- 🎯 **单个Story协调**: 为每个Story创建子任务并协调执行
+- 📝 **子任务创建**: 为每个Story自动创建3-5个子任务
+- 🤖 **并行执行**: Development Team和Quality Agent并行工作
+- ✅ **状态跟踪**: 实时监控所有Story和子任务状态
 
-### 2. Sprint创建与类型检查
+### 2. 智能体协调和状态跟踪
 
 ```mermaid
 flowchart TD
-    A[📋 准备创建Sprint] --> B[🚀 创建JIRA Sprint]
-    B --> C[📥 获取要加入的Issues]
-    C --> D[🔍 检查每个Issue类型]
-    D --> E{Issue类型检查}
-    E -->|Story或Task| F[✅ 允许加入Sprint]
-    E -->|Sub-task| G[❌ 拒绝: Sub-task不允许]
-    E -->|Epic| H[❌ 拒绝: Epic不允许]
-    E -->|Bug| I[❌ 拒绝: Bug不允许]
-    F --> J[📊 统计允许的Issues]
-    J --> K{有允许的Issues?}
-    K -->|是| L[✅ Sprint创建成功]
-    K -->|否| M[❌ Sprint创建失败]
-    G --> N[📝 记录拒绝原因]
-    H --> N
-    I --> N
-    N --> O[🔄 重新选择Issues]
-    O --> C
+    A[🎯 Scrum Master协调] --> B[🤖 Development Team开发]
+    A --> C[🔍 Quality Agent验证]
+    B --> D[🔄 检查Sub-task状态]
+    C --> D
+    D --> E{所有Sub-task为Done?}
+    E -->|否| A
+    E -->|是| F[✅ 标记Story为Done]
+    F --> G{所有Story为Done?}
+    G -->|否| A
+    G -->|是| H[🔍 Story状态验证]
+    H --> I{验证通过?}
+    I -->|否| J[❌ 验证失败报告]
+    I -->|是| K[🏁 关闭Sprint]
+    K --> L[📄 生成交付报告]
+    L --> M[✅ 流程完成]
 ```
 
-**类型检查机制:**
-- 🔍 **自动验证**: 系统自动检查每个Issue的类型
-- ✅ **合规类型**: Story, Task
-- ❌ **不合规类型**: Sub-task, Epic, Bug, Improvement, New Feature
-- 📝 **错误处理**: 记录拒绝原因并提供重新选择机会
+**智能体协调机制:**
+- 🎯 **Scrum Master主导**: Scrum Master Agent负责整体协调
+- 🤖 **实际开发**: Development Team Agent必须执行所有开发工作（代码生成、功能实现）
+- 🔍 **实际验证**: Quality Agent必须执行所有测试验证工作（测试执行、质量保证）
+- 🔄 **状态循环**: 持续检查Sub-task状态直到全部完成
+- ✅ **基于实际工作的流转**: Sub-task全部完成且实际工作验证通过时标记Story为Done
+- 🔍 **状态验证**: 验证所有Story状态确保Sprint可以安全关闭
+- 🏁 **智能关闭**: Story全部完成且验证通过时自动关闭Sprint
 
 
 ### 3. 验收标准验证

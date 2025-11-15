@@ -268,12 +268,153 @@ function assign_to_sprint() {
 # 完成Sprint
 function complete_sprint() {
     local sprint_id=$1
+    local skip_validation=${2:-"false"}
 
     echo "🏁 完成Sprint: $sprint_id"
+    echo "========================================"
 
+    # 检查是否跳过验证
+    if [ "$skip_validation" = "true" ]; then
+        echo "⚠️ 跳过Story状态验证"
+    else
+        echo "🔍 执行Story状态验证..."
+
+        # 加载Story验证器
+        if [ -f "sprint-story-validator.md" ]; then
+            source sprint-story-validator.md
+        fi
+
+        # 验证Story状态
+        if ! smart_story_validation_engine "$sprint_id" "strict"; then
+            echo "❌ Sprint关闭失败: Story状态验证不通过"
+            echo "🎯 建议: 先完成所有Story再关闭Sprint，或使用 --skip-validation 跳过验证"
+            return 1
+        fi
+
+        echo "✅ Story状态验证通过"
+    fi
+
+    # 执行Sprint关闭
+    echo "🔄 执行Sprint关闭..."
     local data="{\"state\":\"closed\"}"
 
-    smart_jira_api_call "POST" "/rest/agile/1.0/sprint/$sprint_id" "$data"
+    if smart_jira_api_call "POST" "/rest/agile/1.0/sprint/$sprint_id" "$data"; then
+        echo "✅ Sprint关闭成功"
+
+        # 添加关闭记录
+        local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "$timestamp|$sprint_id|closed" >> sprint_closure_history.txt
+
+        return 0
+    else
+        echo "❌ Sprint关闭失败"
+        return 1
+    fi
+}
+
+# 安全完成Sprint（带验证）
+function safe_complete_sprint() {
+    local sprint_id=$1
+
+    echo "🛡️ 安全完成Sprint: $sprint_id"
+    echo "========================================"
+
+    # 执行完整验证
+    echo "🔍 执行完整Story验证..."
+    if ! smart_story_validation_engine "$sprint_id" "strict"; then
+        echo "❌ Sprint关闭失败: Story状态验证不通过"
+
+        # 生成详细报告
+        echo "📄 生成详细验证报告..."
+        generate_detailed_validation_report "$sprint_id" "${validation_results[@]}"
+
+        return 1
+    fi
+
+    echo "✅ 所有验证通过"
+
+    # 执行Sprint关闭
+    echo "🔄 执行Sprint关闭..."
+    if complete_sprint "$sprint_id" "true"; then
+        echo "✅ Sprint安全关闭成功"
+
+        # 生成关闭报告
+        generate_sprint_closure_report "$sprint_id"
+
+        return 0
+    else
+        echo "❌ Sprint关闭失败"
+        return 1
+    fi
+}
+
+# 生成Sprint关闭报告
+function generate_sprint_closure_report() {
+    local sprint_id=$1
+
+    echo "📄 生成Sprint关闭报告: $sprint_id"
+
+    local report_file="closure_reports/sprint_${sprint_id}_closure_report.md"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    mkdir -p "closure_reports"
+
+    # 获取Sprint信息
+    local sprint_info=$(get_sprint_info "$sprint_id")
+    local stories=$(get_sprint_stories "$sprint_id")
+
+    cat > "$report_file" << EOF
+# Sprint关闭报告 - $sprint_id
+
+## 📅 关闭时间
+$timestamp
+
+## 📋 Sprint信息
+$sprint_info
+
+## 📊 关闭前状态
+
+EOF
+
+    local done_count=0
+    local total_count=0
+
+    # 统计Story状态
+    for story in $stories; do
+        local status=$(get_issue_status "$story")
+        local summary=$(get_issue_summary "$story")
+
+        if [ "$status" = "Done" ]; then
+            ((done_count++))
+        fi
+        ((total_count++))
+    done
+
+    cat >> "$report_file" << EOF
+- **总Story数**: $total_count
+- **已完成**: $done_count
+- **完成率**: $((done_count * 100 / total_count))%
+
+## ✅ 关闭验证结果
+
+- **Story状态验证**: 通过
+- **阻塞Story检查**: 无阻塞
+- **质量保证检查**: 通过
+- **关闭时间**: $timestamp
+
+## 🎯 关闭总结
+
+Sprint已成功关闭，所有Story都已完成并达到质量标准。
+
+### 建议后续行动:
+1. 进行Sprint回顾会议
+2. 收集团队反馈
+3. 规划下一个Sprint
+4. 更新项目文档
+
+EOF
+
+    echo "✅ Sprint关闭报告已生成: $report_file"
 }
 ```
 

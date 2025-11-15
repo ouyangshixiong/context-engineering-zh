@@ -763,6 +763,225 @@ EOF
 }
 ```
 
+## Sprint Story状态验证系统
+
+### 1. Story状态验证
+```bash
+# 验证Sprint中所有Story状态
+function validate_sprint_stories_status() {
+    local sprint_id=$1
+
+    echo "🔍 验证Sprint Story状态: $sprint_id"
+    echo "========================================"
+
+    # 获取Sprint中的所有Story
+    local stories=$(get_sprint_stories "$sprint_id")
+
+    if [ -z "$stories" ]; then
+        echo "❌ 无法获取Sprint中的Story"
+        return 1
+    fi
+
+    echo "📋 Sprint Story列表:"
+    echo "$stories"
+
+    local all_done=true
+    local blocked_stories=()
+    local done_stories=()
+
+    # 检查每个Story的状态
+    for story in $stories; do
+        echo ""
+        echo "🔍 检查Story: $story"
+
+        local status=$(get_issue_status "$story")
+        local summary=$(get_issue_summary "$story")
+
+        echo "  📋 摘要: $summary"
+        echo "  📊 状态: $status"
+
+        if [ "$status" = "Done" ]; then
+            echo "  ✅ Story已完成"
+            done_stories+=("$story")
+        else
+            echo "  ❌ Story未完成 - 当前状态: $status"
+            all_done=false
+            blocked_stories+=("$story|$status|$summary")
+        fi
+    done
+
+    echo ""
+    echo "📊 验证结果:"
+    echo "  • 总Story数: ${#stories[@]}"
+    echo "  • 已完成: ${#done_stories[@]}"
+    echo "  • 未完成: ${#blocked_stories[@]}"
+
+    if [ "$all_done" = "true" ]; then
+        echo "✅ 所有Story都已完成，可以关闭Sprint"
+        return 0
+    else
+        echo "❌ 存在未完成的Story，无法关闭Sprint"
+        echo ""
+        echo "⚠️ 阻塞Story列表:"
+        for blocked in "${blocked_stories[@]}"; do
+            local story_key=$(echo "$blocked" | cut -d'|' -f1)
+            local status=$(echo "$blocked" | cut -d'|' -f2)
+            local summary=$(echo "$blocked" | cut -d'|' -f3)
+            echo "  • $story_key - $status - $summary"
+        done
+        return 1
+    fi
+}
+
+# 获取Sprint中的Story
+function get_sprint_stories() {
+    local sprint_id=$1
+
+    echo "📋 获取Sprint中的Story: $sprint_id"
+
+    # 获取Sprint中的所有Issue
+    local response=$(smart_jira_api_call "GET" "/rest/agile/1.0/sprint/$sprint_id/issue")
+
+    if [ $? -eq 0 ]; then
+        # 过滤出Story类型的Issue
+        local stories=$(echo "$response" | jq -r '.issues[] | select(.fields.issuetype.name == "Story") | .key')
+
+        if [ -n "$stories" ]; then
+            echo "📋 Sprint Story列表:"
+            echo "$stories"
+            echo "$stories"
+            return 0
+        else
+            echo "⚠️ Sprint中没有Story"
+            return 1
+        fi
+    else
+        echo "❌ 无法获取Sprint Issue"
+        return 1
+    fi
+}
+
+# 生成Story状态验证报告
+function generate_story_validation_report() {
+    local sprint_id=$1
+
+    echo "📄 生成Story状态验证报告: $sprint_id"
+
+    local report_file="validation_reports/sprint_${sprint_id}_story_validation.md"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    mkdir -p "validation_reports"
+
+    # 获取Sprint信息
+    local sprint_info=$(get_sprint_info "$sprint_id")
+    local stories=$(get_sprint_stories "$sprint_id")
+
+    cat > "$report_file" << EOF
+# Sprint Story状态验证报告 - $sprint_id
+
+## 📅 验证时间
+$timestamp
+
+## 📋 Sprint信息
+$sprint_info
+
+## 📊 Story状态概览
+
+EOF
+
+    local done_count=0
+    local blocked_count=0
+    local total_count=0
+
+    # 统计Story状态
+    for story in $stories; do
+        local status=$(get_issue_status "$story")
+        local summary=$(get_issue_summary "$story")
+
+        if [ "$status" = "Done" ]; then
+            ((done_count++))
+            cat >> "$report_file" << EOF
+### ✅ $story - $summary
+- **状态**: $status
+- **验证结果**: 已完成
+
+EOF
+        else
+            ((blocked_count++))
+            cat >> "$report_file" << EOF
+### ❌ $story - $summary
+- **状态**: $status
+- **验证结果**: 未完成
+- **建议行动**: 需要将状态更新为Done
+
+EOF
+        fi
+        ((total_count++))
+    done
+
+    cat >> "$report_file" << EOF
+## 📈 验证总结
+
+- **总Story数**: $total_count
+- **已完成**: $done_count
+- **未完成**: $blocked_count
+- **完成率**: $((done_count * 100 / total_count))%
+
+## 🎯 建议
+
+EOF
+
+    if [ $blocked_count -eq 0 ]; then
+        cat >> "$report_file" << EOF
+✅ 所有Story都已完成，可以安全关闭Sprint。
+
+EOF
+    else
+        cat >> "$report_file" << EOF
+⚠️ 存在 $blocked_count 个未完成的Story，建议先完成这些Story再关闭Sprint。
+
+### 阻塞Story处理建议:
+1. 检查每个阻塞Story的当前状态
+2. 分析阻塞原因并制定解决方案
+3. 更新Story状态为Done
+4. 重新验证Sprint状态
+
+EOF
+    fi
+
+    echo "✅ Story状态验证报告已生成: $report_file"
+}
+
+# 智能Sprint关闭验证
+function smart_sprint_closure_validation() {
+    local sprint_id=$1
+
+    echo "🤖 智能Sprint关闭验证: $sprint_id"
+    echo "========================================"
+
+    # 验证Story状态
+    if validate_sprint_stories_status "$sprint_id"; then
+        echo ""
+        echo "✅ Sprint关闭验证通过"
+        echo "🎯 建议: 可以安全关闭Sprint"
+
+        # 生成验证报告
+        generate_story_validation_report "$sprint_id"
+
+        return 0
+    else
+        echo ""
+        echo "❌ Sprint关闭验证失败"
+        echo "🎯 建议: 先完成所有Story再关闭Sprint"
+
+        # 生成验证报告
+        generate_story_validation_report "$sprint_id"
+
+        return 1
+    fi
+}
+```
+
 ## 使用示例
 
 ### 基本使用
@@ -796,6 +1015,15 @@ generate_sprint_progress_report "456"
 
 # 分析评论内容
 analyze_comment_content "开发完成，开始测试"
+
+# Story状态验证
+validate_sprint_stories_status "789"
+
+# 智能Sprint关闭验证
+smart_sprint_closure_validation "789"
+
+# 生成Story验证报告
+generate_story_validation_report "789"
 ```
 
-这个JIRA集成系统提供了完整的评论管理、状态跟踪、进度同步和报告生成功能，实现了多智能体协作与JIRA系统的深度集成。
+这个JIRA集成系统提供了完整的评论管理、状态跟踪、进度同步、报告生成和Story状态验证功能，实现了多智能体协作与JIRA系统的深度集成，确保Sprint关闭前的质量保证。
