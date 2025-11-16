@@ -9,6 +9,14 @@
 > 特色：集成敏捷与瀑布双模式插件生态系统，支持分钟级软件交付。
 
 ---
+> 基于JIRA Scrum Sprint的标准化、可视化软件开发工程管理，包括基于智能体的任务分解、多智能体协作开发与测试、任务自动comment、任务状态自动流转等。
+
+<p align="center">
+  <img src="images/快速sprint-1.png" width="800">
+</p>
+
+
+---
 
 ## ChangeLog
 * 20251116 修改日志：大幅调整了目录结构，增加specs目录强调基于specs规范的软件工程；优化了`sprint-plugin`；修正了`README.md`
