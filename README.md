@@ -834,7 +834,7 @@ agile-marketplace/requirements-plugin/
 │   ├── 分解story.md                # 将Story分解为可执行Sub-tasks
 │   └── 需求变更.md                 # 需求变更管理
 └── scripts/
-
+```
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 多智能体协作需求分析工作流
@@ -899,17 +899,11 @@ waterfall-marketplace/requirements-plugin/
 │   ├── 创建epic.md                # 创建长期规划Epic
 │   ├── 创建story.md               # 创建功能需求Story
 │   ├── 创建子需求.md              # 创建子需求Subtask
-│   ├── 删除epic.md                # 删除Epic
-│   ├── 删除story.md               # 删除Story
-│   ├── 删除子需求.md              # 删除子需求
 │   └── 需求变更.md                # 需求变更管理
 └── scripts/
     ├── create_epic_from_requirements.py
     ├── create_story.py
     ├── create_subtask.py
-    ├── delete_epic.py
-    ├── delete_story.py
-    └── delete_subtask.py
 ```
 
 #### 可用命令
@@ -917,9 +911,6 @@ waterfall-marketplace/requirements-plugin/
 - `/requirements-plugin:创建epic` - 创建长期规划Epic
 - `/requirements-plugin:创建story` - 创建功能需求Story
 - `/requirements-plugin:创建子需求` - 创建子需求Subtask
-- `/requirements-plugin:删除epic` - 删除Epic
-- `/requirements-plugin:删除story` - 删除Story
-- `/requirements-plugin:删除子需求` - 删除子需求
 - `/requirements-plugin:需求变更` - 需求变更管理
 
 #### 智能体角色
