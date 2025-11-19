@@ -376,15 +376,6 @@ function analyze_blocking_reason() {
         "In Progress")
             reasons+=("Story开发进行中")
             ;;
-        "Testing")
-            reasons+=("Story测试进行中")
-            ;;
-        "Ready for Test")
-            reasons+=("Story等待测试")
-            ;;
-        "Ready for Release")
-            reasons+=("Story等待发布")
-            ;;
     esac
 
     # 基于标签分析
@@ -416,15 +407,6 @@ function generate_blocking_solution() {
             ;;
         "In Progress")
             echo "检查开发进度并解决阻塞问题"
-            ;;
-        "Testing")
-            echo "检查测试进度并解决测试问题"
-            ;;
-        "Ready for Test")
-            echo "分配测试人员并开始测试"
-            ;;
-        "Ready for Release")
-            echo "安排发布时间并完成发布"
             ;;
         *)
             echo "检查当前状态并制定相应解决方案"
@@ -509,10 +491,6 @@ function auto_fix_single_story() {
                 echo "  💬 添加解决阻塞的评论"
                 add_jira_comment "$story_key" "自动检测到阻塞状态，建议检查并解决阻塞问题"
             fi
-            ;;
-        "Testing")
-            # 检查测试状态
-            echo "  🧪 检查测试状态"
             ;;
     esac
 

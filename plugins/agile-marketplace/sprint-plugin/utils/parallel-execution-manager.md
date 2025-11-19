@@ -174,7 +174,7 @@ function assign_task_to_agent() {
                 track_agent_status "$selected_agent" "$task_key" "Completed"
                 ;;
             "Quality Agent")
-                track_agent_status "$selected_agent" "$task_key" "Testing"
+                track_agent_status "$selected_agent" "$task_key" "Verifying"
                 quality_agent "$task_key" "Quality"
                 track_agent_status "$selected_agent" "$task_key" "Completed"
                 ;;
@@ -262,8 +262,8 @@ function coordinate_development_agent() {
     # 检查当前状态
     local current_status=$(get_issue_status "$task_key")
 
-    if [ "$current_status" != "Ready for Dev" ]; then
-        echo "⚠️ 任务状态为 $current_status，需要先设置为 Ready for Dev"
+    if [ "$current_status" != "To Do" ]; then
+        echo "⚠️ 任务状态为 $current_status，需要先设置为 To Do"
         return 1
     fi
 
@@ -284,7 +284,7 @@ function coordinate_quality_agent() {
     # 检查开发是否完成
     local current_status=$(get_issue_status "$task_key")
 
-    if [ "$current_status" != "Ready for Test" ]; then
+    if [ "$current_status" != "In Progress" ]; then
         echo "⏳ 开发尚未完成，当前状态: $current_status"
         return 1
     fi
@@ -635,16 +635,13 @@ function smart_task_scheduler() {
         echo "📋 调度任务: $issue - $summary (状态: $status)"
 
         case "$status" in
-            "Ready for Dev")
+            "To Do")
                 echo "  🤖 加入开发队列"
                 development_queue+=("$issue")
                 ;;
-            "Ready for Test")
+            "In Progress")
                 echo "  🔍 加入质量验证队列"
                 quality_queue+=("$issue")
-                ;;
-            "In Progress"|"Testing")
-                echo "  🔄 任务进行中，跳过调度"
                 ;;
             "Done")
                 echo "  ✅ 任务已完成，跳过调度"
@@ -808,10 +805,10 @@ function resolve_agent_conflicts() {
 
                 # 重新分配任务
                 local task_status=$(get_issue_status "$task_key")
-                if [ "$task_status" = "In Progress" ]; then
+                if [ "$task_status" = "To Do" ]; then
                     echo "🔄 重新分配开发任务: $task_key"
                     assign_task_to_agent "$task_key" "development" &
-                elif [ "$task_status" = "Testing" ]; then
+                elif [ "$task_status" = "In Progress" ]; then
                     echo "🔄 重新分配质量验证任务: $task_key"
                     assign_task_to_agent "$task_key" "quality" &
                 fi

@@ -115,20 +115,8 @@ function realtime_state_monitor() {
                 "To Do")
                     echo "  ⏳ $issue - $summary"
                     ;;
-                "Ready for Dev")
-                    echo "  🔄 $issue - $summary (准备开发)"
-                    ;;
                 "In Progress")
                     echo "  🔧 $issue - $summary (开发中)"
-                    ;;
-                "Ready for Test")
-                    echo "  🧪 $issue - $summary (准备测试)"
-                    ;;
-                "Testing")
-                    echo "  🔍 $issue - $summary (测试中)"
-                    ;;
-                "Ready for Release")
-                    echo "  🚀 $issue - $summary (准备发布)"
                     ;;
                 "Done")
                     echo "  ✅ $issue - $summary (已完成)"
@@ -145,7 +133,7 @@ function realtime_state_monitor() {
         echo "📈 状态统计:"
         local total=$(echo "$issues" | wc -w)
         local done_count=$(echo "$issues" | while read issue; do get_issue_status "$issue"; done | grep -c "^Done$")
-        local progress_count=$(echo "$issues" | while read issue; do get_issue_status "$issue"; done | grep -c -E "^(In Progress|Testing)$")
+        local progress_count=$(echo "$issues" | while read issue; do get_issue_status "$issue"; done | grep -c "^In Progress$")
 
         echo "  • 总任务数: $total"
         echo "  • 已完成: $done_count"
@@ -217,7 +205,7 @@ function monitoring_dashboard() {
                     ((done_count++))
                     echo "  ✅ $issue - $summary"
                     ;;
-                "In Progress"|"Testing")
+                "In Progress")
                     ((progress_count++))
                     echo "  🔄 $issue - $summary"
                     ;;
@@ -279,11 +267,8 @@ function detect_task_blockage() {
                     "In Progress")
                         echo "  🛠️ 开发可能遇到问题，检查开发进度"
                         ;;
-                    "Testing")
-                        echo "  🔍 测试可能遇到问题，检查测试进度"
-                        ;;
-                    "Ready for Test")
-                        echo "  ⏳ 等待测试开始时间过长，可能需要手动协调"
+                    "To Do")
+                        echo "  ⏳ 等待开发开始时间过长，可能需要手动协调"
                         ;;
                 esac
 
@@ -384,10 +369,10 @@ function perform_status_rollback() {
     local target_status=""
 
     case "$current_status" in
-        "Testing"|"Ready for Release")
-            target_status="Ready for Dev"
+        "In Progress")
+            target_status="To Do"
             ;;
-        "Ready for Test")
+        "Done")
             target_status="In Progress"
             ;;
         *)

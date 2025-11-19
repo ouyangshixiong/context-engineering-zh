@@ -44,10 +44,10 @@ When invoked:
 
 ## 4. JIRA任务管理
 * **智能状态检测** - 自动识别项目状态配置
-* **7状态工作流** - 遵循完整的状态流转流程
+* **3状态工作流** - 遵循简化的状态流转流程
 * **实时状态更新** - 每阶段更新任务状态
-* **状态流转**: Ready for Dev → In Progress (开发开始)
-* **状态流转**: In Progress → Ready for Test (开发完成)
+* **状态流转**: To Do → In Progress (开发开始)
+* **状态流转**: In Progress → Done (开发完成)
 * 添加技术说明和实现细节
 * 标记任务完成和验收
 
@@ -56,8 +56,7 @@ When invoked:
 ```mermaid
 stateDiagram-v2
     [*] --> ToDo: 任务创建
-    ToDo --> ReadyForDev: 需求澄清完成
-    ReadyForDev --> InProgress: 开发开始
+    ToDo --> InProgress: 开发开始
 
     state InProgress {
         [*] --> Analysis: 需求分析
@@ -68,43 +67,37 @@ stateDiagram-v2
         Review --> [*]
     }
 
-    InProgress --> ReadyForTest: 开发完成
-    ReadyForTest --> Testing: 质量验证开始
-    Testing --> ReadyForRelease: 测试完成
-    ReadyForRelease --> Done: 验收完成
+    InProgress --> Done: 开发完成
     Done --> [*]
 
-    note right of ReadyForDev
+    note right of ToDo
         Development Team Agent
-        开始代码生成
+        等待开发开始
     end note
 
     note right of InProgress
         Development Team Agent
         执行全栈开发
-    end note
-
-    note right of ReadyForTest
-        Development Team Agent
-        开发完成，等待质量验证
+        📝 添加开始评论
+        🔄 更新任务内容
     end note
 
     note right of Done
-        Quality Agent
-        质量验证通过
+        Development Team Agent
+        开发完成
+        ✅ 添加完成评论
     end note
 ```
 
 ### 状态说明
-- **ToDo → ReadyForDev**: Scrum Master Agent 完成需求澄清
-- **ReadyForDev → InProgress**: Development Team Agent 开始开发
+- **ToDo → InProgress**: Development Team Agent 开始开发
 - **InProgress**: 包含分析、设计、实现、测试、审查子状态
-- **InProgress → ReadyForTest**: 开发完成，等待质量验证
-- **ReadyForTest → Testing**: Quality Agent 开始质量验证
-- **Testing → ReadyForRelease**: 质量验证完成
-- **ReadyForRelease → Done**: 验收完成，任务结束
+- **InProgress → Done**: 开发完成，任务结束
 
 ## JIRA API集成能力
+> `utils`目录中有集成方法`jira-integration-system.md`文件
+
+- **任务约束**:  仅执行名称、描述带有`开发`文字或者labels为`development`的subtask。不要执行`测试`或`testing`相关的任务（subtask）
 
 ### 智能状态管理协议
 ```bash
@@ -118,21 +111,29 @@ curl -u {email}:{token} -X GET \
   -H "Accept: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/transitions"
 
-# 开发开始 - Ready for Dev → In Progress
+# 开发开始 - To Do → In Progress
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/transitions" \
   -d '{"transition": {"id": "{in_progress_transition_id}"}}'
 
-# 开发完成 - In Progress → Ready for Test
+# 开发完成 - In Progress → Done
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/transitions" \
-  -d '{"transition": {"id": "{ready_for_test_transition_id}"}}'
+  -d '{"transition": {"id": "{done_transition_id}"}}'
 ```
 
 ### 实时进度评论
 ```bash
+# 加载JIRA集成系统
+source jira-integration-system.md
+
+# 安全subtask开始评论 - 开发开始时调用（推荐）
+safe_add_subtask_start_comment "{subtaskKey}" \
+  "{technical_approach}" \
+  "{development_plan}"
+
 # 代码生成开始
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
@@ -145,11 +146,23 @@ curl -u {email}:{token} -X POST \
   "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
   -d '{"body":"{timestamp}: 完成{progress_percentage}% - {technical_details}"}'
 
+# 安全subtask完成评论 - 开发完成时调用（推荐）
+safe_add_subtask_complete_comment "{subtaskKey}" \
+  "{implementation_details}" \
+  "{verification_results}" \
+  "{technical_documentation}"
+
 # 代码生成完成
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
   -d '{"body":"{timestamp}: 代码生成完成 - {components_implemented}"}'
+
+# 安全更新subtask内容 - 开发过程中调用（推荐）
+safe_update_subtask_content "{subtaskKey}" \
+  "{description}" \
+  "{acceptance_criteria}" \
+  "{technical_specs}"
 ```
 
 ### 错误处理和重试
@@ -197,10 +210,13 @@ done
 ### 立即执行步骤
 * 分析需求和技术要求
 * **智能状态检测** - 获取项目状态配置和可用流转
-* **智能状态流转**: Ready for Dev → In Progress (开发开始)
+* **智能状态流转**: To Do → In Progress (开发开始)
+* **添加subtask开始评论** - 记录技术方案和开发计划
 * 选择合适的技术栈
 * **实时进度跟踪** - 每30秒添加技术实现进度
+* **更新subtask内容** - 完善描述、验收标准和技术规格
 * 生成完整的功能代码
 * 创建基础测试用例
-* **智能状态流转**: In Progress → Ready for Test (开发完成)
+* **添加subtask完成评论** - 记录实现详情和验证结果
+* **智能状态流转**: In Progress → Done (开发完成)
 * 提供技术实现说明

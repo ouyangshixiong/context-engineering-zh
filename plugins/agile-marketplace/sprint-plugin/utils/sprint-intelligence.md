@@ -67,14 +67,10 @@ function build_status_mapping() {
 
     echo "🗺️ 构建状态映射..."
 
-    # 标准状态映射
+    # 标准状态映射 - 简化为3状态工作流
     declare -A status_patterns=(
         ["To Do"]="To Do|待办|待处理"
-        ["Ready for Dev"]="Ready for Dev|准备开发|开发就绪"
-        ["In Progress"]="In Progress|进行中|开发中"
-        ["Ready for Test"]="Ready for Test|准备测试|测试就绪"
-        ["Testing"]="Testing|测试中|验证中"
-        ["Ready for Release"]="Ready for Release|准备发布|发布就绪"
+        ["In Progress"]="In Progress|进行中|开发中|测试中|验证中"
         ["Done"]="Done|完成|已完成"
     )
 
@@ -125,20 +121,8 @@ function get_status_id() {
         *"To Do"*)
             echo "10001"
             ;;
-        *"Ready for Dev"*)
-            echo "10002"
-            ;;
         *"In Progress"*)
             echo "10003"
-            ;;
-        *"Ready for Test"*)
-            echo "10004"
-            ;;
-        *"Testing"*)
-            echo "10005"
-            ;;
-        *"Ready for Release"*)
-            echo "10006"
             ;;
         *"Done"*)
             echo "10007"
@@ -157,11 +141,7 @@ function save_status_ids() {
     cat > status_ids.env << EOF
 # 状态ID映射 - 自动生成
 TO_DO_ID=10001
-READY_FOR_DEV_ID=10002
 IN_PROGRESS_ID=10003
-READY_FOR_TEST_ID=10004
-TESTING_ID=10005
-READY_FOR_RELEASE_ID=10006
 DONE_ID=10007
 
 # 加载状态映射
@@ -183,15 +163,11 @@ function smart_status_name_matching() {
 
     echo "🔍 智能状态名称匹配: $detected_status"
 
-    # 状态名称模式库
+    # 状态名称模式库 - 简化为3状态
     declare -A status_patterns=(
         ["To Do"]="^To Do$|^待办$|^待处理$|^Backlog$"
-        ["Ready for Dev"]="^Ready for Dev$|^准备开发$|^开发就绪$|^Ready$"
-        ["In Progress"]="^In Progress$|^进行中$|^开发中$|^Progress$"
-        ["Ready for Test"]="^Ready for Test$|^准备测试$|^测试就绪$|^Ready for QA$"
-        ["Testing"]="^Testing$|^测试中$|^验证中$|^QA$"
-        ["Ready for Release"]="^Ready for Release$|^准备发布$|^发布就绪$|^Ready$"
-        ["Done"]="^Done$|^完成$|^已完成$|^Closed$"
+        ["In Progress"]="^In Progress$|^进行中$|^开发中$|^测试中$|^验证中$"
+        ["Done"]="^Done$|^完成$|^已完成$"
     )
 
     for standard_status in "${!status_patterns[@]}"; do
@@ -373,7 +349,7 @@ function analyze_sprint_for_continuation() {
             "Done")
                 ((done_issues++))
                 ;;
-            "In Progress"|"Testing")
+            "In Progress")
                 ((in_progress_issues++))
                 ;;
         esac

@@ -462,7 +462,7 @@ local story_key=$(create_issue "FC" "实现用户注册功能" "用户注册功�
 local sprint_id=$(create_sprint "用户注册功能开发" "FC")
 
 # 强制同步
-sync_checkpoint "Scrum Master" "需求澄清完成" "$story_key" "Ready for Dev" "$READY_FOR_DEV_ID"
+sync_checkpoint "Scrum Master" "需求澄清完成" "$story_key" "In Progress" "$IN_PROGRESS_ID"
 ```
 
 ### 智能API调用

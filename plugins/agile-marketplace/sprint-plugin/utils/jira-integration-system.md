@@ -152,6 +152,132 @@ function add_progress_comment() {
 
     add_jira_comment "$issue_key" "$comment_body"
 }
+
+# 添加subtask开始评论
+function add_subtask_start_comment() {
+    local subtask_key=$1
+    local technical_approach=$2
+    local development_plan=$3
+
+    echo "🚀 添加subtask开始评论: $subtask_key"
+
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local comment_body=$(cat << EOF
+## 🚀 开发开始 - $timestamp
+
+### 📋 技术方案
+$technical_approach
+
+### 📝 开发计划
+$development_plan
+
+### 🎯 预期交付
+- 功能实现完成
+- 代码质量检查通过
+- 基础测试覆盖
+- 技术文档更新
+
+---
+*Development Team Agent 开始执行开发任务*
+EOF
+)
+
+    add_jira_comment "$subtask_key" "$comment_body"
+}
+
+# 添加subtask完成评论
+function add_subtask_complete_comment() {
+    local subtask_key=$1
+    local implementation_details=$2
+    local verification_results=$3
+    local technical_documentation=$4
+
+    echo "✅ 添加subtask完成评论: $subtask_key"
+
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local comment_body=$(cat << EOF
+## ✅ 开发完成 - $timestamp
+
+### 🔧 实现详情
+$implementation_details
+
+### 🧪 验证结果
+$verification_results
+
+### 📚 技术文档
+$technical_documentation
+
+### 🎉 完成状态
+- ✅ 功能实现完成
+- ✅ 代码质量检查通过
+- ✅ 基础测试覆盖
+- ✅ 技术文档更新
+
+---
+*Development Team Agent 已完成开发任务*
+EOF
+)
+
+    add_jira_comment "$subtask_key" "$comment_body"
+}
+
+# 更新subtask内容
+function update_subtask_content() {
+    local subtask_key=$1
+    local description=$2
+    local acceptance_criteria=$3
+    local technical_specs=$4
+
+    echo "📝 更新subtask内容: $subtask_key"
+
+    # 构建更新数据
+    local update_data=$(cat << EOF
+{
+    "fields": {
+        "description": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "$description"
+                        }
+                    ]
+                }
+            ]
+        },
+        "customfield_10026": "$acceptance_criteria",
+        "customfield_10027": "$technical_specs"
+    }
+}
+EOF
+)
+
+    # 调用JIRA API更新subtask内容
+    local response=$(curl -s -u "$EMAIL:$API_TOKEN" \
+        -X PUT \
+        -H "Content-Type: application/json" \
+        "https://$JIRA_DOMAIN/rest/api/3/issue/$subtask_key" \
+        -d "$update_data")
+
+    if echo "$response" | jq -e '.id' > /dev/null 2>&1; then
+        echo "✅ subtask内容更新成功"
+
+        # 添加内容更新评论
+        local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        local comment_body="📝 任务内容已更新 - $timestamp\n\n- 描述信息已完善\n- 验收标准已更新\n- 技术规格已补充"
+        add_jira_comment "$subtask_key" "$comment_body"
+
+        return 0
+    else
+        echo "❌ subtask内容更新失败"
+        echo "错误响应: $response"
+        return 1
+    fi
+}
 ```
 
 ### 2. 智能评论分析
@@ -383,14 +509,9 @@ function validate_status_transition() {
 
     # 定义允许的状态流转
     declare -A allowed_transitions=(
-        ["To Do"]="Ready for Dev"
-        ["Ready for Dev"]="In Progress"
-        ["In Progress"]="Ready for Test"
-        ["Ready for Test"]="Testing"
-        ["Testing"]="Ready for Release"
-        ["Ready for Release"]="Done"
-        ["Testing"]="Ready for Dev"  # 验证不通过回退
-        ["Ready for Release"]="Ready for Dev"  # 发布前回退
+        ["To Do"]="In Progress"
+        ["In Progress"]="Done"
+        ["Done"]="In Progress"  # 验证不通过回退
     )
 
     local allowed_targets=${allowed_transitions[$from_status]}
@@ -493,20 +614,8 @@ function analyze_task_progress() {
         "To Do")
             progress_level=0
             ;;
-        "Ready for Dev")
-            progress_level=10
-            ;;
         "In Progress")
-            progress_level=30
-            ;;
-        "Ready for Test")
-            progress_level=60
-            ;;
-        "Testing")
-            progress_level=80
-            ;;
-        "Ready for Release")
-            progress_level=90
+            progress_level=50
             ;;
         "Done")
             progress_level=100
@@ -595,20 +704,8 @@ function generate_next_actions() {
         "To Do")
             next_actions="- 进行需求澄清\n- 创建技术方案\n- 分解开发任务"
             ;;
-        "Ready for Dev")
-            next_actions="- 启动开发工作\n- 设置开发环境\n- 编写初始代码"
-            ;;
         "In Progress")
             next_actions="- 继续开发工作\n- 定期提交代码\n- 进行代码审查"
-            ;;
-        "Ready for Test")
-            next_actions="- 准备测试环境\n- 编写测试用例\n- 执行功能测试"
-            ;;
-        "Testing")
-            next_actions="- 执行全面测试\n- 记录测试结果\n- 修复发现的问题"
-            ;;
-        "Ready for Release")
-            next_actions="- 准备发布文档\n- 进行最终验证\n- 安排发布时间"
             ;;
         "Done")
             next_actions="- 进行项目总结\n- 收集用户反馈\n- 规划后续改进"
@@ -699,13 +796,9 @@ $sprint_info
 
 EOF
 
-    # 统计任务状态
+    # 统计任务状态 - 简化为3状态
     local todo_count=0
-    local ready_for_dev_count=0
     local in_progress_count=0
-    local ready_for_test_count=0
-    local testing_count=0
-    local ready_for_release_count=0
     local done_count=0
 
     for issue in $issues; do
@@ -715,20 +808,8 @@ EOF
             "To Do")
                 ((todo_count++))
                 ;;
-            "Ready for Dev")
-                ((ready_for_dev_count++))
-                ;;
             "In Progress")
                 ((in_progress_count++))
-                ;;
-            "Ready for Test")
-                ((ready_for_test_count++))
-                ;;
-            "Testing")
-                ((testing_count++))
-                ;;
-            "Ready for Release")
-                ((ready_for_release_count++))
                 ;;
             "Done")
                 ((done_count++))
@@ -736,16 +817,12 @@ EOF
         esac
     done
 
-    local total_count=$((todo_count + ready_for_dev_count + in_progress_count + ready_for_test_count + testing_count + ready_for_release_count + done_count))
+    local total_count=$((todo_count + in_progress_count + done_count))
 
     cat >> "$report_file" << EOF
 - **总任务数**: $total_count
 - **待办**: $todo_count
-- **准备开发**: $ready_for_dev_count
 - **进行中**: $in_progress_count
-- **准备测试**: $ready_for_test_count
-- **测试中**: $testing_count
-- **准备发布**: $ready_for_release_count
 - **已完成**: $done_count
 
 ## 📈 完成率
@@ -982,6 +1059,154 @@ function smart_sprint_closure_validation() {
 }
 ```
 
+## JIRA API调用安全机制
+
+### 1. 二次确认机制
+```bash
+# JIRA API调用前二次确认
+function confirm_jira_operation() {
+    local operation_type=$1
+    local issue_key=$2
+    local operation_details=$3
+
+    echo "⚠️ JIRA操作需要确认: $operation_type"
+    echo "📋 任务: $issue_key"
+    echo "🔍 操作详情: $operation_details"
+    echo ""
+    echo "是否继续执行此操作? (y/N): "
+    read -r user_confirmation
+
+    if [[ $user_confirmation =~ ^[Yy]$ ]]; then
+        echo "✅ 用户确认，继续执行操作"
+        return 0
+    else
+        echo "❌ 用户取消操作"
+        return 1
+    fi
+}
+
+# 安全的JIRA API调用
+function safe_jira_api_call() {
+    local method=$1
+    local endpoint=$2
+    local data=$3
+    local operation_description=$4
+
+    echo "🔐 安全JIRA API调用检查"
+    echo "📋 操作描述: $operation_description"
+
+    # 检查是否需要二次确认
+    if [[ "$method" == "POST" || "$method" == "PUT" || "$method" == "DELETE" ]]; then
+        if ! confirm_jira_operation "$method" "$endpoint" "$operation_description"; then
+            return 1
+        fi
+    fi
+
+    # 执行API调用
+    local response=$(curl -s -u "$EMAIL:$API_TOKEN" \
+        -X "$method" \
+        -H "Content-Type: application/json" \
+        "https://$JIRA_DOMAIN$endpoint" \
+        -d "$data")
+
+    echo "📊 API调用结果: $response"
+    echo "$response"
+}
+
+# 安全的评论添加
+function safe_add_jira_comment() {
+    local issue_key=$1
+    local comment_body=$2
+
+    if confirm_jira_operation "添加评论" "$issue_key" "添加评论: ${comment_body:0:50}..."; then
+        add_jira_comment "$issue_key" "$comment_body"
+    fi
+}
+
+# 安全的状态更新
+function safe_update_issue_status() {
+    local issue_key=$1
+    local target_status=$2
+
+    if confirm_jira_operation "更新状态" "$issue_key" "更新状态为: $target_status"; then
+        update_issue_status "$issue_key" "$target_status"
+    fi
+}
+
+# 安全的subtask开始评论
+function safe_add_subtask_start_comment() {
+    local subtask_key=$1
+    local technical_approach=$2
+    local development_plan=$3
+
+    if confirm_jira_operation "添加开始评论" "$subtask_key" "记录技术方案和开发计划"; then
+        add_subtask_start_comment "$subtask_key" "$technical_approach" "$development_plan"
+    fi
+}
+
+# 安全的subtask完成评论
+function safe_add_subtask_complete_comment() {
+    local subtask_key=$1
+    local implementation_details=$2
+    local verification_results=$3
+    local technical_documentation=$4
+
+    if confirm_jira_operation "添加完成评论" "$subtask_key" "记录实现详情和验证结果"; then
+        add_subtask_complete_comment "$subtask_key" "$implementation_details" "$verification_results" "$technical_documentation"
+    fi
+}
+
+# 安全的subtask内容更新
+function safe_update_subtask_content() {
+    local subtask_key=$1
+    local description=$2
+    local acceptance_criteria=$3
+    local technical_specs=$4
+
+    if confirm_jira_operation "更新内容" "$subtask_key" "更新描述、验收标准和技术规格"; then
+        update_subtask_content "$subtask_key" "$description" "$acceptance_criteria" "$technical_specs"
+    fi
+}
+```
+
+### 2. 操作预览和回滚机制
+```bash
+# 操作预览
+function preview_jira_operation() {
+    local operation_type=$1
+    local issue_key=$2
+    local operation_data=$3
+
+    echo "🔍 操作预览: $operation_type"
+    echo "📋 任务: $issue_key"
+    echo "📝 操作数据:"
+    echo "$operation_data"
+    echo ""
+    echo "--- 预览结束 ---"
+}
+
+# 批量操作确认
+function confirm_batch_operations() {
+    local operations_count=$1
+    local operations_description=$2
+
+    echo "⚠️ 批量操作需要确认"
+    echo "📊 操作数量: $operations_count"
+    echo "📋 操作类型: $operations_description"
+    echo ""
+    echo "是否继续执行这些操作? (y/N): "
+    read -r user_confirmation
+
+    if [[ $user_confirmation =~ ^[Yy]$ ]]; then
+        echo "✅ 用户确认，继续执行批量操作"
+        return 0
+    else
+        echo "❌ 用户取消批量操作"
+        return 1
+    fi
+}
+```
+
 ## 使用示例
 
 ### 基本使用
@@ -1002,10 +1227,39 @@ update_issue_status "FC-123" "In Progress"
 track_task_progress "FC-123"
 ```
 
+### 安全使用（推荐）
+```bash
+# 加载JIRA集成系统
+source jira-integration-system.md
+
+# 安全添加评论
+safe_add_jira_comment "FC-123" "需求澄清完成，开始技术方案设计"
+
+# 安全更新状态
+safe_update_issue_status "FC-123" "In Progress"
+
+# 安全添加subtask开始评论
+safe_add_subtask_start_comment "FC-124" \
+  "使用React + Node.js技术栈" \
+  "先开发后端API，再实现前端界面"
+
+# 安全添加subtask完成评论
+safe_add_subtask_complete_comment "FC-124" \
+  "实现了用户注册和登录功能" \
+  "单元测试通过率95%，集成测试通过" \
+  "更新了API文档和部署指南"
+
+# 安全更新subtask内容
+safe_update_subtask_content "FC-124" \
+  "用户认证模块开发" \
+  "Given用户未登录 When访问受限页面 Then跳转到登录页面" \
+  "JWT token认证，密码加密存储"
+```
+
 ### 高级使用
 ```bash
 # 智能状态流转
-smart_status_transition "FC-123" "In Progress" "Ready for Test"
+smart_status_transition "FC-123" "In Progress" "Done"
 
 # 批量同步进度
 batch_sync_sprint_progress "456"
@@ -1026,4 +1280,4 @@ smart_sprint_closure_validation "789"
 generate_story_validation_report "789"
 ```
 
-这个JIRA集成系统提供了完整的评论管理、状态跟踪、进度同步、报告生成和Story状态验证功能，实现了多智能体协作与JIRA系统的深度集成，确保Sprint关闭前的质量保证。
+这个JIRA集成系统提供了完整的评论管理、状态跟踪、进度同步、报告生成和Story状态验证功能，实现了多智能体协作与JIRA系统的深度集成，确保Sprint关闭前的质量保证。同时新增了JIRA API调用安全机制，包括二次确认、操作预览和批量操作确认，确保所有JIRA操作都经过用户确认，提高系统安全性。
