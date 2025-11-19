@@ -19,6 +19,7 @@
 ---
 
 ## ChangeLog
+* 20251120 修改日志：要求`agile-plugin`的`quality-agent`通过API在JIRA上提bug；修复了utils中规范未关联的bug
 * 20251116 修改日志：大幅调整了目录结构，增加specs目录强调基于specs规范的软件工程；优化了`sprint-plugin`；修正了`README.md`
 * 20251031 修改日志：基于ClaudeCode Plugin能力，实现了Waterfall和Agile模型，并集成了完整的插件生态系统。
 
@@ -831,27 +832,15 @@ agile-marketplace/requirements-plugin/
 │   ├── 创建epic.md                 # 从需求文档创建JIRA Epic
 │   ├── 创建story.md                # 从需求文档创建JIRA Story
 │   ├── 分解story.md                # 将Story分解为可执行Sub-tasks
-│   ├── 删除epic.md                 # 删除JIRA Epic
-│   ├── 删除story.md                # 删除JIRA Story
-│   ├── 删除task.md                 # 删除JIRA Sub-task
 │   └── 需求变更.md                 # 需求变更管理
 └── scripts/
-    ├── create_epic_from_requirements.py
-    ├── create_story.py
-    ├── create_subtask.py
-    ├── delete_epic.py
-    ├── delete_story.py
-    └── delete_subtask.py
-```
+
 
 #### 可用命令
 - `/requirements-plugin:需求分析` - 多智能体协作需求分析工作流
 - `/requirements-plugin:创建epic` - 从需求文档创建JIRA Epic
 - `/requirements-plugin:创建story` - 从需求文档创建JIRA Story
 - `/requirements-plugin:分解story` - 将Story分解为可执行Sub-tasks
-- `/requirements-plugin:删除epic` - 删除JIRA Epic
-- `/requirements-plugin:删除story` - 删除JIRA Story
-- `/requirements-plugin:删除task` - 删除JIRA Sub-task
 - `/requirements-plugin:需求变更` - 需求变更管理
 
 #### 智能体角色
@@ -861,6 +850,7 @@ agile-marketplace/requirements-plugin/
 - **Scrum Master Agent**: 敏捷流程协调与跟踪
 
 ### 5.1.2 迭代插件（sprint-plugin）
+> 核心功能是`快速sprint`命令。
 
 #### 目录结构
 ```
@@ -872,19 +862,10 @@ agile-marketplace/sprint-plugin/
 ├── commands/
 │   └── 快速sprint.md               # 基于Agile理论的即时交付工作流
 └── utils/
-    ├── acceptance-criteria-validator.md
-    ├── core-sync-engine.md
-    ├── discussion-file-manager.md
     ├── jira-integration-system.md
-    ├── jira-team-constraints.md
-    ├── monitoring-recovery-system.md
     ├── multi-round-negotiation-coordinator.md
-    ├── parallel-execution-manager.md
-    ├── shared-utils.md
-    ├── sprint-intelligence.md
     ├── sprint-story-validator.md
     ├── story-decomposition-principles.md
-    └── user-input-parser.md
 ```
 
 #### 可用命令
@@ -896,13 +877,9 @@ agile-marketplace/sprint-plugin/
 - **Quality Agent**: 质量验证、测试执行、验收标准验证、强制bug管理和主动问题识别
 
 #### 核心特性
-- **分钟级交付**: 5-8分钟完成端到端软件交付
 - **多智能体并行协作**: Development Team和Quality Agent并行执行
 - **强制同步协议**: 100% JIRA状态同步
-- **智能状态检测**: 自动识别项目状态配置
-- **Story状态验证**: Sprint关闭前强制验证所有Story状态
 - **JIRA状态流转增强**: 智能状态流转管理和状态流转验证机制
-- **Utils工具与智能体关联性**: 共享工具库和JIRA集成系统深度集成
 
 
 ## 5.2 waterfall-marketplace介绍
