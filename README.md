@@ -893,7 +893,7 @@ agile-marketplace/sprint-plugin/
 #### 智能体角色
 - **Scrum Master Agent**: 需求澄清、Sprint管理、智能体协调
 - **Development Team Agent**: 分钟级代码生成、功能实现
-- **Quality Agent**: 质量验证、测试执行、验收标准验证
+- **Quality Agent**: 质量验证、测试执行、验收标准验证、强制bug管理和主动问题识别
 
 #### 核心特性
 - **分钟级交付**: 5-8分钟完成端到端软件交付
@@ -901,6 +901,8 @@ agile-marketplace/sprint-plugin/
 - **强制同步协议**: 100% JIRA状态同步
 - **智能状态检测**: 自动识别项目状态配置
 - **Story状态验证**: Sprint关闭前强制验证所有Story状态
+- **JIRA状态流转增强**: 智能状态流转管理和状态流转验证机制
+- **Utils工具与智能体关联性**: 共享工具库和JIRA集成系统深度集成
 
 
 ## 5.2 waterfall-marketplace介绍
