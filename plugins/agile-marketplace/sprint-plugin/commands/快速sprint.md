@@ -10,6 +10,9 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 ### Scrum Sprint 定义
 根据Scrum指南，Sprint是Scrum的核心，是一个固定时间盒（通常1-4周），在此期间完成"完成"的产品增量。
 
+### JIRA API集成能力
+> `utils`目录中有集成方法`jira-integration-system.md`文件
+
 ### Sprint 创建规范
 - **必须使用JIRA Sprint API创建**：Sprint必须通过`/rest/agile/1.0/sprint` API创建
 - **禁止创建任务类型Sprint**：Sprint不是普通任务，不能作为Issue创建

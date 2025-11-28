@@ -1,7 +1,7 @@
 {
 	"name": "requirements-plugin",
 	"description": "software requirements elaborate, refine, change",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"author": {
 		"name": "ouyangshixiong"
 	}
