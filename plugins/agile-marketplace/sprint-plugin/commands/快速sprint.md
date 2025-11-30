@@ -385,6 +385,46 @@ flowchart TD
 - 生成状态ID映射文件
 - 支持手动配置状态映射
 
+**Python虚拟环境配置:**
+> 参考 `utils/setup_venv.md` 文件获取完整的Python虚拟环境配置规范
+
+### 环境检查业务逻辑
+
+在执行Python相关操作前，系统必须执行以下环境检查：
+
+```mermaid
+flowchart TD
+    A[🔍 项目类型检测] --> B{是否为Python项目?}
+    B -->|否| C[⏭️ 跳过venv步骤]
+    B -->|是| D[🔍 检查venv状态]
+    D --> E{venv已激活?}
+    E -->|否| F[⚠️ 提示激活venv]
+    E -->|是| G[✅ venv状态正常]
+    F --> H[🔄 尝试自动激活]
+    H --> I{激活成功?}
+    I -->|否| J[❌ 手动激活要求]
+    I -->|是| G
+    G --> K[🔍 检查依赖包]
+    K --> L{依赖包完整?}
+    L -->|否| M[📦 安装缺失依赖]
+    L -->|是| N[✅ 环境准备完成]
+    M --> N
+    C --> N
+```
+
+**Python项目识别条件:**
+- ✅ 存在requirements.txt或requirements_ml.txt文件
+- ✅ 存在setup.py或pyproject.toml文件
+- ✅ 存在Python源代码文件(.py)
+- ✅ 存在venv目录
+
+**强制规范：**
+- 🚫 **禁止系统环境操作**：所有Python包安装必须在venv中进行
+- ✅ **强制venv检查**：安装Python包前必须检查venv状态
+- 🔍 **强制依赖验证**：执行Python代码前必须验证依赖包完整性
+- ⏭️ **智能项目检测**：非Python项目自动跳过venv步骤
+- ⚠️ **强制环境隔离**：确保开发环境的隔离性和可重复性
+
 ## 📊 监控和性能
 
 ### 实时监控指标
