@@ -30,6 +30,7 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 - ⚡ **强制智能体协作**：Scrum Master必须协调其他智能体执行实际工作，禁止直接状态更新
 - 📋 **强制任务分解**：Story必须分解为可执行的任务单元，确保可独立验证
 - 🔄 **强制状态同步**：所有状态变更必须同步到JIRA，确保数据一致性
+- ⚠️ **强制范围限制**：仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
 ## 🎯 核心特性
 
@@ -64,28 +65,33 @@ flowchart TD
     E -->|是| G[📋 获取Sprint详情]
     F --> H[✅ Sprint创建成功]
     G --> H
-    H --> I[🔄 多Story协调管理]
-    I --> J{所有Story处理完成?}
-    J -->|否| K[🎯 协调单个Story]
-    K --> L[📋 智能任务分解]
-    L --> M[🤖 Development Team开发]
-    L --> N[🔍 Quality Agent验证]
-    M --> O[🔄 检查任务状态]
-    N --> O
-    O --> P{所有任务为Done?}
-    P -->|否| K
-    P -->|是| Q[✅ 标记Story为Done]
-    Q --> J
-    J -->|是| R[🔍 Story状态验证]
-    R --> S{验证通过?}
-    S -->|否| T[❌ 验证失败报告]
-    S -->|是| U[🏁 使用JIRA Sprint API关闭Sprint]
-    U --> V[📊 生成交付报告]
+    H --> I[🔍 验证Story归属]
+    I --> J{Story在Sprint中?}
+    J -->|否| K[❌ 仅处理Sprint中Story]
+    J -->|是| L[🔄 多Story协调管理]
+    K --> M[⚠️ 范围限制警告]
+    L --> N{所有Story处理完成?}
+    N -->|否| O[🎯 协调单个Story]
+    O --> P[📋 智能任务分解]
+    P --> Q[🤖 Development Team开发]
+    P --> R[🔍 Quality Agent验证]
+    Q --> S[🔄 检查任务状态]
+    R --> S
+    S --> T{所有任务为Done?}
+    T -->|否| O
+    T -->|是| U[✅ 标记Story为Done]
+    U --> N
+    N -->|是| V[🔍 Story状态验证]
+    V --> W{验证通过?}
+    W -->|否| X[❌ 验证失败报告]
+    W -->|是| Y[🏁 使用JIRA Sprint API关闭Sprint]
+    Y --> Z[📊 生成交付报告]
+    M --> Z
 
     %% 强制规范检查
-    F -.->|🚫 禁止创建任务类型Sprint| W[强制规范检查]
-    U -.->|🚫 禁止直接状态更新| W
-    W{强制规范检查}
+    F -.->|🚫 禁止创建任务类型Sprint| AA[强制规范检查]
+    Y -.->|🚫 禁止直接状态更新| AA
+    AA{强制规范检查}
 ```
 
 ### 时间分配优化
@@ -142,11 +148,11 @@ flowchart TD
     E --> F
     F --> G[🔍 检查Story归属]
     G --> H{Story在Sprint中?}
-    H -->|否| I[➕ 添加Story到Sprint]
+    H -->|否| I[❌ Story不在Sprint中]
     H -->|是| J[✅ Story已在Sprint]
-    I --> K[✅ Story添加成功]
-    J --> K
-    K --> L[🎯 阶段2完成]
+    I --> K[⚠️ 仅处理Sprint中已有Story]
+    J --> L[🎯 阶段2完成]
+    K --> L
 ```
 
 **Sprint检查机制:**
@@ -154,12 +160,12 @@ flowchart TD
 - 📝 **新Sprint创建**: 如果没有活跃Sprint，创建新Sprint
 - 📋 **Sprint详情获取**: 获取现有Sprint的详细信息
 - 🔍 **Story归属检查**: 验证用户指定的Story是否已在Sprint中
-- ➕ **Story添加**: 如果Story不在Sprint中，添加到Sprint
+- ⚠️ **Story范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story
 
 **智能决策逻辑:**
 - 🎯 **继续现有Sprint**: 使用现有活跃Sprint继续执行
 - 🚀 **创建新Sprint**: 创建新Sprint并设置合理的时间范围
-- ✅ **Story管理**: 确保目标Story在Sprint中
+- ⚠️ **Story范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story
 - 🔄 **状态跟踪**: 持续监控Story和Sub-task状态
 
 ### 阶段3: 智能体协调和状态跟踪
@@ -209,6 +215,7 @@ flowchart TD
 - ✅ **强制实际开发**: Development Team Agent必须执行所有开发工作（代码生成、功能实现）
 - ✅ **强制实际测试**: Quality Agent必须执行所有测试验证工作（测试执行、质量保证）
 - 🔍 **强制验证机制**: 所有状态更新必须基于实际工作完成验证
+- ⚠️ **强制范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
 ### 智能体职责边界
 
@@ -255,16 +262,21 @@ flowchart TD
     E -->|是| G[📋 获取Sprint详情]
     F --> H[✅ Sprint创建成功]
     G --> H
-    H --> I[🔄 多Story协调管理]
-    I --> J{所有Story处理完成?}
-    J -->|否| K[🎯 协调单个Story]
-    K --> L[📝 创建子任务]
-    L --> M[🤖 并行开发]
-    L --> N[🔍 并行验证]
-    M --> O[✅ 标记Story为Done]
-    N --> O
-    O --> J
-    J -->|是| P[✅ 多Story协调完成]
+    H --> I[🔍 验证Story归属]
+    I --> J{Story在Sprint中?}
+    J -->|否| K[❌ 仅处理Sprint中Story]
+    J -->|是| L[🔄 多Story协调管理]
+    K --> M[⚠️ 范围限制警告]
+    L --> N{所有Story处理完成?}
+    N -->|否| O[🎯 协调单个Story]
+    O --> P[📝 创建子任务]
+    P --> Q[🤖 并行开发]
+    P --> R[🔍 并行验证]
+    Q --> S[✅ 标记Story为Done]
+    R --> S
+    S --> N
+    N -->|是| T[✅ 多Story协调完成]
+    M --> T
 ```
 
 **多Story管理能力:**
@@ -275,6 +287,7 @@ flowchart TD
 - 📝 **智能任务分解**: 根据Story复杂度自动分解为可执行的任务单元
 - 🤖 **并行执行**: Development Team和Quality Agent并行工作，最大化效率
 - ✅ **状态跟踪**: 实时监控所有Story和任务状态，确保进度可视化
+- ⚠️ **范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
 ### 2. 智能体协调和状态跟踪
 
@@ -305,6 +318,7 @@ flowchart TD
 - ✅ **基于实际工作的流转**: 所有任务完成且实际工作验证通过时标记Story为Done
 - 🔍 **状态验证**: 验证所有Story状态确保Sprint可以安全关闭
 - 🏁 **智能关闭**: Story全部完成且验证通过时使用JIRA Sprint API自动关闭Sprint
+- ⚠️ **范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
 
 ### 3. 验收标准验证
