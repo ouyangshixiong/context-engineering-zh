@@ -25,19 +25,21 @@
 
 ## 目录
 
-1. 上下文概念与软件工程理论基础
-2. 模式对比：氛围（vibe）编程 vs Spec 驱动
-3. 框架与开发流程（图文并茂，使用指定模板格式，详尽填充）
-
-   * 框架项目：两阶段
-   * 目标项目：两阶段
-   * 生产部署：两阶段
-4. Prerequisites
-5. 支持敏捷与瀑布双模型的插件系统
-
+1. 简介
+2. 核心概念
+3. 快速开始
+4. 框架架构
+5. 开发流程
+   * 框架项目
+   * 目标项目
+   * 生产部署
+6. 插件系统
    * agile-marketplace
    * waterfall-marketplace
    * 使用示例与工作流
+7. 最佳实践
+8. 故障排除
+9. 常见问题
 
 
 ---
@@ -185,119 +187,244 @@ flowchart LR
 
     %% ================= Stage 1 =================
     I1["输入:
-    - 框架规范文件集（requirements）
-    - 简单文字输入
-    - Waterfall/Agile插件"]
+    - 框架规范文件集
+    - 自然语言需求（简短/模糊）
+    - Waterfall/Agile插件选择"]
 
     O1["输出:
-    - research-report.md
-    - requirements.md
-    - 需求更新
-    - JIRA Epic/Story"]
+    - requirements/research-report.md
+    - requirements/requirements.md
+    - JIRA Epic/Story结构（Agile）
+    - 需求变更记录"]
 
     subgraph S1["Stage 1 — 需求分析与规范理解"]
-        W1["WHO:
-        - requirements-plugin (需求分析)
-        - research-agent (或tech-agent)
-        - Product Owner Agent
-        - Scrum Master Agent
-        - 用户"]
-
-        A1["DO WHAT:
-        - 使用 /requirements-plugin:需求分析 命令
-        - 多智能体协作需求分析
-        - 技术关键词识别与调研
-        - 业务价值提炼与优先级管理
-        - 生成结构化需求文档
-        - 创建JIRA Epic/Story结构"]
-
-        V1["满足条件:
-        - 明确澄清需求项与需求补充
-        - 技术可行性验证通过
-        - JIRA结构完整创建"]
-
-        W1 --> A1 --> V1
+        direction TB
+        
+        %% 公共步骤
+        Common1["1. 创建requirements目录"]
+        Common2["2. 接收用户需求"]
+        Common3["3. 调用Research Agent识别技术关键词"]
+        Common4["4. 生成requirements/research-report.md"]
+        Common5["5. 调用Requirements Agent分析需求"]
+        Common6["6. 生成结构化requirements/requirements.md"]
+        
+        %% 敏捷模式特有步骤
+        subgraph Agile["敏捷模式特有流程"]
+            direction TB
+            Agile1["7. 调用Product Owner Agent提炼业务目标"]
+            Agile2["8. 以checkbox形式列出需求项，标注来源、优先级与验收标准"]
+            Agile3["9. Product Owner Agent审核业务逻辑"]
+            Agile4["10. Scrum Master Agent评估迭代可执行性"]
+            Agile5["11. Tech Lead Agent验证可实现性"]
+            Agile6["12. 需求文档冻结为迭代基线"]
+            Agile7["13. 绑定至Epic/Story/Subtask层级"]
+            Agile8["14. Scrum Master Agent负责跟踪执行与变更控制"]
+            
+            Agile1 --> Agile2 --> Agile3 --> Agile4 --> Agile5 --> Agile6 --> Agile7 --> Agile8
+        end
+        
+        %% 瀑布模式特有步骤
+        subgraph Waterfall["瀑布模式特有流程"]
+            direction TB
+            Waterfall1["7. 合并分析需求（如存在research-report.md）"]
+            Waterfall2["8. 以checkbox形式列出所有需求项"]
+            
+            Waterfall1 --> Waterfall2
+        end
+        
+        %% 流程连接
+        Common1 --> Common2 --> Common3 --> Common4 --> Common5 --> Common6
+        Common6 --> Agile
+        Common6 --> Waterfall
     end
 
     I1 --> S1 --> O1
 ```
-* **输入**：框架规范文件集，自然语言需求（用户提供，通常简短/模糊），插件配置。
-* **WHO**：requirements-plugin 命令（主导），requirements-plugin（需求分析），research-agent（技术调研，来自requirements-plugin），Product Owner Agent（业务价值管理），Scrum Master Agent（流程协调），用户（回答并澄清问题）。
+* **输入**：框架规范文件集，自然语言需求（用户提供，通常简短/模糊），Waterfall/Agile插件选择。
+* **WHO**：
+  > **公共角色**：requirements-plugin 命令（主导），research-agent（技术调研），requirements-agent（需求分析），用户（回答并澄清问题）；
+  > **敏捷模式特有角色**：Product Owner Agent（业务价值管理），Scrum Master Agent（流程协调），Tech Lead Agent（技术可行性验证）；
+  > **瀑布模式特有角色**：无额外角色。
 * **DO WHAT**：
-  > 使用 `/requirements-plugin:需求分析` 命令启动需求分析流程；
-  > 多智能体协作：requirements-plugin 解析自然语言，research-agent 技术调研，Product Owner Agent 业务价值提炼；
-  > 如包含技术关键词，research-agent 进行技术调研并生成技术报告；
-  > 为低确定性条目打分并生成澄清问题集（若评分过低，写明需人工补充项）；
-  > 使用 `/requirements-plugin:创建epic` 和 `/requirements-plugin:创建story` 创建JIRA结构。
-* **满足条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6,或存在明确的澄清项与后续处理策略；技术可行性验证通过；JIRA Epic/Story结构完整创建。
-* **输出**：`requirements/requirements.md`（结构化需求文档），`requirements/research-report.md`（技术调研报告，如有技术关键词），JIRA Epic/Story结构。
+  > **公共流程**：创建requirements目录，接收用户需求，调用Research Agent识别技术关键词，生成`requirements/research-report.md`，调用Requirements Agent分析需求，生成结构化`requirements/requirements.md`；
+  > **敏捷模式特有流程**：调用Product Owner Agent提炼业务目标，以checkbox形式列出需求项并标注来源、优先级与验收标准，Product Owner Agent审核业务逻辑，Scrum Master Agent评估迭代可执行性，Tech Lead Agent验证可实现性，需求文档冻结为迭代基线，绑定至Epic/Story/Subtask层级，Scrum Master Agent负责跟踪执行与变更控制；
+  > **瀑布模式特有流程**：合并分析需求（如存在research-report.md），以checkbox形式列出所有需求项。
+* **满足条件**：
+  > **公共条件**：`requirements/requirements.md`中所有条目和问题的分数都要大于0.6，或存在明确的澄清项与后续处理策略；技术可行性验证通过；
+  > **敏捷模式特有条件**：JIRA Epic/Story结构完整创建；
+  > **瀑布模式特有条件**：无额外条件。
+* **输出**：
+  > **公共输出**：`requirements/requirements.md`（结构化需求文档），`requirements/research-report.md`（技术调研报告）；
+  > **敏捷模式特有输出**：JIRA Epic/Story结构，需求变更记录；
+  > **瀑布模式特有输出**：无额外输出。
 
 
-### 3.1.2 Stage 2 — 任务拆解与代码生成
+### 3.1.2 Stage 2 — venv环境与部署
 ```mermaid
 flowchart LR
     %% ================= Stage 2 =================
     I2["📥 输入文件:
+    - 目标项目(含README/代码/配置)
     - tech.md
-    - requirements/requirements.md
-    - ML.md(API/代码骨架部分)
-    - JIRA Story结构"]
+    - VENV_CONFIG.md
+    - DEBUG_CODE.md
+    - DOCKER_CONFIG.md"]
 
     O2["📤 输出文件:
-    - project/（包含README.md）
-    - PROJECT_BUILD_LOG.md
-    - 分钟级交付功能模块"]
+    - venv.md
+    - 规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md)"]
 
-    subgraph S2["Stage 2 — 任务拆解与代码生成"]
+    subgraph S2["Stage 2 — venv环境与部署"]
         direction TB
-        W3["WHO:
-        - Coder智能体
-        - Planner智能体
-        - sprint-plugin 命令
-        - Development Team Agent
-        - Quality Agent"]
+        W2["WHO:
+        - Ops智能体"]
 
-        A3["DO WHAT:
-        - 生成任务清单
-        - 创建代码骨架
-        - 执行任务清单并填充代码骨架
-        - 使用 /sprint-plugin:instant-sprint 分钟级交付
-        - 记录任务执行结果"]
+        A2["DO WHAT:
+        - 读取 README.md 和 VENV_CONFIG.md
+        - 生成 venv.md
+        - 复制规范文件到目标目录"]
 
-        V3["满足条件:
-        - 代码骨架填充完整
-        - PROJECT_BUILD_LOG.md逐项复核通过
-        - 关键功能模块分钟级交付"]
+        V2["满足条件:
+        - venv.md 内容正确
+        - 规范文件副本齐全"]
 
-        W3 --> A3 --> V3
+        W2 --> A2 --> V2
     end
 
     I2 --> S2 --> O2
 ```
-* **输入**：`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、JIRA Story结构。
-* **活动**：
-    >Planner智能体读取`tech.md`、`ML.md`规范，构建task清单；
-    >Coder智能体读取`tech.md`、`ML.md`规范，逐项执行task生成代码骨架、目标项目README.md；生成代码和配置填充代码骨架；
-    >使用 `/sprint-plugin:instant-sprint` 命令对关键功能模块进行分钟级交付（5-8分钟完成需求到验证）；
-    >Development Team Agent 负责代码生成，Quality Agent 负责质量验证；
-    >Coder智能体记录任务执行结果，生成`PROJECT_BUILD_LOG.md`。
-    >Planner智能体逐项验证task执行情况，验证和复核。总结结果并更新目标项目的`README.md`
-* **输出**：`{xx}_project/`（目标项目,包含：代码骨架，用真实项目名称代替`{xx}_project/`），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录），分钟级交付的功能模块。
-* **责任方**：Planner智能体（生成task清单，验收和复核task）, Coder智能体（执行清单，包括生成代码骨架、填充代码、生成配置文件、记录任务执行结果），sprint-plugin（分钟级交付），Development Team Agent（代码生成），Quality Agent（质量验证）。
-* **满足条件**：代码骨架填充完整，例如包含可运行的训练脚本和推理脚本。PROJECT_BUILD_LOG.md逐项复核都通过。关键功能模块通过分钟级交付完成。
+* **输入**：目标项目(含`README.md`、代码、配置文件)、tech.md、VENV_CONFIG.md、DEBUG_CODE.md、DOCKER_CONFIG.md。
 
-### 3.1.3 Stage 3 — 代码与配置审核
+* **WHO**：Ops智能体。
+
+* **DO WHAT**：
+    > 读取目标项目`README.md`和`VENV_CONFIG.md`规范文件，生成目标项目的 `venv.md`（包含目标项目的python 版本、requirements-cpu.txt或requirements-gpu.txt）；
+    > 把`venv.md`和规范文件副本复制到目标目录中。
+
+* **输出**：`venv.md`、规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md)。
+
+* **满足条件**：目标项目中包含`venv.md`且内容正确；包含完整的规范文件副本。
+
+### 3.1.3 Stage 3 — 任务拆解与代码生成
 ```mermaid
 flowchart LR
     %% ================= Stage 3 =================
     I3["📥 输入文件:
+    - tech.md
+    - requirements/requirements.md
+    - ML.md(API/代码骨架部分)
+    - JIRA Story结构
+    - 验收标准(Given-When-Then)"]
+
+    O3["📤 输出文件:
+    - project/（包含README.md）
+    - PROJECT_BUILD_LOG.md
+    - 分钟级交付功能模块
+    - 演示包(Demo Package)
+    - 回顾报告(Retrospective Report)"]
+
+    subgraph S3["Stage 3 — 任务拆解与代码生成"]
+        direction TB
+        
+        %% 1. Story分解
+        StoryDecomp["1. Story分解"]
+        StoryDecomp1["1.1 基于Agile理论分解Story"]
+        StoryDecomp2["1.2 生成可执行Sub-tasks"]
+        StoryDecomp3["1.3 标签区分Sub-task类型(development/testing/documentation)"]
+        StoryDecomp4["1.4 生成TASK-[StoryKey]-[序号]编号"]
+        
+        %% 2. 任务规划与执行
+        TaskPlan["2. 任务规划与执行"]
+        TaskPlan1["2.1 Planner智能体构建task清单"]
+        TaskPlan2["2.2 Coder智能体生成代码骨架"]
+        TaskPlan3["2.3 填充代码与配置"]
+        TaskPlan4["2.4 记录任务执行结果"]
+        
+        %% 3. 快速Sprint交付
+        SprintDelivery["3. 快速Sprint交付"]
+        SprintDelivery1["3.1 使用 /sprint-plugin:快速sprint 分钟级交付"]
+        SprintDelivery2["3.2 Development Team Agent并行开发"]
+        SprintDelivery3["3.3 Quality Agent并行质量验证"]
+        SprintDelivery4["3.4 验收标准验证(Given-When-Then)"]
+        
+        %% 4. 验收与报告
+        Acceptance["4. 验收与报告"]
+        Acceptance1["4.1 生成PROJECT_BUILD_LOG.md"]
+        Acceptance2["4.2 生成演示包"]
+        Acceptance3["4.3 生成回顾报告"]
+        Acceptance4["4.4 更新目标项目README.md"]
+        
+        %% 智能体协作
+        subgraph Agents["智能体协作"]
+            direction TB
+            ScrumMaster["Scrum Master Agent<br/>流程协调与状态监控"]
+            Planner["Planner智能体<br/>任务规划与管理"]
+            Coder["Coder智能体<br/>代码生成与实现"]
+            DevTeam["Development Team Agent<br/>并行开发"]
+            QualityAgent["Quality Agent<br/>并行质量验证"]
+        end
+        
+        %% 流程连接
+        StoryDecomp --> StoryDecomp1 --> StoryDecomp2 --> StoryDecomp3 --> StoryDecomp4
+        StoryDecomp4 --> TaskPlan
+        TaskPlan --> TaskPlan1 --> TaskPlan2 --> TaskPlan3 --> TaskPlan4
+        TaskPlan4 --> SprintDelivery
+        SprintDelivery --> SprintDelivery1 --> SprintDelivery2 --> SprintDelivery3 --> SprintDelivery4
+        SprintDelivery4 --> Acceptance
+        Acceptance --> Acceptance1 --> Acceptance2 --> Acceptance3 --> Acceptance4
+        
+        %% 智能体与流程关联
+        ScrumMaster -.-> SprintDelivery
+        Planner -.-> TaskPlan1
+        Coder -.-> TaskPlan2
+        DevTeam -.-> SprintDelivery2
+        QualityAgent -.-> SprintDelivery3
+        
+        %% 满足条件
+        V3["满足条件:
+        - 代码骨架填充完整
+        - PROJECT_BUILD_LOG.md逐项复核通过
+        - 关键功能模块分钟级交付
+        - 验收标准100%通过
+        - 演示包生成成功"]
+        
+        Acceptance4 --> V3
+    end
+
+    I3 --> S3 --> O3
+```
+* **输入**：`tech.md`、`requirements/requirements.md`、`ML.md`（文件中的API/代码骨架部分）、JIRA Story结构、验收标准(Given-When-Then)。
+
+* **WHO**：
+  > **Scrum Master Agent**：流程协调与状态监控；
+  > **Planner智能体**：任务规划与管理；
+  > **Coder智能体**：代码生成与实现；
+  > **Development Team Agent**：并行开发；
+  > **Quality Agent**：并行质量验证。
+
+* **活动**：
+    >**1. Story分解**：基于Agile理论分解Story，生成可执行Sub-tasks，标签区分Sub-task类型，生成TASK-[StoryKey]-[序号]编号；
+    >**2. 任务规划与执行**：Planner智能体构建task清单，Coder智能体生成代码骨架，填充代码与配置，记录任务执行结果；
+    >**3. 快速Sprint交付**：使用 `/sprint-plugin:快速sprint` 命令进行分钟级交付，Development Team Agent并行开发，Quality Agent并行质量验证，验收标准验证(Given-When-Then)；
+    >**4. 验收与报告**：生成PROJECT_BUILD_LOG.md，生成演示包，生成回顾报告，更新目标项目README.md。
+
+* **输出**：`{xx}_project/`（目标项目,包含：代码骨架，用真实项目名称代替`{xx}_project/`），`PROJECT_BUILD_LOG.md`（任务清单执行结果记录），分钟级交付的功能模块，演示包(Demo Package)，回顾报告(Retrospective Report)。
+
+* **满足条件**：代码骨架填充完整，PROJECT_BUILD_LOG.md逐项复核通过，关键功能模块通过分钟级交付完成，验收标准100%通过，演示包生成成功。
+
+### 3.1.4 Stage 4 — 代码与配置审核
+```mermaid
+flowchart LR
+    %% ================= Stage 4 =================
+    I4["📥 输入文件:
     - 目标项目(含README/代码/配置)
     - PROJECT_BUILD_LOG.md"]
 
-    O3["📤 输出文件:
-    - REVIEW_REPORT.md"]
+    O4["📤 输出文件:
+    - REVIEW_REPORT.md
+    - 修订后的目标项目"]
 
-    subgraph S3["Stage 3 — 代码与配置审核"]
+    subgraph S4["Stage 4 — 代码与配置审核"]
         direction TB
         W4["WHO:
         - Reviewer智能体"]
@@ -314,67 +441,22 @@ flowchart LR
         W4 --> A4 --> V4
     end
 
-    I3 --> S3 --> O3
-
-```
-* **输入**：：目标项目（包含`README.md`、代码、配置文件）、PROJECT_BUILD_LOG.md。
-
-* **DO WHAT**：
->Reviewer智能体执行代码与配置的静态分析和`README.md`一致性校验；
->审核代码逻辑、依赖与`README.md`的匹配情况；
->针对`PROJECT_BUILD_LOG.md`逐项检查是否真正完成；
->输出`REVIEW_REPORT.md`，必要时修订目标项目。
-* **输出**：`REVIEW_REPORT.md`、修订后的目标项目。
-* **WHO**：Reviewer智能体。
-* **满足条件**：`REVIEW_REPORT.md`所有条目审核通过，目标项目文档与代码的一致性和完整性相匹配。
-
-### 3.1.4 Stage 4 — venv环境与部署
-```mermaid
-flowchart LR
-    %% ================= Stage 4 =================
-    I4["📥 输入文件:
-    - 目标项目(含README/代码/配置)
-    - CLAUDE.md
-    - tech.md
-    - VENV_CONFIG.md
-    - DEBUG_CODE.md
-    - DOCKER_CONFIG.md"]
-
-    O4["📤 输出文件:
-    - venv.md
-    - CLAUDE.md
-    - tech.md
-    - VENV_CONFIG.md
-    - DEBUG_CODE.md
-    - DOCKER_CONFIG.md"]
-
-    subgraph S4["Stage 4 — venv环境与部署"]
-        direction TB
-        W5["WHO:
-        - Ops智能体"]
-
-        A5["DO WHAT:
-        - 读取 README.md  VENV_CONFIG.md
-        - 生成 venv.md
-        - 复制规范文件到目标目录"]
-
-        V5["满足条件:
-        - venv.md 正确
-        - 规范文件副本齐全"]
-
-        W5 --> A5 --> V5
-    end
-
     I4 --> S4 --> O4
 
 ```
-* **输入**：完整的目标项目(含`README.md`、代码、配置文件等)、框架规范文件（`CLAUDE.md`、`VENV_CONFIG.md`、`DEBUG_CODE.md`、`DOCKER_CONFIG.md`等）。
+* **输入**：目标项目（包含`README.md`、代码、配置文件）、PROJECT_BUILD_LOG.md。
+
+* **WHO**：Reviewer智能体。
+
 * **DO WHAT**：
-    > 读取目标项目`README.md`和`VENV_CONFIG.md`规范文件，生成目标项目的 `venv.md`（包含目标项目的python 版本、目标项目的requirements-cpu.txt或requirements-gpu.txt）
-    >把`venv.md` 和规范文件副本`CLAUDE.md`、`DEBUG_CODE.md` `DOCKER_CONFIG.md`等复制到目标目录中。
-* **输出**：`venv.md`。
-* **WHO**：Ops智能体。
-* **满足条件**：目标项目中包含`venv.md`，且内容正确；包含副本规范文件。
+    > Reviewer智能体执行代码与配置的静态分析和`README.md`一致性校验；
+    > 审核代码逻辑、依赖与`README.md`的匹配情况；
+    > 针对`PROJECT_BUILD_LOG.md`逐项检查是否真正完成；
+    > 输出`REVIEW_REPORT.md`，必要时修订目标项目。
+
+* **输出**：`REVIEW_REPORT.md`、修订后的目标项目。
+
+* **满足条件**：`REVIEW_REPORT.md`所有条目审核通过，目标项目文档与代码的一致性和完整性相匹配。
 
 
 
@@ -382,14 +464,14 @@ flowchart LR
 
 ## 3.2 目标项目（环境准备与 1-epoch 验证）
 
-> **目标**：在目标项目内使用新的`CLAUDE.md`（bugfix版本）中的工作流和相关规范文件，完成环境搭建、在 mini 数据集上的 1-epoch 验证与所有 bugfix，最终输出可运行的验证记录与全量训练指导文档。
+> **目标**：在目标项目内使用规范文件中的工作流和相关规范文件，完成环境搭建、在 mini 数据集上的 1-epoch 验证与所有 bugfix，最终输出可运行的验证记录与全量训练指导文档。
 
 ```mermaid
 flowchart LR
     S2[Stage 1: 环境构建与 mini 数据集准备]
     S3[Stage 2: 1-epoch 验证与自动 bugfix]
     S4[Stage 3: 全量训练策略输出]
-    IN[输入: 目标项目初始包（venv.md, CLAUDE.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md）]
+    IN[输入: 目标项目初始包（venv.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md）]
     OUT[输出: env_check_report.json, bugfix_report.md, full_train_guidance.md]
 
     IN --> S2 --> S3 --> S4 --> OUT
@@ -969,9 +1051,113 @@ waterfall-marketplace/pm-plugin/
 预期交付：快速完成购物车添加功能
 
 # 第五步：即时交付第二个故事
-/sprint-plugin:instant-sprint
+/sprint-plugin:快速sprint
 
 选择故事示例：
 "用户故事：修改购物车商品数量"
 预期交付：快速完成数量修改功能
 ```
+
+# 6. 最佳实践
+
+## 6.1 需求分析最佳实践
+
+1. **明确业务目标**：在需求分析阶段，确保明确业务目标和关键价值
+2. **技术可行性验证**：在开始开发前，进行技术可行性验证
+3. **结构化需求文档**：使用结构化的需求文档，便于追踪和管理
+4. **优先级标注**：为每个需求项标注优先级，便于迭代规划
+5. **验收标准明确**：为每个需求项明确验收标准，便于测试和验证
+
+## 6.2 开发流程最佳实践
+
+1. **两阶段原则**：先VENV调试，后DOCKER部署
+2. **1-epoch验证**：在mini数据集上进行1-epoch验证，确保代码正确性
+3. **自动化测试**：使用自动化测试工具，确保代码质量
+4. **代码审查**：进行代码审查，确保代码符合规范
+5. **持续集成**：使用持续集成工具，确保代码可以正常构建和测试
+
+## 6.3 部署最佳实践
+
+1. **容器化部署**：使用Docker进行容器化部署，确保环境一致性
+2. **健康检查**：为每个服务添加健康检查，便于监控和管理
+3. **性能监控**：使用性能监控工具，监控服务性能
+4. **日志管理**：使用日志管理工具，便于问题排查
+5. **回滚策略**：制定回滚策略，便于在出现问题时快速恢复
+
+# 7. 故障排除
+
+## 7.1 常见问题
+
+### 7.1.1 需求分析阶段问题
+
+1. **问题**：需求不明确
+   **解决方案**：与用户进行沟通，明确需求细节
+
+2. **问题**：技术可行性不确定
+   **解决方案**：进行技术调研，生成技术调研报告
+
+3. **问题**：需求优先级不明确
+   **解决方案**：与Product Owner沟通，明确需求优先级
+
+### 7.1.2 开发阶段问题
+
+1. **问题**：代码编译错误
+   **解决方案**：检查代码语法，修复编译错误
+
+2. **问题**：测试失败
+   **解决方案**：分析测试失败原因，修复代码
+
+3. **问题**：性能不达标
+   **解决方案**：进行性能优化，提高代码性能
+
+### 7.1.3 部署阶段问题
+
+1. **问题**：容器启动失败
+   **解决方案**：检查容器日志，分析失败原因
+
+2. **问题**：服务不可访问
+   **解决方案**：检查网络配置，确保服务可以访问
+
+3. **问题**：性能不达标
+   **解决方案**：进行性能优化，提高服务性能
+
+## 7.2 调试技巧
+
+1. **日志分析**：查看日志文件，分析问题原因
+2. **断点调试**：使用调试工具，设置断点进行调试
+3. **单元测试**：编写单元测试，验证代码正确性
+4. **性能分析**：使用性能分析工具，分析性能瓶颈
+5. **监控工具**：使用监控工具，实时监控服务状态
+
+# 8. 常见问题
+
+## 8.1 什么是Spec驱动开发？
+
+Spec驱动开发是一种将"可执行规范（Spec）"作为事实（ground truth，GT），由多角色自主智能体依照规范进行规划（plan）、实现（create）、验证（validate）与部署（deploy）的软件工程方法论。
+
+## 8.2 框架支持哪些开发模型？
+
+框架支持两种开发模型：
+- **敏捷模型**：基于JIRA Scrum Sprint的标准化、可视化软件开发工程管理
+- **瀑布模型**：线性阶段化开发，适合需求稳定的项目
+
+## 8.3 如何选择开发模型？
+
+- **敏捷模型**：适合需求经常变化、需要快速迭代的项目
+- **瀑布模型**：适合需求稳定、需要严格控制的项目
+
+## 8.4 框架支持哪些智能体？
+
+框架支持多种智能体：
+- **requirements-plugin**：详细需求文档编写
+- **research-agent**：技术选型
+- **coder-agent**：编写代码
+- **reviewer-agent**：代码完整性检查，代码质量评审
+- **planner-agent**：根据需求和技术选型编排计划
+- **ops-agent**：创建python venv环境，创建docker环境
+- **tester-agent**：代码测试、功能测试和模块测试 
+- **dataset-agent**：找到ML算法对应的最适合的开源数据集
+
+## 8.5 如何开始第一个项目？
+
+请参考"快速开始"部分，按照步骤创建第一个项目。
