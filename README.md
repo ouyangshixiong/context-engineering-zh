@@ -267,26 +267,29 @@ flowchart LR
     - 目标项目(含README/代码/配置)
     - tech.md
     - VENV_CONFIG.md
-    - DEBUG_CODE.md
-    - DOCKER_CONFIG.md"]
+    - DEBUG_CODE.md"]
 
     O2["📤 输出文件:
     - venv.md
-    - 规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md)"]
+    - 规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md)
+    - 激活的Python虚拟环境"]
 
     subgraph S2["Stage 2 — venv环境与部署"]
         direction TB
         W2["WHO:
-        - Ops智能体"]
+        - 快速sprint插件"]
 
         A2["DO WHAT:
-        - 读取 README.md 和 VENV_CONFIG.md
+        - 自动检测Python项目类型
+        - 读取 VENV_CONFIG.md 规范文件
         - 生成 venv.md
-        - 复制规范文件到目标目录"]
+        - 复制规范文件到目标目录
+        - 自动创建和激活Python虚拟环境"]
 
         V2["满足条件:
         - venv.md 内容正确
-        - 规范文件副本齐全"]
+        - 规范文件副本齐全
+        - Python项目自动激活venv环境"]
 
         W2 --> A2 --> V2
     end
@@ -295,15 +298,17 @@ flowchart LR
 ```
 * **输入**：目标项目(含`README.md`、代码、配置文件)、tech.md、VENV_CONFIG.md、DEBUG_CODE.md、DOCKER_CONFIG.md。
 
-* **WHO**：Ops智能体。
+* **WHO**：快速sprint插件。
 
 * **DO WHAT**：
-    > 读取目标项目`README.md`和`VENV_CONFIG.md`规范文件，生成目标项目的 `venv.md`（包含目标项目的python 版本、requirements-cpu.txt或requirements-gpu.txt）；
-    > 把`venv.md`和规范文件副本复制到目标目录中。
+    > 自动检测Python项目类型（基于requirements.txt、setup.py、Python源代码文件等）；
+    > 读取`VENV_CONFIG.md`规范文件，生成目标项目的 `venv.md`（包含目标项目的python 版本、requirements-cpu.txt或requirements-gpu.txt）；
+    > 把`venv.md`和规范文件副本复制到目标目录中；
+    > 如果是Python项目，自动创建和激活Python虚拟环境（参考 `plugins/agile-marketplace/sprint-plugin/utils/setup_venv.md` 规范）。
 
-* **输出**：`venv.md`、规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md)。
+* **输出**：`venv.md`、规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md, DOCKER_CONFIG.md)、激活的Python虚拟环境。
 
-* **满足条件**：目标项目中包含`venv.md`且内容正确；包含完整的规范文件副本。
+* **满足条件**：目标项目中包含`venv.md`且内容正确；包含完整的规范文件副本；Python项目自动激活venv环境。
 
 ### 3.1.3 Stage 3 — 任务拆解与代码生成
 ```mermaid
@@ -496,11 +501,11 @@ flowchart LR
     subgraph S["Stage — 环境准备与数据抽样"]
         direction TB
         W["WHO:
-        - Ops智能体
+        - 快速sprint插件
         - Dataset智能体"]
 
         A["DO WHAT:
-        - 创建venv环境
+        - 自动检测Python项目并配置venv环境
         - 安装requirements
         - 抽样构建 mini数据集，创建notebook做可视化
         - 生成mini数据集使用说明"]
@@ -518,10 +523,10 @@ flowchart LR
 ```
 * **输入**：`venv.md`、`README.md`、`requirements-cpu.txt`、`requirements-gpu.txt`。
 * **DO WHAT**：
-    >执行 `python -m venv debug-cpu`，`pip install -r requirements-cpu.txt` 或者执行 `python -m venv debug-gpu`，`pip install -r requirements-gpu.txt`（要求用户二选一）；
+    >快速sprint插件自动检测Python项目并配置venv环境，安装requirements；
     >Dataset 智能体按`venv.md`中规范抽样构建 mini数据集 并生成 `data/mini/`（样本数据、样本数、样本类别和分布等），创建notebook做可视化。
 * **输出**：`env_check_report.md`（Python、包版本、可用 GPU 信息）、`data/mini/`（mini 数据集）与 `mini_dataset.md`（mini数据集使用说明和指标）。
-* **WHO**：Ops 智能体 + Dataset 智能体
+* **WHO**：快速sprint插件 + Dataset 智能体
 * **满足条件**：`env_check_report.md` 包含 `python_version`、`packages_installed`等环境安装和配置报告；mini 数据可被scripts目录下的notebook可视化。
 
 ### 3.2.2 Stage 2 — 1-epoch 验证与自动 bugfix
@@ -804,8 +809,8 @@ flowchart TD
         S2_desc["Stage2 — 任务拆解与代码生成: 生成任务清单，创建代码骨架，分钟级交付关键功能模块"]
         S3_who["智能体: Reviewer智能体"]
         S3_desc["Stage3 — 代码与配置审核: REVIEWER_REPORT.md所有条目通过"]
-        S4_who["智能体: Ops运维智能体"]
-        S4_desc["Stage4 — venv环境与部署: 生成 venv.md，复制规范文件"]
+        S4_who["智能体: 快速sprint插件"]
+        S4_desc["Stage4 — venv环境与部署: 自动检测Python项目，生成 venv.md，复制规范文件，自动配置venv环境"]
 
         S1_who --> S1_desc
         S2_who --> S2_desc
@@ -817,8 +822,8 @@ flowchart TD
     %% ================= 目标项目 =================
     subgraph F2["目标项目"]
 
-        S6_who["智能体: Ops运维智能体 + Dataset数据智能体"]
-        S6_desc["Stage1 — 环境构建与 mini 数据集准备: 安装依赖，抽样生成 mini 数据集并可视化"]
+        S6_who["智能体: 快速sprint插件 + Dataset数据智能体"]
+        S6_desc["Stage1 — 环境构建与 mini 数据集准备: 自动配置venv环境，安装依赖，抽样生成 mini 数据集并可视化"]
         S7_who["智能体: Coder编程智能体"]
         S7_desc["Stage2 — 1-epoch 验证与自动 bugfix: 执行快速训练并自动修复错误"]
         S8_who["智能体: Coder编程智能体"]
@@ -1154,9 +1159,10 @@ Spec驱动开发是一种将"可执行规范（Spec）"作为事实（ground tru
 - **coder-agent**：编写代码
 - **reviewer-agent**：代码完整性检查，代码质量评审
 - **planner-agent**：根据需求和技术选型编排计划
-- **ops-agent**：创建python venv环境，创建docker环境
-- **tester-agent**：代码测试、功能测试和模块测试 
+- **ops-agent**：创建docker环境（生产部署）
+- **tester-agent**：代码测试、功能测试和模块测试
 - **dataset-agent**：找到ML算法对应的最适合的开源数据集
+- **快速sprint插件**：自动检测Python项目并配置venv环境
 
 ## 8.5 如何开始第一个项目？
 
