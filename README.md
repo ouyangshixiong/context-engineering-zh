@@ -167,14 +167,10 @@ specs/
 
 ```mermaid
 flowchart LR
-    S1[Stage 1: 需求分析与规范理解
-    插件驱动]
-    S2[Stage 2: 任务拆解与代码生成
-    分钟级交付]
-    S3[Stage 3: 代码与配置审核
-    质量保证]
-    S4[Stage 4: venv环境与部署
-    环境准备]
+    S1[Stage 1: 需求分析与规范理解 插件驱动]
+    S2[Stage 2: 任务拆解与代码生成 分钟级交付]
+    S3[Stage 3: 代码与配置审核 质量保证]
+    S4[Stage 4: venv环境与部署 环境准备]
     IN[输入: 框架规范markdown文件集 + 简短自然语言需求]
     OUT[输出: 目标项目初始包（requirements/, tech.md, code skeleton, venv.md, mini dataset）]
 
@@ -186,16 +182,9 @@ flowchart LR
 flowchart LR
 
     %% ================= Stage 1 =================
-    I1["输入:
-    - 框架规范文件集
-    - 自然语言需求（简短/模糊）
-    - Waterfall/Agile插件选择"]
+    I1["输入:<br/>框架规范文件集<br/>自然语言需求（简短/模糊）<br/>Waterfall/Agile插件选择"]
 
-    O1["输出:
-    - requirements/research-report.md
-    - requirements/requirements.md
-    - JIRA Epic/Story结构（Agile）
-    - 需求变更记录"]
+    O1["输出:<br/>requirements/research-report.md<br/>requirements/requirements.md<br/>JIRA Epic/Story结构（Agile）<br/>需求变更记录"]
 
     subgraph S1["Stage 1 — 需求分析与规范理解"]
         direction TB
@@ -204,21 +193,21 @@ flowchart LR
         Common1["1. 创建requirements目录"]
         Common2["2. 接收用户需求"]
         Common3["3. 调用Research Agent识别技术关键词"]
-        Common4["4. 生成requirements/research-report.md"]
+        Common4["4. 生成research-report.md"]
         Common5["5. 调用Requirements Agent分析需求"]
-        Common6["6. 生成结构化requirements/requirements.md"]
+        Common6["6. 生成结构化requirements.md"]
         
         %% 敏捷模式特有步骤
         subgraph Agile["敏捷模式特有流程"]
             direction TB
-            Agile1["7. 调用Product Owner Agent提炼业务目标"]
-            Agile2["8. 以checkbox形式列出需求项，标注来源、优先级与验收标准"]
+            Agile1["7. Product Owner Agent提炼业务目标"]
+            Agile2["8. 以checkbox形式列出需求项（含来源/优先级/验收标准）"]
             Agile3["9. Product Owner Agent审核业务逻辑"]
             Agile4["10. Scrum Master Agent评估迭代可执行性"]
             Agile5["11. Tech Lead Agent验证可实现性"]
             Agile6["12. 需求文档冻结为迭代基线"]
             Agile7["13. 绑定至Epic/Story/Subtask层级"]
-            Agile8["14. Scrum Master Agent负责跟踪执行与变更控制"]
+            Agile8["14. Scrum Master Agent跟踪执行与变更"]
             
             Agile1 --> Agile2 --> Agile3 --> Agile4 --> Agile5 --> Agile6 --> Agile7 --> Agile8
         end
@@ -239,6 +228,7 @@ flowchart LR
     end
 
     I1 --> S1 --> O1
+
 ```
 * **输入**：框架规范文件集，自然语言需求（用户提供，通常简短/模糊），Waterfall/Agile插件选择。
 * **WHO**：
@@ -262,34 +252,20 @@ flowchart LR
 ### 3.1.2 Stage 2 — venv环境与部署
 ```mermaid
 flowchart LR
-    %% ================= Stage 2 =================
-    I2["📥 输入文件:
-    - 目标项目(含README/代码/配置)
-    - tech.md
-    - VENV_CONFIG.md
-    - DEBUG_CODE.md"]
 
-    O2["📤 输出文件:
-    - venv.md
-    - 规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md)
-    - 激活的Python虚拟环境"]
+    %% ================= Stage 2 =================
+    I2["输入文件:<br/>目标项目(含README/代码/配置)<br/>tech.md<br/>VENV_CONFIG.md<br/>DEBUG_CODE.md"]
+
+    O2["输出文件:<br/>venv.md<br/>规范文件副本(tech.md, VENV_CONFIG.md, DEBUG_CODE.md)<br/>激活的Python虚拟环境"]
 
     subgraph S2["Stage 2 — venv环境与部署"]
         direction TB
-        W2["WHO:
-        - 快速sprint插件"]
 
-        A2["DO WHAT:
-        - 自动检测Python项目类型
-        - 读取 VENV_CONFIG.md 规范文件
-        - 生成 venv.md
-        - 复制规范文件到目标目录
-        - 自动创建和激活Python虚拟环境"]
+        W2["WHO:<br/>快速sprint插件"]
 
-        V2["满足条件:
-        - venv.md 内容正确
-        - 规范文件副本齐全
-        - Python项目自动激活venv环境"]
+        A2["DO WHAT:<br/>自动检测Python项目类型<br/>读取 VENV_CONFIG.md<br/>生成 venv.md<br/>复制规范文件到目标目录<br/>创建并激活Python虚拟环境"]
+
+        V2["满足条件:<br/>venv.md 内容正确<br/>规范文件副本齐全<br/>项目可自动激活venv"]
 
         W2 --> A2 --> V2
     end
