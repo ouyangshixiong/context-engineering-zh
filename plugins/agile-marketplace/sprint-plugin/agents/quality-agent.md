@@ -18,11 +18,11 @@ When invoked:
 * **基于实际工作的状态更新**: 所有状态流转必须基于实际验证完成
 * **强制bug创建**: 当发现严重缺陷或测试通过率<90%时，必须在JIRA上创建bug
 * **主动问题识别**: 必须主动识别和报告质量问题，不得忽略发现的缺陷
-* **支持并行测试**: 必须支持同时执行多个测试任务，最大化测试效率
+* **支持并行测试**: 必须支持通过多实例并行执行多个测试任务（单实例处理单任务），最大化测试效率
 
 ## 🎯 核心职责
 * 1-2分钟内完成代码质量验证
-* **并行执行自动化测试和功能检查** - 支持同时执行多个测试任务
+* **并行执行自动化测试和功能检查** - 支持通过多实例并行执行测试
 * 生成质量报告和改进建议
 * **主动识别和创建缺陷报告** - 在JIRA上创建bug并关联到相关任务
 * 管理JIRA验收状态和缺陷跟踪
@@ -170,7 +170,7 @@ curl -u {email}:{token} -X POST \
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
-  -d '{"body":"{timestamp}: 质量验证完成 - 通过率{pass_rate}%，质量评分{quality_score}"}'
+  -d '{"body":"{timestamp}: 质量验证完成 - 通过率{pass_rate}%，质量评分{quality_score} - summary: {summary}"}'
 ```
 
 ### 主动缺陷报告创建和管理
@@ -253,10 +253,193 @@ curl -u {email}:{token} -X POST \
 * 无明显严重缺陷
 * JIRA状态及时更新
 
+## 结构化输出（JSON Schema）
+- 统一输出格式，确保质量报告可机读、可验证
+- 强制字段约束与枚举，提升数据一致性与对齐度
+- 用于自动创建Bug与报告汇总的下游系统
+
+### 输出结构
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QualityAgentOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "summary": { "type": "string" },
+    "pass_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+    "score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "category": { "type": "string", "enum": ["functional", "performance", "security", "code_quality"] },
+          "description": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["severity", "category", "description"]
+      }
+    },
+    "jira_bugs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "bug_key": { "type": "string" },
+          "priority": { "type": "string", "enum": ["Highest", "High", "Medium", "Low"] },
+          "linked_story": { "type": "string" }
+        },
+        "required": ["bug_key", "priority"]
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["summary", "pass_rate", "issues"]
+}
+```
+
+### TypeScript示例（Agent SDK）
+```typescript
+import { query } from '@anthropic-ai/claude-agent-sdk'
+
+const schema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  title: 'QualityAgentOutput',
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    summary: { type: 'string' },
+    pass_rate: { type: 'number', minimum: 0, maximum: 100 },
+    score: { type: 'number', minimum: 0, maximum: 100 },
+    issues: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+          category: { type: 'string', enum: ['functional', 'performance', 'security', 'code_quality'] },
+          description: { type: 'string' },
+          file: { type: 'string' },
+          line: { type: 'integer', minimum: 1 }
+        },
+        required: ['severity', 'category', 'description']
+      }
+    },
+    jira_bugs: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          bug_key: { type: 'string' },
+          priority: { type: 'string', enum: ['Highest', 'High', 'Medium', 'Low'] },
+          linked_story: { type: 'string' }
+        },
+        required: ['bug_key', 'priority']
+      }
+    },
+    recommendations: {
+      type: 'array',
+      items: { type: 'string' }
+    }
+  },
+  required: ['summary', 'pass_rate', 'issues']
+}
+
+for await (const message of query({
+  prompt: '执行质量验证并返回结构化报告',
+  options: {
+    outputFormat: {
+      type: 'json_schema',
+      schema
+    }
+  }
+})) {
+  if (message.type === 'result' && message.structured_output) {
+    console.log(message.structured_output)
+  }
+}
+```
+
+### Python示例（Agent SDK）
+```python
+from claude_agent_sdk import query
+
+schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "QualityAgentOutput",
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "summary": {"type": "string"},
+        "pass_rate": {"type": "number", "minimum": 0, "maximum": 100},
+        "score": {"type": "number", "minimum": 0, "maximum": 100},
+        "issues": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+                    "category": {"type": "string", "enum": ["functional", "performance", "security", "code_quality"]},
+                    "description": {"type": "string"},
+                    "file": {"type": "string"},
+                    "line": {"type": "integer", "minimum": 1}
+                },
+                "required": ["severity", "category", "description"]
+            }
+        },
+        "jira_bugs": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "bug_key": {"type": "string"},
+                    "priority": {"type": "string", "enum": ["Highest", "High", "Medium", "Low"]},
+                    "linked_story": {"type": "string"}
+                },
+                "required": ["bug_key", "priority"]
+            }
+        },
+        "recommendations": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["summary", "pass_rate", "issues"]
+}
+
+async for message in query(
+    prompt="执行质量验证并返回结构化报告",
+    options={
+        "output_format": {
+            "type": "json_schema",
+            "schema": schema
+        }
+    }
+):
+    if hasattr(message, "structured_output"):
+        print(message.structured_output)
+```
+
+### 错误处理
+- 当输出不满足Schema时返回错误，进行重试或降级
+- `jira_bugs`用于承载自动创建缺陷的关键标识，便于后续追踪
+
 ### 立即执行步骤
 * 接收开发完成的代码
 * **智能状态检测** - 获取项目状态配置和可用流转
-* **并行执行自动化测试套件** - 同时执行多个测试任务
+* **并行执行自动化测试套件** - 同时执行多个测试任务（通过多实例）
 * **实时进度跟踪** - 每30秒添加测试执行进度
 * 验证核心功能完整性
 * 检查代码质量和规范

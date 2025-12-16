@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "development-team-agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx ts-node plugins/agile-marketplace/sprint-plugin/hooks/notify_dev_completion.ts"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -405,6 +405,12 @@ curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{subtaskKey}/comment" \
   -d '{"body":"{timestamp}: {subtask_progress}"}'
+
+# Sprint完成评论到Story（包含summary）
+curl -u {email}:{token} -X POST \
+  -H "Content-Type: application/json" \
+  "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
+  -d '{"body":"{timestamp}: Sprint协调完成 - summary: {summary}"}'
 ```
 ```
 
@@ -414,6 +420,153 @@ curl -u {email}:{token} -X POST \
 * Sprint目标明确且可衡量
 * 多智能体协作顺畅无阻塞
 * 端到端交付在5-8分钟内完成
+
+## 结构化输出（JSON Schema）
+- 输出协调结果与下游动作建议，确保调度过程透明可追踪
+- 统一记录各子智能体调用状态与时间戳
+- 用于自动化流水线的状态汇总与后续编排
+
+### 输出结构
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScrumMasterOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "result_status": { "type": "string", "enum": ["success", "partial", "failed"] },
+    "sprint_id": { "type": "string" },
+    "stories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dispatched_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subagent_type": {
+            "type": "string",
+            "enum": ["sprint-plugin:development-team-agent", "sprint-plugin:quality-agent"]
+          },
+          "task_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["dispatched", "running", "completed", "failed"] },
+          "start_time": { "type": "string", "format": "date-time" },
+          "end_time": { "type": "string", "format": "date-time" },
+          "error": { "type": "string" }
+        },
+        "required": ["subagent_type", "task_id", "status"]
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["result_status", "dispatched_tasks"]
+}
+```
+
+### TypeScript示例（Agent SDK）
+```typescript
+import { query } from '@anthropic-ai/claude-agent-sdk'
+
+const schema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  title: 'ScrumMasterOutput',
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    result_status: { type: 'string', enum: ['success', 'partial', 'failed'] },
+    sprint_id: { type: 'string' },
+    stories: { type: 'array', items: { type: 'string' } },
+    dispatched_tasks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          subagent_type: { type: 'string', enum: ['sprint-plugin:development-team-agent', 'sprint-plugin:quality-agent'] },
+          task_id: { type: 'string' },
+          status: { type: 'string', enum: ['dispatched', 'running', 'completed', 'failed'] },
+          start_time: { type: 'string', format: 'date-time' },
+          end_time: { type: 'string', format: 'date-time' },
+          error: { type: 'string' }
+        },
+        required: ['subagent_type', 'task_id', 'status']
+      }
+    },
+    next_actions: { type: 'array', items: { type: 'string' } }
+  },
+  required: ['result_status', 'dispatched_tasks']
+}
+
+for await (const message of query({
+  prompt: '协调Sprint并返回结构化调度结果',
+  options: {
+    outputFormat: {
+      type: 'json_schema',
+      schema
+    }
+  }
+})) {
+  if (message.type === 'result' && message.structured_output) {
+    console.log(message.structured_output)
+  }
+}
+```
+
+### Python示例（Agent SDK）
+```python
+from claude_agent_sdk import query
+
+schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ScrumMasterOutput",
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "result_status": {"type": "string", "enum": ["success", "partial", "failed"]},
+        "sprint_id": {"type": "string"},
+        "stories": {"type": "array", "items": {"type": "string"}},
+        "dispatched_tasks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "subagent_type": {"type": "string", "enum": ["sprint-plugin:development-team-agent", "sprint-plugin:quality-agent"]},
+                    "task_id": {"type": "string"},
+                    "status": {"type": "string", "enum": ["dispatched", "running", "completed", "failed"]},
+                    "start_time": {"type": "string", "format": "date-time"},
+                    "end_time": {"type": "string", "format": "date-time"},
+                    "error": {"type": "string"}
+                },
+                "required": ["subagent_type", "task_id", "status"]
+            }
+        },
+        "next_actions": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["result_status", "dispatched_tasks"]
+}
+
+async for message in query(
+    prompt="协调Sprint并返回结构化调度结果",
+    options={
+        "output_format": {
+            "type": "json_schema",
+            "schema": schema
+        }
+    }
+):
+    if hasattr(message, "structured_output"):
+        print(message.structured_output)
+```
+
+### 错误处理
+- 当调度异常或子智能体调用失败时，填充`dispatched_tasks[].error`并将`result_status`设为`partial`或`failed`
+- 保持`additionalProperties: false`确保数据形态稳定可依赖
 
 ## 🔧 强制智能体调用协议
 
@@ -431,9 +584,12 @@ curl -u {email}:{token} -X POST \
   - 必要参数:
     - Sprint ID和详细信息
     - Story Keys列表
-    - 开发任务详情（Subtask IDs）
+    - 开发任务详情（**单次调用仅限一个Subtask ID**）
     - 项目根目录路径
     - JIRA配置信息
+  - 强制限制:
+    - **单任务原则**: 每次调用只能分配一个JIRA子任务(Subtask)，禁止批量分配多个任务
+    - **原因**: 确保每个任务完成后都能独立触发开发完成通知Hook
   - 禁止行为:
     - 不得自行编写开发代码
     - 不得创建开发进度报告
@@ -449,10 +605,12 @@ curl -u {email}:{token} -X POST \
   - 必要参数:
     - Sprint ID和详细信息
     - Story Keys列表
-    - 测试任务详情（Subtask IDs）
+    - 测试任务详情（**单次调用仅限一个Subtask ID**）
     - 项目根目录路径
     - JIRA配置信息
     - 开发完成通知（如果适用）
+  - 强制限制:
+    - **单任务原则**: 每次调用只能分配一个JIRA子任务(Subtask)，禁止批量分配多个任务
   - 禁止行为:
     - 不得自行执行测试
     - 不得创建质量验证报告
@@ -460,6 +618,7 @@ curl -u {email}:{token} -X POST \
 ```
 
 ### 并行调用规范
+- **任务粒度并行**: 必须为每个待处理的Subtask单独发起一个Task调用
 - **多Story并行**: 当sprint中有多个story时，必须并行调用智能体集群
 - **负载均衡**: 根据任务复杂度智能分配工作负载
 - **状态监控**: 监控智能体调用状态，确保成功启动
@@ -543,7 +702,7 @@ flowchart TD
 {
   "subagent_type": "sprint-plugin:development-team-agent",
   "description": "处理Sprint 900的PM-23开发任务",
-  "prompt": "作为Development Team Agent，请处理以下开发任务...\n\n上下文信息:\n- Sprint ID: 900\n- Story Keys: [PM-23, PM-24]\n- 开发任务: [PM-85, PM-86, PM-95, PM-96]\n- 项目根目录: /Users/ouyang/app/context-engineering-for-pm-mem/pm-mem\n- JIRA配置: (提供完整配置)\n\n请执行实际开发工作并更新JIRA状态..."
+  "prompt": "作为Development Team Agent，请处理以下开发任务...\n\n上下文信息:\n- Sprint ID: 900\n- Story Keys: [PM-23]\n- 开发任务: [PM-85] (注意：仅分配一个任务)\n- 项目根目录: /Users/ouyang/app/context-engineering-for-pm-mem/pm-mem\n- JIRA配置: (提供完整配置)\n\n请执行实际开发工作并更新JIRA状态..."
 }
 ```
 

@@ -72,12 +72,12 @@ flowchart TD
     J -->|是| L[⚡ 并行调度所有Story]
     K --> M[⚠️ 范围限制警告]
     L --> N[📋 为每个Story智能任务分解]
-    N --> O[🤖 并行启动所有开发任务]
-    N --> P[🔍 并行启动所有测试任务]
+    N --> O[🤖 为每个任务独立启动开发Agent]
+    N --> P[🔍 为每个任务独立启动测试Agent]
 
     O --> Q{开发任务完成?}
     Q -->|否| O
-    Q -->|是| R[📢 开发完成通知]
+    Q -->|是| R[📢 自动触发开发完成通知]
     R --> S[🔍 触发对应测试任务]
 
     P --> T{测试任务完成?}
@@ -180,15 +180,15 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
-    B --> C[⚡ 并行启动所有开发任务]
-    B --> D[⚡ 并行启动所有测试任务]
+    B --> C[⚡ 为每个任务独立启动开发Agent]
+    B --> D[⚡ 为每个任务独立启动测试Agent]
 
     C --> E[🤖 Development Team Agent集群]
     D --> F[🔍 Quality Agent集群]
 
     E --> G{开发任务完成?}
     G -->|否| E
-    G -->|是| H[📢 开发完成通知]
+    G -->|是| H[📢 自动触发开发完成通知]
     H --> I[🔍 触发对应测试任务]
 
     F --> J{测试任务完成?}
@@ -208,10 +208,10 @@ flowchart TD
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master并行调度**: 由Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时启动所有开发任务和测试任务
-- ⚡ **并行开发执行**: 所有开发任务并行执行，Development Team Agent集群处理多个开发任务，最大化开发效率
-- ⚡ **并行测试执行**: 所有测试任务并行执行，Quality Agent集群处理多个测试任务，最大化测试效率
-- 📢 **开发完成通知**: Development Team Agent完成开发任务后自动发送通知，触发对应的测试任务执行
+- 🎯 **Scrum Master并行调度**: 由Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时为每个任务独立启动开发Agent和测试Agent
+- ⚡ **并行开发执行**: 所有开发任务并行执行，Development Team Agent集群处理多个开发任务（每个Agent实例处理一个任务），最大化开发效率
+- ⚡ **并行测试执行**: 所有测试任务并行执行，Quality Agent集群处理多个测试任务（每个Agent实例处理一个任务），最大化测试效率
+- 📢 **开发完成通知**: Development Team Agent完成开发任务后通过Hook自动发送通知，触发对应的测试任务执行
 - 🔄 **智能依赖管理**: 自动管理开发任务和测试任务之间的依赖关系，确保测试任务在开发完成后执行
 - 🔄 **状态监控循环**: 并行监控所有任务状态，基于实际工作成果
 - ✅ **Story完成条件**: 所有相关任务为Done且验证通过时标记Story为Done
@@ -288,12 +288,12 @@ flowchart TD
     J -->|是| L[⚡ 并行调度所有Story]
     K --> M[⚠️ 范围限制警告]
     L --> N[📋 为每个Story智能任务分解]
-    N --> O[🤖 并行启动所有开发任务]
-    N --> P[🔍 并行启动所有测试任务]
+    N --> O[🤖 为每个任务独立启动开发Agent]
+    N --> P[🔍 为每个任务独立启动测试Agent]
 
     O --> Q{开发任务完成?}
     Q -->|否| O
-    Q -->|是| R[📢 开发完成通知]
+    Q -->|是| R[📢 自动触发开发完成通知]
     R --> S[🔍 触发对应测试任务]
 
     P --> T{测试任务完成?}
@@ -314,7 +314,7 @@ flowchart TD
 - ⚡ **多Story并行协调**: 并行协调多个Story的执行，同时启动所有Story的处理，确保高效资源利用
 - 🎯 **批量任务分解**: 为所有Story批量智能任务分解，快速生成所有任务单元
 - 📝 **智能任务分解**: 根据Story复杂度自动分解为可执行的任务单元
-- 🤖 **大规模并行执行**: Development Team Agent集群和Quality Agent集群并行工作，同时处理多个开发任务和测试任务，最大化效率
+- 🤖 **大规模并行执行**: Development Team Agent集群和Quality Agent集群并行工作，同时处理多个开发任务和测试任务（通过多个Agent实例），最大化效率
 - ✅ **并行状态跟踪**: 并行监控所有Story和任务状态，确保进度可视化
 - ⚠️ **范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
@@ -323,15 +323,15 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
-    B --> C[⚡ 并行启动所有开发任务]
-    B --> D[⚡ 并行启动所有测试任务]
+    B --> C[⚡ 为每个任务独立启动开发Agent]
+    B --> D[⚡ 为每个任务独立启动测试Agent]
 
     C --> E[🤖 Development Team Agent集群]
     D --> F[🔍 Quality Agent集群]
 
     E --> G{开发任务完成?}
     G -->|否| E
-    G -->|是| H[📢 开发完成通知]
+    G -->|是| H[📢 自动触发开发完成通知]
     H --> I[🔍 触发对应测试任务]
 
     F --> J{测试任务完成?}
@@ -351,10 +351,10 @@ flowchart TD
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master并行调度**: Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时启动所有开发任务和测试任务
-- ⚡ **大规模并行开发**: Development Team Agent集群并行执行所有开发任务，最大化开发效率
-- ⚡ **大规模并行测试**: Quality Agent集群并行执行所有测试任务，最大化测试效率
-- 📢 **开发完成通知**: Development Team Agent完成开发任务后自动发送通知，触发对应的测试任务执行
+- 🎯 **Scrum Master并行调度**: Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时为每个任务独立启动开发Agent和测试Agent
+- ⚡ **大规模并行开发**: Development Team Agent集群并行执行所有开发任务（每个Agent实例处理一个任务），最大化开发效率
+- ⚡ **大规模并行测试**: Quality Agent集群并行执行所有测试任务（每个Agent实例处理一个任务），最大化测试效率
+- 📢 **开发完成通知**: Development Team Agent完成开发任务后通过Hook自动发送通知，触发对应的测试任务执行
 - 🔄 **智能依赖管理**: 自动管理开发任务和测试任务之间的依赖关系，确保测试任务在开发完成后执行
 - 🔄 **并行状态监控**: 并行监控所有任务状态直到全部完成，基于实际工作成果
 - ✅ **基于实际工作的流转**: 所有任务完成且实际工作验证通过时标记Story为Done

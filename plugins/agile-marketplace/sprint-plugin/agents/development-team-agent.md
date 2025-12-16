@@ -16,7 +16,7 @@ When invoked:
 * **强制实际开发**: 必须执行实际代码生成和功能实现
 * **禁止状态欺骗**: 不得只更新JIRA状态而不执行实际开发工作
 * **基于实际工作的状态更新**: 所有状态流转必须基于实际开发完成
-* **强制开发完成通知**: 开发任务完成后必须发送通知，触发对应的测试任务执行
+* **自动化开发完成通知**: 开发任务完成后，通过Hook自动发送通知，无需手动执行通知命令
 
 ## 🎯 核心职责
 * 3-5分钟内完成需求到代码的转换
@@ -157,13 +157,7 @@ safe_add_subtask_complete_comment "{subtaskKey}" \
 curl -u {email}:{token} -X POST \
   -H "Content-Type: application/json" \
   "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
-  -d '{"body":"{timestamp}: 代码生成完成 - {components_implemented}"}'
-
-# 开发完成通知 - 触发测试任务执行
-curl -u {email}:{token} -X POST \
-  -H "Content-Type: application/json" \
-  "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
-  -d '{"body":"{timestamp}: 🚀 开发完成通知 - 开发任务已完成，等待质量验证"}'
+  -d '{"body":"{timestamp}: 代码生成完成 - {components_implemented} - summary: {summary}"}'
 ```
 
 ### 错误处理和重试
@@ -208,6 +202,270 @@ done
 * 包含基础测试和文档
 * JIRA任务状态及时更新
 
+## 结构化输出（JSON Schema）
+- 保证每次执行返回严格匹配模式的有效JSON
+- 便于与应用集成，无需额外解析或二次校验
+- 使用`additionalProperties: false`确保字段收敛与可预期
+
+### 输出结构
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DevelopmentTeamOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "summary": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "enum": ["api", "ui", "db", "test", "doc", "script"] },
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "status": { "type": "string", "enum": ["created", "updated", "unchanged"] },
+          "lines_changed": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["type", "name", "path", "status"]
+      }
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit_total": { "type": "integer", "minimum": 0 },
+        "unit_passed": { "type": "integer", "minimum": 0 },
+        "integration_total": { "type": "integer", "minimum": 0 },
+        "integration_passed": { "type": "integer", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["coverage"]
+    },
+    "jira": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issue_key": { "type": "string" },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            },
+            "required": ["from", "to"]
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["message"]
+      }
+    }
+  },
+  "required": ["summary", "artifacts", "tests"]
+}
+```
+
+### TypeScript示例（Agent SDK）
+```typescript
+import { query } from '@anthropic-ai/claude-agent-sdk'
+
+const schema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  title: 'DevelopmentTeamOutput',
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    summary: { type: 'string' },
+    artifacts: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          type: { type: 'string', enum: ['api', 'ui', 'db', 'test', 'doc', 'script'] },
+          name: { type: 'string' },
+          path: { type: 'string' },
+          status: { type: 'string', enum: ['created', 'updated', 'unchanged'] },
+          lines_changed: { type: 'integer', minimum: 0 }
+        },
+        required: ['type', 'name', 'path', 'status']
+      }
+    },
+    tests: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        unit_total: { type: 'integer', minimum: 0 },
+        unit_passed: { type: 'integer', minimum: 0 },
+        integration_total: { type: 'integer', minimum: 0 },
+        integration_passed: { type: 'integer', minimum: 0 },
+        coverage: { type: 'number', minimum: 0, maximum: 100 }
+      },
+      required: ['coverage']
+    },
+    jira: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        issue_key: { type: 'string' },
+        transitions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              from: { type: 'string' },
+              to: { type: 'string' },
+              timestamp: { type: 'string', format: 'date-time' }
+            },
+            required: ['from', 'to']
+          }
+        }
+      }
+    },
+    errors: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          code: { type: 'string' },
+          message: { type: 'string' },
+          file: { type: 'string' },
+          line: { type: 'integer', minimum: 1 }
+        },
+        required: ['message']
+      }
+    }
+  },
+  required: ['summary', 'artifacts', 'tests']
+}
+
+for await (const message of query({
+  prompt: '完成开发并返回结构化交付结果',
+  options: {
+    outputFormat: {
+      type: 'json_schema',
+      schema
+    }
+  }
+})) {
+  if (message.type === 'result' && message.structured_output) {
+    console.log(message.structured_output)
+  }
+}
+```
+
+### Python示例（Agent SDK）
+```python
+from claude_agent_sdk import query
+
+schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "DevelopmentTeamOutput",
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "summary": {"type": "string"},
+        "artifacts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "type": {"type": "string", "enum": ["api", "ui", "db", "test", "doc", "script"]},
+                    "name": {"type": "string"},
+                    "path": {"type": "string"},
+                    "status": {"type": "string", "enum": ["created", "updated", "unchanged"]},
+                    "lines_changed": {"type": "integer", "minimum": 0}
+                },
+                "required": ["type", "name", "path", "status"]
+            }
+        },
+        "tests": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "unit_total": {"type": "integer", "minimum": 0},
+                "unit_passed": {"type": "integer", "minimum": 0},
+                "integration_total": {"type": "integer", "minimum": 0},
+                "integration_passed": {"type": "integer", "minimum": 0},
+                "coverage": {"type": "number", "minimum": 0, "maximum": 100}
+            },
+            "required": ["coverage"]
+        },
+        "jira": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "issue_key": {"type": "string"},
+                "transitions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "from": {"type": "string"},
+                            "to": {"type": "string"},
+                            "timestamp": {"type": "string", "format": "date-time"}
+                        },
+                        "required": ["from", "to"]
+                    }
+                }
+            }
+        },
+        "errors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "code": {"type": "string"},
+                    "message": {"type": "string"},
+                    "file": {"type": "string"},
+                    "line": {"type": "integer", "minimum": 1}
+                },
+                "required": ["message"]
+            }
+        }
+    },
+    "required": ["summary", "artifacts", "tests"]
+}
+
+async for message in query(
+    prompt="完成开发并返回结构化交付结果",
+    options={
+        "output_format": {
+            "type": "json_schema",
+            "schema": schema
+        }
+    }
+):
+    if hasattr(message, "structured_output"):
+        print(message.structured_output)
+```
+
+### 错误处理
+- 当无法生成匹配Schema的输出时，返回错误`error_max_structured_output_retries`
+- 通过`errors`字段汇总开发阶段的异常并标注定位信息
+
 ### 立即执行步骤
 * 分析需求和技术要求
 * **智能状态检测** - 获取项目状态配置和可用流转
@@ -219,6 +477,6 @@ done
 * 生成完整的功能代码
 * 创建基础测试用例
 * **添加subtask完成评论** - 记录实现详情和验证结果
-* **发送开发完成通知** - 发送通知触发测试任务执行
 * **智能状态流转**: In Progress → Done (开发完成)
+* (注意：开发完成通知将通过Hook自动发送)
 * 提供技术实现说明
