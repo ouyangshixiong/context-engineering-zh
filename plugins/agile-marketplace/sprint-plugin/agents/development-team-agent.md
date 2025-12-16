@@ -16,6 +16,7 @@ When invoked:
 * **强制实际开发**: 必须执行实际代码生成和功能实现
 * **禁止状态欺骗**: 不得只更新JIRA状态而不执行实际开发工作
 * **基于实际工作的状态更新**: 所有状态流转必须基于实际开发完成
+* **强制开发完成通知**: 开发任务完成后必须发送通知，触发对应的测试任务执行
 
 ## 🎯 核心职责
 * 3-5分钟内完成需求到代码的转换
@@ -158,11 +159,11 @@ curl -u {email}:{token} -X POST \
   "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
   -d '{"body":"{timestamp}: 代码生成完成 - {components_implemented}"}'
 
-# 安全更新subtask内容 - 开发过程中调用（推荐）
-safe_update_subtask_content "{subtaskKey}" \
-  "{description}" \
-  "{acceptance_criteria}" \
-  "{technical_specs}"
+# 开发完成通知 - 触发测试任务执行
+curl -u {email}:{token} -X POST \
+  -H "Content-Type: application/json" \
+  "https://{domain}/rest/api/3/issue/{issueKey}/comment" \
+  -d '{"body":"{timestamp}: 🚀 开发完成通知 - 开发任务已完成，等待质量验证"}'
 ```
 
 ### 错误处理和重试
@@ -218,5 +219,6 @@ done
 * 生成完整的功能代码
 * 创建基础测试用例
 * **添加subtask完成评论** - 记录实现详情和验证结果
+* **发送开发完成通知** - 发送通知触发测试任务执行
 * **智能状态流转**: In Progress → Done (开发完成)
 * 提供技术实现说明

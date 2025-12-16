@@ -31,6 +31,7 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 - 📋 **强制任务分解**：Story必须分解为可执行的任务单元，确保可独立验证
 - 🔄 **强制状态同步**：所有状态变更必须同步到JIRA，确保数据一致性
 - ⚠️ **强制范围限制**：仅处理Sprint中已有的Story，不自动添加新Story到Sprint
+- 🚫 **禁止文档脚本代码**：不允许编写文档、脚本和代码，仅处理现有代码的修改和配置
 
 ## 🎯 核心特性
 
@@ -68,30 +69,36 @@ flowchart TD
     H --> I[🔍 验证Story归属]
     I --> J{Story在Sprint中?}
     J -->|否| K[❌ 仅处理Sprint中Story]
-    J -->|是| L[🔄 多Story协调管理]
+    J -->|是| L[⚡ 并行调度所有Story]
     K --> M[⚠️ 范围限制警告]
-    L --> N{所有Story处理完成?}
-    N -->|否| O[🎯 协调单个Story]
-    O --> P[📋 智能任务分解]
-    P --> Q[🤖 Development Team开发]
-    P --> R[🔍 Quality Agent验证]
-    Q --> S[🔄 检查任务状态]
-    R --> S
-    S --> T{所有任务为Done?}
-    T -->|否| O
-    T -->|是| U[✅ 标记Story为Done]
-    U --> N
-    N -->|是| V[🔍 Story状态验证]
-    V --> W{验证通过?}
-    W -->|否| X[❌ 验证失败报告]
-    W -->|是| Y[🏁 使用JIRA Sprint API关闭Sprint]
-    Y --> Z[📊 生成交付报告]
-    M --> Z
+    L --> N[📋 为每个Story智能任务分解]
+    N --> O[🤖 并行启动所有开发任务]
+    N --> P[🔍 并行启动所有测试任务]
+
+    O --> Q{开发任务完成?}
+    Q -->|否| O
+    Q -->|是| R[📢 开发完成通知]
+    R --> S[🔍 触发对应测试任务]
+
+    P --> T{测试任务完成?}
+    T -->|否| P
+    T -->|是| U[✅ 测试验证完成]
+
+    S --> U
+
+    U --> V{所有Story的task为Done?}
+    V -->|否| L
+    V -->|是| W[🔍 Story状态验证]
+    W --> X{验证通过?}
+    X -->|否| Y[❌ 验证失败报告]
+    X -->|是| Z[🏁 使用JIRA Sprint API关闭Sprint]
+    Z --> AA[📊 生成交付报告]
+    M --> AA
 
     %% 强制规范检查
-    F -.->|🚫 禁止创建任务类型Sprint| AA[强制规范检查]
-    Y -.->|🚫 禁止直接状态更新| AA
-    AA{强制规范检查}
+    F -.->|🚫 禁止创建任务类型Sprint| BB[强制规范检查]
+    Z -.->|🚫 禁止直接状态更新| BB
+    BB{强制规范检查}
 ```
 
 ### 时间分配优化
@@ -172,34 +179,47 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[🎯 Scrum Master协调] --> B[🤖 Development Team开发]
-    A --> C[🔍 Quality Agent验证]
-    B --> D[🔄 检查Sub-task状态]
-    C --> D
-    D --> E{所有Sub-task为Done?}
-    E -->|否| A
-    E -->|是| F[✅ 标记Story为Done]
-    F --> G{所有Story为Done?}
-    G -->|否| A
-    G -->|是| H[🔍 Story状态验证]
-    H --> I{验证通过?}
-    I -->|否| J[❌ 验证失败报告]
-    I -->|是| K[🏁 关闭Sprint]
-    K --> L[📄 生成交付报告]
-    L --> M[✅ 阶段3完成]
+    A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
+    B --> C[⚡ 并行启动所有开发任务]
+    B --> D[⚡ 并行启动所有测试任务]
+
+    C --> E[🤖 Development Team Agent集群]
+    D --> F[🔍 Quality Agent集群]
+
+    E --> G{开发任务完成?}
+    G -->|否| E
+    G -->|是| H[📢 开发完成通知]
+    H --> I[🔍 触发对应测试任务]
+
+    F --> J{测试任务完成?}
+    J -->|否| F
+    J -->|是| K[✅ 测试验证完成]
+
+    I --> K
+
+    K --> L{所有Story的task为Done?}
+    L -->|否| A
+    L -->|是| M[🔍 Story状态验证]
+    M --> N{验证通过?}
+    N -->|否| O[❌ 验证失败报告]
+    N -->|是| P[🏁 使用JIRA Sprint API关闭Sprint]
+    P --> Q[📄 生成交付报告]
+    Q --> R[✅ 阶段3完成]
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master协调**: 由Scrum Master Agent负责整体协调和流程管理
-- 🤖 **Development Team开发**: 并行执行所有任务的开发工作，确保实际代码实现
-- 🔍 **Quality Agent验证**: 并行执行所有任务的质量验证，确保交付质量
-- 🔄 **状态检查循环**: 持续检查任务状态直到全部完成，基于实际工作成果
+- 🎯 **Scrum Master并行调度**: 由Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时启动所有开发任务和测试任务
+- ⚡ **并行开发执行**: 所有开发任务并行执行，Development Team Agent集群处理多个开发任务，最大化开发效率
+- ⚡ **并行测试执行**: 所有测试任务并行执行，Quality Agent集群处理多个测试任务，最大化测试效率
+- 📢 **开发完成通知**: Development Team Agent完成开发任务后自动发送通知，触发对应的测试任务执行
+- 🔄 **智能依赖管理**: 自动管理开发任务和测试任务之间的依赖关系，确保测试任务在开发完成后执行
+- 🔄 **状态监控循环**: 并行监控所有任务状态，基于实际工作成果
 - ✅ **Story完成条件**: 所有相关任务为Done且验证通过时标记Story为Done
 - 🔍 **Story状态验证**: 验证所有Story状态确保可以安全关闭Sprint
 - 🏁 **Sprint完成条件**: 所有Story为Done且验证通过时使用JIRA Sprint API关闭Sprint
 
 **状态流转逻辑:**
-- 🔄 **循环检查**: 持续监控Sub-task状态，直到全部完成
+- 🔄 **并行监控**: 并行监控所有Sub-task状态，直到全部完成
 - ✅ **基于实际工作的标记**: Sub-task全部完成且实际工作验证通过时标记Story为Done
 - 🔍 **状态验证**: 验证所有Story状态确保Sprint可以安全关闭
 - 🏁 **智能关闭**: Story全部完成且验证通过时自动关闭Sprint
@@ -265,56 +285,78 @@ flowchart TD
     H --> I[🔍 验证Story归属]
     I --> J{Story在Sprint中?}
     J -->|否| K[❌ 仅处理Sprint中Story]
-    J -->|是| L[🔄 多Story协调管理]
+    J -->|是| L[⚡ 并行调度所有Story]
     K --> M[⚠️ 范围限制警告]
-    L --> N{所有Story处理完成?}
-    N -->|否| O[🎯 协调单个Story]
-    O --> P[📝 创建子任务]
-    P --> Q[🤖 并行开发]
-    P --> R[🔍 并行验证]
-    Q --> S[✅ 标记Story为Done]
-    R --> S
-    S --> N
-    N -->|是| T[✅ 多Story协调完成]
-    M --> T
+    L --> N[📋 为每个Story智能任务分解]
+    N --> O[🤖 并行启动所有开发任务]
+    N --> P[🔍 并行启动所有测试任务]
+
+    O --> Q{开发任务完成?}
+    Q -->|否| O
+    Q -->|是| R[📢 开发完成通知]
+    R --> S[🔍 触发对应测试任务]
+
+    P --> T{测试任务完成?}
+    T -->|否| P
+    T -->|是| U[✅ 测试验证完成]
+
+    S --> U
+
+    U --> V{所有Story的task为Done?}
+    V -->|否| L
+    V -->|是| W[✅ 多Story协调完成]
+    M --> W
 ```
 
 **多Story管理能力:**
 - 🔍 **智能输入分析**: 自动解析用户输入中的Story Keys，支持多种输入格式
 - 📋 **多Story识别**: 支持多种Story标识格式，灵活适应不同项目规范
-- 🔄 **多Story协调**: 并行协调多个Story的执行，确保高效资源利用
-- 🎯 **单个Story协调**: 为每个Story进行智能任务分解和协调执行
+- ⚡ **多Story并行协调**: 并行协调多个Story的执行，同时启动所有Story的处理，确保高效资源利用
+- 🎯 **批量任务分解**: 为所有Story批量智能任务分解，快速生成所有任务单元
 - 📝 **智能任务分解**: 根据Story复杂度自动分解为可执行的任务单元
-- 🤖 **并行执行**: Development Team和Quality Agent并行工作，最大化效率
-- ✅ **状态跟踪**: 实时监控所有Story和任务状态，确保进度可视化
+- 🤖 **大规模并行执行**: Development Team Agent集群和Quality Agent集群并行工作，同时处理多个开发任务和测试任务，最大化效率
+- ✅ **并行状态跟踪**: 并行监控所有Story和任务状态，确保进度可视化
 - ⚠️ **范围限制**: 仅处理Sprint中已有的Story，不自动添加新Story到Sprint
 
 ### 2. 智能体协调和状态跟踪
 
 ```mermaid
 flowchart TD
-    A[🎯 Scrum Master协调] --> B[🤖 Development Team开发]
-    A --> C[🔍 Quality Agent验证]
-    B --> D[🔄 检查Sub-task状态]
-    C --> D
-    D --> E{所有Sub-task为Done?}
-    E -->|否| A
-    E -->|是| F[✅ 标记Story为Done]
-    F --> G{所有Story为Done?}
-    G -->|否| A
-    G -->|是| H[🔍 Story状态验证]
-    H --> I{验证通过?}
-    I -->|否| J[❌ 验证失败报告]
-    I -->|是| K[🏁 关闭Sprint]
-    K --> L[📄 生成交付报告]
-    L --> M[✅ 流程完成]
+    A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
+    B --> C[⚡ 并行启动所有开发任务]
+    B --> D[⚡ 并行启动所有测试任务]
+
+    C --> E[🤖 Development Team Agent集群]
+    D --> F[🔍 Quality Agent集群]
+
+    E --> G{开发任务完成?}
+    G -->|否| E
+    G -->|是| H[📢 开发完成通知]
+    H --> I[🔍 触发对应测试任务]
+
+    F --> J{测试任务完成?}
+    J -->|否| F
+    J -->|是| K[✅ 测试验证完成]
+
+    I --> K
+
+    K --> L{所有Story的task为Done?}
+    L -->|否| A
+    L -->|是| M[🔍 Story状态验证]
+    M --> N{验证通过?}
+    N -->|否| O[❌ 验证失败报告]
+    N -->|是| P[🏁 使用JIRA Sprint API关闭Sprint]
+    P --> Q[📄 生成交付报告]
+    Q --> R[✅ 流程完成]
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master主导**: Scrum Master Agent负责整体协调和流程管理
-- 🤖 **实际开发**: Development Team Agent必须执行所有开发工作，确保功能实现
-- 🔍 **实际验证**: Quality Agent必须执行所有质量验证工作，确保交付标准
-- 🔄 **状态循环**: 持续检查任务状态直到全部完成，基于实际工作成果
+- 🎯 **Scrum Master并行调度**: Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时启动所有开发任务和测试任务
+- ⚡ **大规模并行开发**: Development Team Agent集群并行执行所有开发任务，最大化开发效率
+- ⚡ **大规模并行测试**: Quality Agent集群并行执行所有测试任务，最大化测试效率
+- 📢 **开发完成通知**: Development Team Agent完成开发任务后自动发送通知，触发对应的测试任务执行
+- 🔄 **智能依赖管理**: 自动管理开发任务和测试任务之间的依赖关系，确保测试任务在开发完成后执行
+- 🔄 **并行状态监控**: 并行监控所有任务状态直到全部完成，基于实际工作成果
 - ✅ **基于实际工作的流转**: 所有任务完成且实际工作验证通过时标记Story为Done
 - 🔍 **状态验证**: 验证所有Story状态确保Sprint可以安全关闭
 - 🏁 **智能关闭**: Story全部完成且验证通过时使用JIRA Sprint API自动关闭Sprint

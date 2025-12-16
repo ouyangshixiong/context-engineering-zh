@@ -30,6 +30,11 @@ description: 基于Agile理论将JIRA Story分解为可执行Sub-tasks，符合S
 
 ## 🧩 分解工作流程
 
+### 0. 项目需求上下文分析
+- 读取并分析当前项目requirements目录中的需求文档、技术调研、示例代码等相关文件
+- 理解项目整体目标、业务背景和技术约束
+- 掌握需求优先级、验收标准和项目背景知识，确保分解方案与项目整体需求一致
+
 ### 1. Story理解与价值分析
 - 明确Story的业务目标和用户价值
 - 识别用户角色与预期收益
@@ -63,9 +68,10 @@ Sub-task将按照以下规范自动生成编号：
 
 ## 🛠️ 技术实现流程
 
-1. 读取jira.md中的JIRA_DOMAIN、user-email和auth-token，如果没有这个配置文件，提示用户输入JIRA_DOMAIN、user-email和auth-token并创建jira.md配置文件
-2. 根据example先获取所属story内部ID
-3. 将任务格式化，关联story，模仿`scripts/create_subtask.py`创建jira的Subtask
+1. 读取并分析当前项目requirements目录中的需求文档、技术调研、示例代码等相关文件，理解项目背景和约束条件
+2. 读取jira.md中的JIRA_DOMAIN、user-email和auth-token，如果没有这个配置文件，提示用户输入JIRA_DOMAIN、user-email和auth-token并创建jira.md配置文件
+3. 根据example先获取所属story内部ID
+4. 将任务格式化，关联story，模仿`scripts/create_subtask.py`创建jira的Subtask
 
 ## 📋 输出结构要求
 
