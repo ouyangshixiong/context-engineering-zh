@@ -52,3 +52,10 @@ npm install --save-dev typescript @types/node
 ### Development Team Agent
 负责代码生成和开发任务执行。
 - **自动化通知**: 开发任务状态流转为 "Done" 时，会自动发送 JIRA 通知，无需人工干预。
+
+### Scrum Master Agent
+专注于获取sprint中的stories和tasks信息，返回结构化数据并构建todo list。
+- **Sprint信息获取**: 获取Sprint的ID、名称、目标、状态等基本信息
+- **Story和Task分析**: 提取Sprint中的所有Story和关联的Sub-task
+- **Todo List构建**: 基于任务信息构建可执行的Todo List
+- **结构化数据输出**: 返回清晰的Sprint信息、Story列表、Task列表和Todo List

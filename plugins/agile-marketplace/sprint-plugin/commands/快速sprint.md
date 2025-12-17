@@ -1,5 +1,5 @@
 ---
-description: agile理论中的即时交付工作流，识别上下文中的sprint或者用户输入的sprint（如果没有任何sprint信息，提示用户输入），通过jira API获取相关详细信息，并快速完成开发任务“to do”、“in progress”、“done”的完整流程，触发多智能体并行有序协同
+description: agile理论中的即时交付工作流，识别上下文中的sprint或者用户输入的sprint（如果没有任何sprint信息，提示用户输入），通过jira API获取相关详细信息，包括sprint信息、stories和tasks数据，构建todo list，并触发多智能体并行有序协同完成开发任务
 ---
 
 # 快速Sprint Command
@@ -27,7 +27,7 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 - 🚫 **禁止任务类型Sprint**：Sprint必须使用正确的JIRA Sprint API创建，禁止创建任务类型的Sprint
 - ✅ **强制Sprint类型验证**：创建前验证Sprint类型正确性，确保符合Scrum规范
 - 🔍 **强制状态流转**：确保状态流转符合Scrum工作流，基于实际工作成果
-- ⚡ **强制智能体协作**：Scrum Master必须协调其他智能体执行实际工作，禁止直接状态更新
+- 📊 **强制数据获取**：Scrum Master负责获取sprint信息、stories和tasks数据，构建todo list，为后续智能体协作提供基础数据
 - 📋 **强制任务分解**：Story必须分解为可执行的任务单元，确保可独立验证
 - 🔄 **强制状态同步**：所有状态变更必须同步到JIRA，确保数据一致性
 - ⚠️ **强制范围限制**：仅处理Sprint中已有的Story，不自动添加新Story到Sprint
@@ -179,7 +179,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
+    A[📊 Sprint数据获取] --> B[📋 分析所有Story和task]
     B --> C[⚡ 为每个任务独立启动开发Agent]
     B --> D[⚡ 为每个任务独立启动测试Agent]
 
@@ -208,7 +208,7 @@ flowchart TD
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master并行调度**: 由Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时为每个任务独立启动开发Agent和测试Agent
+- 📊 **Sprint数据获取**: 由Scrum Master Agent负责获取sprint信息、分析所有story和task数据，构建todo list，为后续智能体协作提供基础数据
 - ⚡ **并行开发执行**: 所有开发任务并行执行，Development Team Agent集群处理多个开发任务（每个Agent实例处理一个任务），最大化开发效率
 - ⚡ **并行测试执行**: 所有测试任务并行执行，Quality Agent集群处理多个测试任务（每个Agent实例处理一个任务），最大化测试效率
 - 📢 **开发完成通知**: Development Team Agent完成开发任务后通过Hook自动发送通知，触发对应的测试任务执行
@@ -241,9 +241,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[🎯 Scrum Master Agent] --> B[📋 需求澄清和任务分解]
-    A --> C[🔄 智能体协调和状态监控]
-    A --> D[✅ 基于实际工作的状态更新]
+    A[📊 Scrum Master Agent] --> B[🔍 获取Sprint信息]
+    A --> C[📋 分析Stories和Tasks]
+    A --> D[✅ 构建Todo List]
 
     E[🤖 Development Team Agent] --> F[💻 实际代码开发]
     E --> G[🔧 功能实现]
@@ -253,12 +253,17 @@ flowchart TD
     I --> K[✅ 质量验证]
     I --> L[📊 测试报告生成]
 
-    F --> D
-    G --> D
-    H --> D
-    J --> D
-    K --> D
-    L --> D
+    B --> M[📊 数据基础]
+    C --> M
+    D --> M
+    F --> N[✅ 开发工作成果]
+    G --> N
+    H --> N
+    J --> O[✅ 测试验证结果]
+    K --> O
+    L --> O
+    N --> P[📈 状态更新基础]
+    O --> P
 ```
 
 **验证机制:**
@@ -322,7 +327,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[🎯 Scrum Master并行调度] --> B[📋 分析所有Story和task]
+    A[📊 Sprint数据获取] --> B[📋 分析所有Story和task]
     B --> C[⚡ 为每个任务独立启动开发Agent]
     B --> D[⚡ 为每个任务独立启动测试Agent]
 
@@ -351,7 +356,7 @@ flowchart TD
 ```
 
 **智能体协调机制:**
-- 🎯 **Scrum Master并行调度**: Scrum Master Agent负责高层次并行调度，当sprint中有多个story时，并行分析所有story和task，同时为每个任务独立启动开发Agent和测试Agent
+- 📊 **Sprint数据获取**: Scrum Master Agent负责获取sprint信息、分析所有story和task数据，构建todo list，为后续智能体协作提供基础数据
 - ⚡ **大规模并行开发**: Development Team Agent集群并行执行所有开发任务（每个Agent实例处理一个任务），最大化开发效率
 - ⚡ **大规模并行测试**: Quality Agent集群并行执行所有测试任务（每个Agent实例处理一个任务），最大化测试效率
 - 📢 **开发完成通知**: Development Team Agent完成开发任务后通过Hook自动发送通知，触发对应的测试任务执行
