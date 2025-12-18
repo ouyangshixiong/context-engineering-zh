@@ -1,14 +1,19 @@
-import { readFileSync } from 'fs';
 import { exit } from 'process';
+import { readJiraConfig } from '../scripts/lib/config'
 
-// Check environment variables
-const { EMAIL, API_TOKEN, JIRA_DOMAIN } = process.env;
+const cfg = (() => {
+    try {
+        const c = readJiraConfig()
+        return { domain: c.domain, email: c.email, apiToken: c.apiToken }
+    } catch {
+        return undefined
+    }
+})()
 
-if (!EMAIL || !API_TOKEN || !JIRA_DOMAIN) {
-    exit(0);
-}
+if (!cfg) exit(0)
 
-const auth = Buffer.from(`${EMAIL}:${API_TOKEN}`).toString('base64');
+const { domain } = cfg
+const auth = Buffer.from(`${cfg.email}:${cfg.apiToken}`).toString('base64');
 const headers = {
     'Authorization': `Basic ${auth}`,
     'Accept': 'application/json',
@@ -17,10 +22,8 @@ const headers = {
 
 async function checkAndNotify() {
     try {
-        // 1. Search for issues transitioned to Done in the last 5 minutes
-        // We use JQL to find relevant issues
         const jql = 'status = Done AND updated >= -5m ORDER BY updated DESC';
-        const searchUrl = `https://${JIRA_DOMAIN}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=5`;
+        const searchUrl = `https://${domain}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=5`;
         
         const searchRes = await fetch(searchUrl, { headers });
         if (!searchRes.ok) return;
@@ -31,8 +34,13 @@ async function checkAndNotify() {
         for (const issue of issues) {
             const issueKey = issue.key;
 
+            const issueType = String(issue.fields?.issuetype?.name ?? '');
+            if (issueType && issueType.toLowerCase() !== 'sub-task' && issueType.toLowerCase() !== 'subtask') {
+                continue;
+            }
+
             // 2. Check comments to avoid duplicate notifications
-            const commentUrl = `https://${JIRA_DOMAIN}/rest/api/3/issue/${issueKey}/comment`;
+            const commentUrl = `https://${domain}/rest/api/3/issue/${issueKey}/comment`;
             const commentRes = await fetch(commentUrl, { headers });
             
             if (!commentRes.ok) continue;

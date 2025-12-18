@@ -5,6 +5,35 @@ description: agile理论中的即时交付工作流，识别上下文中的sprin
 # 快速Sprint Command
 > 基于多智能体并行协作的分钟级软件交付工作流
 
+在执行任何JIRA操作或智能体调度前，必须先运行工作流编排器并以其JSON输出为唯一事实来源：
+
+```bash
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/quick_sprint.ts --input "<用户原始输入>"
+```
+
+如果用户输入包含Sprint ID（例如`/sprint-plugin:快速sprint 123`），优先使用Sprint ID作为范围来源：
+
+```bash
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/quick_sprint.ts --input "<用户原始输入>" --sprint-id 123
+```
+
+规则：
+- 只处理JSON输出中 `scope.stories_in_sprint` 的Story
+- `scope.stories_out_of_sprint` 仅提示范围限制，不自动添加进Sprint
+- `items.work_items` 为唯一任务清单，不允许自行脑补或新增
+
+工作流执行（由TypeScript统一编排三类Agent）：
+
+```bash
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>" --dry-run
+```
+
+Sprint ID模式：
+
+```bash
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>" --sprint-id 123 --dry-run
+```
+
 ## 📋 Agile Scrum Sprint 文字规范
 
 ### Scrum Sprint 定义

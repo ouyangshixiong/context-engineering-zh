@@ -6,7 +6,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx ts-node plugins/agile-marketplace/sprint-plugin/hooks/notify_dev_completion.ts"
+            "command": "npx -y tsx plugins/agile-marketplace/sprint-plugin/hooks/notify_dev_completion.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "quality-agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y tsx plugins/agile-marketplace/sprint-plugin/hooks/notify_quality_completion.ts"
           }
         ]
       }
