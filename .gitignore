@@ -6,3 +6,10 @@ __pycache__
 .DS_Store
 cnn-visual-tutorial/
 yolov10/
+plugins/agile-marketplace/sprint-plugin/node_modules/
+.trae/
+sprint_logs/
+jira.md
+.claude/jira.md
+plugins/agile-marketplace/sprint-plugin/jira.md
+plugins/agile-marketplace/sprint-plugin/.claude/jira.md

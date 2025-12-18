@@ -10,7 +10,11 @@ function ensureDir(): void {
   if (!existsSync(LOG_DIR)) {
     try {
       mkdirSync(LOG_DIR, { recursive: true })
-    } catch {}
+    } catch (err) {
+      try {
+        process.stderr.write(`[sprint-log] mkdir failed: ${String((err as any)?.message ?? err)}\n`)
+      } catch {}
+    }
   }
 }
 
@@ -22,12 +26,20 @@ export async function logEvent(scope: string, event: string, meta?: any): Promis
   const line = JSON.stringify(payload) + '\n'
   try {
     await fsp.appendFile(LOG_FILE, line)
-  } catch {}
+  } catch (err) {
+    try {
+      process.stderr.write(`[sprint-log] append failed: ${String((err as any)?.message ?? err)}\n`)
+    } catch {}
+  }
 }
 
 export function logInfo(scope: string, message: string): void {
   if (!ENABLE) return
   try {
     process.stdout.write(`[${scope}] ${message}\n`)
-  } catch {}
+  } catch (err) {
+    try {
+      process.stderr.write(`[sprint-log] stdout failed: ${String((err as any)?.message ?? err)}\n`)
+    } catch {}
+  }
 }

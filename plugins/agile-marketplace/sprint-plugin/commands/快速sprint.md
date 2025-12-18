@@ -25,13 +25,13 @@ npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/quick_sprint.ts --inp
 工作流执行（由TypeScript统一编排三类Agent）：
 
 ```bash
-npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>" --dry-run
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>"
 ```
 
 Sprint ID模式：
 
 ```bash
-npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>" --sprint-id 123 --dry-run
+npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_agents.ts --input "<用户原始输入>" --sprint-id 123
 ```
 
 ## 📋 Agile Scrum Sprint 文字规范

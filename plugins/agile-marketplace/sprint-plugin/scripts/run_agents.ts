@@ -18,6 +18,7 @@ function buildOptionsFromArgv(argv: string[]): QuickSprintOptions {
     userInput,
     closeWhenDone: hasFlag(argv, '--close'),
     sprintId,
+    autoCreateSprint: hasFlag(argv, '--auto-create-sprint'),
     sprintName: readArgValue(argv, '--sprint-name'),
     sprintGoal: readArgValue(argv, '--sprint-goal')
   }
@@ -34,7 +35,8 @@ async function run(): Promise<void> {
         'Options:',
         '  --max-items <n>        Limit processed work items (default: 5)',
         '  --concurrency <n>      Concurrent work items (default: 2)',
-        '  --sprint-id <id>        Use a specific sprint id as scope source'
+        '  --sprint-id <id>        Use a specific sprint id as scope source',
+        '  --auto-create-sprint   Create sprint when no active sprint exists'
       ].join('\n') +
         '\n'
     )
@@ -102,11 +104,21 @@ async function run(): Promise<void> {
   const results: any[] = []
   logEvent('orchestrator', 'execute_start', { work_items: workItems.length, concurrency })
 
-  function fireAndForget(cmd: string, args: string[]): void {
+  function fireAndForget(cmd: string, args: string[], extraEnv?: Record<string, string | undefined>): void {
     try {
-      const child = spawn(cmd, args, { stdio: 'ignore', detached: true })
+      const env = extraEnv ? { ...process.env, ...extraEnv } : process.env
+      const child = spawn(cmd, args, { stdio: 'ignore', detached: true, env })
       child.unref()
-    } catch {}
+    } catch (err) {
+      void logEvent('orchestrator', 'hook_spawn_failed', {
+        cmd,
+        args,
+        error: String((err as any)?.message ?? err)
+      })
+      try {
+        process.stderr.write(`[orchestrator] hook_spawn_failed: ${cmd} ${args.join(' ')}\n`)
+      } catch {}
+    }
   }
 
   await runWithConcurrency({
@@ -125,7 +137,10 @@ async function run(): Promise<void> {
         const dev = await runDevTeamSubAgent(llm, { issueKey: item.key, context: baseContext })
         await applyJiraActions({ jira, allowedIssueKeys, actions: dev.result.actions })
         logEvent('agent', 'dev_actions_applied', { issueKey: item.key, count: dev.result.actions.length })
-        fireAndForget('npx', ['-y', 'tsx', 'plugins/agile-marketplace/sprint-plugin/hooks/notify_dev_completion.ts'])
+        fireAndForget('npx', ['-y', 'tsx', 'plugins/agile-marketplace/sprint-plugin/hooks/notify_dev_completion.ts'], {
+          SPRINT_HOOK_ISSUE_KEYS: item.key,
+          SPRINT_HOOK_PROJECT_KEY: jiraCfg.projectKey
+        })
         results.push({ agent: 'development-team-agent', issueKey: item.key, actions: dev.result.actions })
         logInfo('agent', `Dev actions applied for ${item.key}`)
       }
@@ -134,7 +149,10 @@ async function run(): Promise<void> {
       const qa = await runQualitySubAgent(llm, { issueKey: item.key, context: baseContext })
       await applyJiraActions({ jira, allowedIssueKeys, actions: qa.result.actions })
       logEvent('agent', 'qa_actions_applied', { issueKey: item.key, count: qa.result.actions.length })
-      fireAndForget('npx', ['-y', 'tsx', 'plugins/agile-marketplace/sprint-plugin/hooks/notify_quality_completion.ts'])
+      fireAndForget('npx', ['-y', 'tsx', 'plugins/agile-marketplace/sprint-plugin/hooks/notify_quality_completion.ts'], {
+        SPRINT_HOOK_ISSUE_KEYS: item.key,
+        SPRINT_HOOK_PROJECT_KEY: jiraCfg.projectKey
+      })
       results.push({ agent: 'quality-agent', issueKey: item.key, actions: qa.result.actions })
       logInfo('agent', `QA actions applied for ${item.key}`)
     }

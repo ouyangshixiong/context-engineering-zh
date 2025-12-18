@@ -1,7 +1,7 @@
 import { ensurePluginNpmDependenciesInstalled, readJiraConfig } from './lib/config'
 import { JiraClient } from './lib/jira'
 import { planQuickSprint, QuickSprintOptions } from './lib/quickSprintWorkflow'
-import { readArgValue, inferSprintIdFromInput } from './lib/utils'
+import { readArgValue, hasFlag, inferSprintIdFromInput } from './lib/utils'
 
 // Import debug logger
 const DEBUG_MODE = process.env.SPRINT_DEBUG === '1' || process.env.SPRINT_DEBUG === 'true'
@@ -34,6 +34,7 @@ function buildOptionsFromArgv(argv: string[]): QuickSprintOptions {
     userInput,
     closeWhenDone: argv.includes('--close'),
     sprintId,
+    autoCreateSprint: hasFlag(argv, '--auto-create-sprint'),
     sprintName: readArgValue(argv, '--sprint-name'),
     sprintGoal: readArgValue(argv, '--sprint-goal')
   }
@@ -107,6 +108,7 @@ async function main(): Promise<void> {
         'Options:',
         '  --input <text>         User input text containing story keys',
         '  --sprint-id <id>        Use a specific sprint id as scope source',
+        '  --auto-create-sprint   Create sprint when no active sprint exists',
         '  --close                Close sprint if all work items are Done',
         '  --sprint-name <name>   Override sprint name when creating',
         '  --sprint-goal <goal>   Override sprint goal when creating'
