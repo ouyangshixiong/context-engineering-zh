@@ -1,5 +1,35 @@
-# 核心同步引擎
+# 核心同步引擎（TypeScript优先）
 
+> 说明：同步与JIRA集成全部通过TypeScript客户端（JiraClient）执行，禁止使用curl与Shell。下文的Shell示例不再推荐，仅供参考；请改用`scripts/lib/jira.ts`提供的API与应用工作流。
+
+## TypeScript示例
+
+```typescript
+import { JiraClient } from '../scripts/lib/jira'
+
+const jira = new JiraClient({
+  domain: process.env.JIRA_DOMAIN!,
+  email: process.env.JIRA_EMAIL!,
+  apiToken: process.env.JIRA_TOKEN!
+})
+await jira.validateConnection()
+
+// 强制同步检查点：双重状态验证 + 状态流转
+async function syncCheckpoint(issueKey: string, target: 'In Progress' | 'Done') {
+  const issue = await jira.getIssue(issueKey)
+  const current = issue.fields.status?.name || 'To Do'
+  if (current === target) return
+  await jira.transitionIssue(issueKey, target)
+}
+
+// API兼容性：统一通过 JiraClient，自动日志与错误捕获
+const boards = await jira.getBoardsByProject('RWC')
+const sprints = await jira.getActiveSprints(boards[0].id)
+
+// Sprint 操作
+const sprint = await jira.getSprint(sprints[0].id)
+const issues = await jira.getSprintIssues(sprint.id)
+```
 ## 🎯 核心功能
 - JIRA API强制同步协议
 - API兼容性智能检测和迁移

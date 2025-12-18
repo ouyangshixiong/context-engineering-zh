@@ -1,5 +1,50 @@
-# JIRA集成系统
+# JIRA集成系统（TypeScript优先）
 
+> 说明：本系统已升级为TypeScript客户端（JiraClient）统一执行JIRA操作，禁止使用curl与Shell脚本。下文的Shell示例不再推荐，仅供参考；请改用`scripts/lib/jira.ts`提供的API。
+
+## TypeScript用法示例
+
+```typescript
+import { JiraClient } from '../scripts/lib/jira'
+
+const jira = new JiraClient({
+  domain: process.env.JIRA_DOMAIN!,
+  email: process.env.JIRA_EMAIL!,
+  apiToken: process.env.JIRA_TOKEN!
+})
+await jira.validateConnection()
+
+// 添加评论
+await jira.addComment('RWC-123', '开始验证与进度记录')
+const comments = await jira.getIssueComments('RWC-123')
+
+// 状态流转
+await jira.transitionIssue('RWC-123', 'In Progress')
+await jira.transitionIssue('RWC-123', 'Done')
+
+// 更新字段（例如描述/自定义字段）
+await jira.updateIssueFields('RWC-123', {
+  description: {
+    type: 'doc',
+    version: 1,
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: '任务描述更新' }]}]
+  }
+})
+
+// 创建缺陷并关联到Story
+const bug = await jira.createBug({
+  projectKey: 'RWC',
+  summary: '[Quality Agent] 接口超时问题',
+  priorityName: 'High',
+  description: '接口响应时间超过阈值，需要优化查询与缓存',
+  labels: ['quality-agent', 'automated-bug']
+})
+await jira.linkIssues(bug.key, 'RWC-123', 'Blocks')
+
+// 读取项目状态配置
+const statuses = await jira.getProjectStatuses('RWC')
+console.log(statuses)
+```
 ## 🎯 核心功能
 - JIRA评论系统集成
 - 任务状态实时跟踪

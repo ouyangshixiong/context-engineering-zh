@@ -11,12 +11,8 @@ export type JiraConfig = {
   boardId?: number
 }
 
-export type LlmConfig = {
-  provider: 'anthropic' | 'openai_compatible'
-  apiKey: string
-  model: string
-  baseUrl?: string
-}
+// LlmConfig removed as we use Agent SDK
+
 
 function pluginRootDir(): string {
   const here = dirname(fileURLToPath(import.meta.url))
@@ -144,7 +140,9 @@ export function readJiraConfig(): JiraConfig {
 export function ensurePluginNpmDependenciesInstalled(): void {
   const root = pluginRootDir()
   const tsxBin = join(root, 'node_modules', '.bin', process.platform === 'win32' ? 'tsx.cmd' : 'tsx')
-  if (existsSync(tsxBin)) return
+  const hasAgentSdk = existsSync(join(root, 'node_modules', '@anthropic-ai', 'claude-agent-sdk'))
+  const hasZod = existsSync(join(root, 'node_modules', 'zod'))
+  if (existsSync(tsxBin) && hasAgentSdk && hasZod) return
 
   const hasLock = existsSync(join(root, 'package-lock.json'))
   const args = hasLock ? ['ci'] : ['install']
@@ -179,28 +177,6 @@ export function readJiraConfigFromEnv(): JiraConfig {
   }
 }
 
-export function readLlmConfigFromEnv(): LlmConfig {
-  const providerRaw = (process.env.LLM_PROVIDER ?? 'anthropic').toLowerCase()
-  const provider = providerRaw === 'openai_compatible' ? 'openai_compatible' : 'anthropic'
-  const model = process.env.LLM_MODEL ?? (provider === 'anthropic' ? 'claude-3-5-sonnet-20241022' : 'gpt-4o-mini')
-
-  const apiKey =
-    provider === 'anthropic'
-      ? process.env.ANTHROPIC_API_KEY
-      : process.env.OPENAI_API_KEY ?? process.env.LLM_API_KEY
-
-  if (!apiKey) {
-    throw new Error('Missing required LLM api key env var')
-  }
-
-  const baseUrl = process.env.LLM_BASE_URL
-  return {
-    provider,
-    apiKey,
-    model,
-    baseUrl
-  }
-}
 
 export function readTextFile(filePath: string): string {
   return readFileSync(filePath, 'utf8')

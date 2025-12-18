@@ -1,6 +1,8 @@
 import { JiraClient, JiraIssue, JiraSprint } from './jira'
 import { parseStoryKeys } from './utils'
-import { logEvent } from './log'
+
+// Removed log dependency as it was used for CLI progress bars which are deprecated
+
 const toIsoUtc = (date: Date): string => date.toISOString()
 const addDays = (date: Date, days: number): Date => {
   const d = new Date(date.getTime())
@@ -119,7 +121,7 @@ async function ensureActiveSprint(params: {
   const active = await params.jira.getActiveSprints(params.boardId)
   if (active.length > 0) return active[0]
   if (!params.allowCreate) {
-    logEvent('plan', 'no_active_sprint', { boardId: params.boardId })
+    // Removed logEvent
     throw new Error('NO_ACTIVE_SPRINT')
   }
   const name = params.sprintName ?? pickDefaultSprintName(params.projectKey)
@@ -133,6 +135,34 @@ async function resolveSprint(jira: JiraClient, config: { projectKey?: string; bo
     const sprint = await jira.getSprint(opts.sprintId)
     const boardId = config.boardId ?? -1
     return { sprint, boardId }
+  }
+  if (opts.sprintName) {
+    if (config.boardId) {
+      const all = await jira.getSprints(config.boardId, 'active,future,closed')
+      const match = all.find((s) => String(s.name ?? '').toLowerCase() === String(opts.sprintName ?? '').toLowerCase())
+      if (match) return { sprint: match, boardId: config.boardId }
+      if (opts.autoCreateSprint) {
+        const start = toIsoUtc(new Date())
+        const end = toIsoUtc(addDays(new Date(), 14))
+        const created = await jira.createSprint({ name: opts.sprintName!, boardId: config.boardId, goal: opts.sprintGoal, startDate: start, endDate: end })
+        return { sprint: created, boardId: config.boardId }
+      }
+      throw new Error('SPRINT_NAME_NOT_FOUND')
+    }
+    if (!config.projectKey) throw new Error('Missing PROJECT_KEY/JIRA_PROJECT_KEY or JIRA_BOARD_ID for sprint discovery')
+    const boards = await jira.getBoardsByProject(config.projectKey)
+    const scrumBoards = boards.filter((b) => b.type === 'scrum')
+    const discovered = selectBoardId(undefined, (scrumBoards[0] ?? boards[0])?.id)
+    const all = await jira.getSprints(discovered, 'active,future,closed')
+    const match = all.find((s) => String(s.name ?? '').toLowerCase() === String(opts.sprintName ?? '').toLowerCase())
+    if (match) return { sprint: match, boardId: discovered }
+    if (opts.autoCreateSprint) {
+      const start = toIsoUtc(new Date())
+      const end = toIsoUtc(addDays(new Date(), 14))
+      const created = await jira.createSprint({ name: opts.sprintName!, boardId: discovered, goal: opts.sprintGoal, startDate: start, endDate: end })
+      return { sprint: created, boardId: discovered }
+    }
+    throw new Error('SPRINT_NAME_NOT_FOUND')
   }
   if (config.boardId) {
     const sprint = await ensureActiveSprint({
@@ -166,11 +196,12 @@ export async function planQuickSprint(params: {
   opts: QuickSprintOptions
 }): Promise<QuickSprintPlan> {
   try {
-    logEvent('plan', 'start', { input_preview: String(params.opts.userInput ?? '').slice(0, 200), sprintId: params.opts.sprintId })
+    // Removed logEvent calls
+    // logEvent('plan', 'start', { input_preview: String(params.opts.userInput ?? '').slice(0, 200), sprintId: params.opts.sprintId })
     const parsed = parseStoryKeys(params.opts.userInput)
 
     if (!params.opts.sprintId && parsed.storyKeys.length === 0) {
-      logEvent('plan', 'no_scope', { raw: parsed.raw })
+      // Removed logEvent
       return {
         ok: false,
         error: 'NO_SPRINT_OR_STORY_KEYS',
@@ -179,7 +210,7 @@ export async function planQuickSprint(params: {
     }
 
     const { sprint, boardId } = await resolveSprint(params.jira, params.config, params.opts)
-    logEvent('plan', 'sprint_resolved', { boardId, sprint })
+    // Removed logEvent
 
     const sprintIssues = await params.jira.getSprintIssues(sprint.id)
     const stories = sprintIssues.filter((i) => isStoryType(normalizeIssueType(i)))
@@ -193,11 +224,7 @@ export async function planQuickSprint(params: {
     }
     const directIssueSample = directIssues.slice(0, 20).map((i) => i.key)
     if (directIssues.length > 0) {
-      logEvent('plan', 'ignored_direct_issues', {
-        total: directIssues.length,
-        by_type: directIssuesByType,
-        sample_keys: directIssueSample
-      })
+      // Removed logEvent
     }
     const storyKeysInSprint = stories.map((s) => s.key)
     const inSet = new Set(storyKeysInSprint)
@@ -247,6 +274,8 @@ export async function planQuickSprint(params: {
       }
     }
 
+    // Removed logEvent
+    /*
     logEvent('plan', 'computed', {
       stories_total: stories.length,
       work_items_total: workItems.length,
@@ -254,21 +283,22 @@ export async function planQuickSprint(params: {
       qa_next: plan.next_actions?.quality?.length,
       ignored_direct_issues: directIssues.length
     })
+    */
 
     if (params.opts.closeWhenDone) {
       const remaining = workItems.filter((w) => w.status !== 'Done')
       if (remaining.length === 0) {
         await params.jira.closeSprint(sprint.id)
         if (plan.jira) plan.jira.sprint.state = 'closed'
-        logEvent('plan', 'sprint_closed', { sprintId: sprint.id })
+        // Removed logEvent
       }
     }
 
-    logEvent('plan', 'complete', { ok: true })
+    // Removed logEvent
     return plan
   } catch (err) {
     const msg = String((err as any)?.message ?? err)
-    logEvent('plan', 'failed', { error: msg })
+    // Removed logEvent
     if (msg === 'NO_ACTIVE_SPRINT') {
       return {
         ok: false,

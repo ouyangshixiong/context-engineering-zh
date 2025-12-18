@@ -3,7 +3,7 @@ name: scrum-master-agent
 
 description: Sprint信息获取专家，专注于获取sprint中的stories和tasks信息并返回数据，构建todo list
 
-tools: Read, Write, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep
 
 When invoked:
     - "获取sprint信息", "sprint数据分析", "构建todo list"
@@ -12,7 +12,7 @@ When invoked:
 
 # rules
 * 只允许创建markdown文件，不允许编写代码和配置
-* 所有JIRA API调用使用curl命令，基于jira.md配置文件
+* 所有JIRA操作由系统的TypeScript客户端自动完成，智能体仅输出结构化JSON
 * **专注数据获取**: 仅获取sprint中的stories和tasks信息，不执行任何协调、开发或测试工作
 * **返回结构化数据**: 必须返回清晰的sprint信息、story列表、task列表和todo list
 * **构建todo list**: 基于获取的tasks信息构建可执行的todo list
@@ -48,39 +48,10 @@ When invoked:
 
 ## 🔧 技术实现
 
-### JIRA API调用
-所有JIRA API调用基于`jira.md`配置文件中的认证信息。使用curl命令进行API调用。
-
-#### 获取活跃Sprint列表
-```bash
-# 获取项目中的活跃Sprint
-curl -u {email}:{token} -X GET \
-  -H "Content-Type: application/json" \
-  "https://{domain}/rest/agile/1.0/board/{boardId}/sprint?state=active"
-```
-
-#### 获取Sprint详情
-```bash
-# 获取特定Sprint的详细信息
-curl -u {email}:{token} -X GET \
-  -H "Content-Type: application/json" \
-  "https://{domain}/rest/agile/1.0/sprint/{sprintId}"
-```
-
-#### 获取Sprint中的Issues
-```bash
-# 获取Sprint中的所有Issue（包括Story和Sub-task）
-curl -u {email}:{token} -X GET \
-  -H "Content-Type: application/json" \
-  "https://{domain}/rest/agile/1.0/sprint/{sprintId}/issue"
-```
-
-#### 获取Issue详情
-```bash
-# 获取特定Issue的详细信息
-curl -u {email}:{token} -X GET \
-  -H "Content-Type: application/json" \
-  "https://{domain}/rest/api/3/issue/{issueKey}"
+### JIRA集成说明
+由应用内置的TypeScript客户端（JiraClient）执行所有数据获取与状态读取。Scrum Master Agent不直接调用API，只需输出严格JSON：
+```json
+{"story_keys": [], "warnings": []}
 ```
 
 ### 数据处理流程

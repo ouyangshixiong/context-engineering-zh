@@ -58,7 +58,17 @@ export class JiraClient {
       throw new Error(`JIRA API error ${res.status} ${res.statusText}: ${text.slice(0, 500)}`)
     }
 
-    return (await res.json()) as T
+    // Handle empty responses (e.g., 204 No Content)
+    const text = await res.text()
+    if (!text || text.trim() === '') {
+      return undefined as unknown as T
+    }
+
+    try {
+      return JSON.parse(text) as T
+    } catch (error) {
+      throw new Error(`Failed to parse JSON response: ${text.slice(0, 200)}. Error: ${error}`)
+    }
   }
 
   async validateConnection(): Promise<void> {
@@ -77,6 +87,14 @@ export class JiraClient {
     const data = await this.requestJson<{ values?: JiraSprint[] }>(
       'GET',
       `/rest/agile/1.0/board/${boardId}/sprint?state=active&maxResults=50`
+    )
+    return data.values ?? []
+  }
+
+  async getSprints(boardId: number, states: string = 'active,future,closed'): Promise<JiraSprint[]> {
+    const data = await this.requestJson<{ values?: JiraSprint[] }>(
+      'GET',
+      `/rest/agile/1.0/board/${boardId}/sprint?state=${encodeURIComponent(states)}&maxResults=50`
     )
     return data.values ?? []
   }
@@ -176,6 +194,53 @@ export class JiraClient {
     }
     await this.requestJson('POST', `/rest/api/3/issue/${encodeURIComponent(issueKey)}/transitions`, {
       transition: { id: target.id }
+    })
+  }
+
+  async updateIssueFields(issueKey: string, fields: Record<string, unknown>): Promise<void> {
+    await this.requestJson('PUT', `/rest/api/3/issue/${encodeURIComponent(issueKey)}`, { fields })
+  }
+
+  async getProjectStatuses(projectKey: string): Promise<unknown> {
+    return await this.requestJson('GET', `/rest/api/3/project/${encodeURIComponent(projectKey)}/statuses`)
+  }
+
+  async createBug(params: {
+    projectKey: string
+    summary: string
+    priorityName?: string
+    description?: string
+    components?: string[]
+    labels?: string[]
+  }): Promise<{ key: string; id: string }> {
+    const description =
+      params.description
+        ? {
+            type: 'doc',
+            version: 1,
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: params.description }]}]
+          }
+        : undefined
+    const components = (params.components ?? []).map((name) => ({ name }))
+    const labels = params.labels ?? []
+    return await this.requestJson('POST', '/rest/api/3/issue', {
+      fields: {
+        project: { key: params.projectKey },
+        summary: params.summary,
+        issuetype: { name: 'Bug' },
+        ...(params.priorityName ? { priority: { name: params.priorityName } } : {}),
+        ...(description ? { description } : {}),
+        ...(components.length > 0 ? { components } : {}),
+        ...(labels.length > 0 ? { labels } : {})
+      }
+    })
+  }
+
+  async linkIssues(inwardIssueKey: string, outwardIssueKey: string, typeName: string = 'Relates'): Promise<void> {
+    await this.requestJson('POST', '/rest/api/3/issueLink', {
+      type: { name: typeName },
+      inwardIssue: { key: inwardIssueKey },
+      outwardIssue: { key: outwardIssueKey }
     })
   }
 }
