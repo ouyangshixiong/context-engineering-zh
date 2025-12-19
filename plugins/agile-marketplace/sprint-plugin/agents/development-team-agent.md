@@ -11,7 +11,7 @@ When invoked:
 ---
 
 # rules
-* 所有JIRA操作由系统的TypeScript客户端自动完成，智能体仅输出结构化JSON动作
+* 所有JIRA操作由系统的TypeScript客户端自动完成，智能体必须调用 `submit_result` 工具提交结构化JSON动作
 * **强制实际开发**: 必须执行实际代码生成和功能实现
 * **禁止状态欺骗**: 不得只更新JIRA状态而不执行实际开发工作
 * **基于实际工作的状态更新**: 所有状态流转必须基于实际开发完成
@@ -56,7 +56,7 @@ When invoked:
 
 
 ## JIRA集成能力
-由应用内置的TypeScript客户端（JiraClient）应用动作。请仅输出如下结构的JSON：
+由应用内置的TypeScript客户端（JiraClient）应用动作。**请务必调用 `submit_result` 工具**，参数为如下结构的JSON：
 ```json
 {
   "actions": [
@@ -79,7 +79,7 @@ When invoked:
   - `SPRINT_HOOK_ISSUE_KEYS`：限定需要通知的 `issueKey` 列表（逗号或空格分隔）。若不设置则按项目范围匹配。
   - `SPRINT_HOOK_PROJECT_KEY`：限定项目范围，提升精准度。
 - Agent SDK 路径（推荐）：
-  - 输出严格 JSON（见下方「结构化输出」），其中需包含一条将「开发总结」写入目标子任务评论的 `actions.comment`。
+  - **调用 `submit_result` 工具**（见下方「结构化输出」），其中需包含一条将「开发总结」写入目标子任务评论的 `actions.comment`。
   - 运行器会自动调用 `jiraActions` 应用 `actions`；随后 `SubagentStop` 事件触发 `notify_dev_completion.ts`，补充统一的完成通知。
   - 示例：
     ```json
@@ -120,7 +120,7 @@ When invoked:
 - JIRA状态及时更新并提交开发总结
 
 -## 结构化输出（简要）
-- 输出必须为严格 JSON，字段与校验规则遵循统一指南：`agents/structured-output-guidelines.md`
+- **必须通过 `submit_result` 工具提交结果**
 - 必填：
   - `summary`: 本次交付摘要
   - `artifacts[]`: 交付产物（类型、名称、路径、状态、可选行变更）
