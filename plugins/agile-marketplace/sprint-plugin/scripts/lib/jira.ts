@@ -41,7 +41,7 @@ export class JiraClient {
     this.authHeader = `Basic ${token}`
   }
 
-  private async requestJson<T>(method: string, path: string, body?: unknown): Promise<T> {
+  public async requestJson<T>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `https://${this.domain}${path.startsWith('/') ? path : `/${path}`}`
     const res = await fetch(url, {
       method,

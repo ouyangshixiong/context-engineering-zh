@@ -8,7 +8,8 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start-agent": "tsx scripts/sprint-agent.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.1.72",
