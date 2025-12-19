@@ -1,5 +1,5 @@
-import { JiraClient } from './lib/jira'
-import { readJiraConfig } from './lib/config'
+import { JiraClient } from '../lib/jira'
+import { readJiraConfig } from '../lib/config'
 
 async function generateSprintClosingReport() {
   const config = readJiraConfig()
@@ -8,7 +8,6 @@ async function generateSprintClosingReport() {
   try {
     console.log('\n📊 Sprint 最终报告生成...\n')
 
-    // 1. 获取Sprint详情
     const activeSprints = await jira.getActiveSprints(config.boardId ?? -1)
     if (activeSprints.length === 0) {
       throw new Error('未找到任何活跃Sprint')
@@ -18,7 +17,6 @@ async function generateSprintClosingReport() {
     console.log(`📋 Sprint 执行 Detail: ${sprint.name} (ID: ${sprint.id})`)
     console.log(`   总Issue数量: ${sprintIssues.length}`)
 
-    // 2. Story状态分析
     const stories = sprintIssues.filter(i =>
       i.fields?.issuetype?.name?.toLowerCase() === 'story'
     )
@@ -31,7 +29,6 @@ async function generateSprintClosingReport() {
       console.log(`   状态: ${status}`)
     })
 
-    // 3. Sub-task状态分析
     const subtasks = sprintIssues.filter(i => {
       const type = i.fields?.issuetype?.name?.toLowerCase() ?? ''
       return type === 'sub-task' || type === 'subtask' || type.includes('子任务')
@@ -47,7 +44,6 @@ async function generateSprintClosingReport() {
     console.log(`   ⏳ In Progress: ${inProgressSubtasks}`)
     console.log(`   📋 To Do: ${todoSubtasks}`)
 
-    // 4. 模拟工作完成状态（基于报告）
     const allTasksDone = doneSubtasks === subtasks.length
 
     console.log(`\n🎯 完成度验证:`)
@@ -59,7 +55,6 @@ async function generateSprintClosingReport() {
       console.log(`   ⚠️ 仍有 ${todoSubtasks + inProgressSubtasks} 个任务在进行中`)
     }
 
-    // 5. 执行总结
     console.log(`\n🏆 Sprint 执行总结:`)
     console.log('   执行效率: ⭐⭐⭐⭐⭐ (分钟级交付)')
     console.log('   开发质量: ⭐⭐⭐⭐⭐ (95%+ 通过率)')
@@ -101,10 +96,8 @@ async function closeSprint() {
 async function main() {
   console.log('🚀 Sprint 最终交付验证和关闭\n')
 
-  // 1. 生成执行报告
   const canClose = await generateSprintClosingReport()
 
-  // 2. 执行Sprint关闭
   if (canClose) {
     await closeSprint()
   } else {

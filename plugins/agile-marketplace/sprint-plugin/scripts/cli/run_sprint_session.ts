@@ -1,24 +1,21 @@
 import { unstable_v2_createSession, tool } from '@anthropic-ai/claude-agent-sdk'
 import { z } from 'zod'
-import { JiraClient } from './lib/jira'
-import { readJiraConfig } from './lib/config'
-import { applyActions } from './lib/tools/jiraActions'
-import { buildExecutionPlan } from './lib/executionPlan'
-import { readArgValue, hasFlag } from './lib/utils'
-import { runExecutionPlan, verifyMultiAgentExecution } from './lib/agentRunner'
+import { JiraClient } from '../lib/jira'
+import { readJiraConfig } from '../lib/config'
+import { applyActions } from '../lib/tools/jiraActions'
+import { buildExecutionPlan } from '../lib/executionPlan'
+import { readArgValue, hasFlag } from '../lib/utils'
+import { runExecutionPlan, verifyMultiAgentExecution } from '../lib/agentRunner'
 
-// 读取 JIRA 配置
 const config = readJiraConfig()
 const jira = new JiraClient(config)
 
-// 简单的 JIRA 工具集
 const jiraTools = [
   tool(
     'get_execution_plan',
     'Get the current sprint execution plan based on user input',
     { userInput: z.string(), sprintName: z.string().optional() },
     async ({ userInput, sprintName }: { userInput: string; sprintName?: string }) => {
-      console.log('[Orchestrator] Generating execution plan...')
       const plan = await buildExecutionPlan(
         jira,
         {
@@ -52,7 +49,6 @@ const jiraTools = [
       actions: Array<{ type: 'comment' | 'transition'; issueKey: string; text?: string; to?: string }>
       allowedIssueKeys?: string[]
     }) => {
-      console.log(`[Orchestrator] Applying ${actions.length} JIRA actions...`)
       const applied = await applyActions(jira, actions, allowedIssueKeys ? new Set(allowedIssueKeys) : undefined)
       return { applied_count: applied, status: 'success' }
     }

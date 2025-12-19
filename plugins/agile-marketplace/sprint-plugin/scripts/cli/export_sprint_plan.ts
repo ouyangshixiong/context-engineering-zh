@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { ensurePluginNpmDependenciesInstalled, readJiraConfig } from './lib/config'
-import { JiraClient } from './lib/jira'
-import { readArgValue, hasFlag } from './lib/utils'
-import { buildExecutionPlan } from './lib/executionPlan'
-import { QuickSprintOptions } from './lib/quickSprintWorkflow'
+import { ensurePluginNpmDependenciesInstalled, readJiraConfig } from '../lib/config'
+import { JiraClient } from '../lib/jira'
+import { readArgValue, hasFlag } from '../lib/utils'
+import { buildExecutionPlan } from '../lib/executionPlan'
+import { QuickSprintOptions } from '../lib/quickSprintWorkflow'
 
 async function run(): Promise<void> {
   ensurePluginNpmDependenciesInstalled()

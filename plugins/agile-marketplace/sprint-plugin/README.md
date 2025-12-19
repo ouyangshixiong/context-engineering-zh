@@ -4,9 +4,8 @@
 
 ## 目录结构
 - `agents/`: 包含 Development Team, Quality, Scrum Master 等 Agent 定义。
-- `commands/`: 包含 Sprint 相关的命令。
+- `commands/`: 包含 Sprint 相关的命令与集成文档（如 `core-sync-engine.md`、`jira-integration-system.md`）。
 - `hooks/`: 包含自动化 Hook 脚本和配置。
-- `utils/`: 包含各种辅助工具和集成系统。
 
 ## 安装与配置
 

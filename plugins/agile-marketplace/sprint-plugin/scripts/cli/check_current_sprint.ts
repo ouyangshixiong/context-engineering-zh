@@ -1,5 +1,5 @@
-import { readJiraConfig } from './lib/config'
-import { JiraClient } from './lib/jira'
+import { readJiraConfig } from '../lib/config'
+import { JiraClient } from '../lib/jira'
 
 async function checkCurrentSprint() {
   try {
@@ -28,14 +28,12 @@ async function checkCurrentSprint() {
       return
     }
 
-    // 获取第一个活跃Sprint的详细信息
     const sprint = activeSprints[0]
     console.log(`📋 获取Sprint ${sprint.id} (${sprint.name}) 的Issue...`)
 
     const sprintIssues = await jira.getSprintIssues(sprint.id)
     console.log(`📊 Sprint中有 ${sprintIssues.length} 个Issue`)
 
-    // 分析Issue类型
     const stories = sprintIssues.filter(i =>
       i.fields?.issuetype?.name?.toLowerCase() === 'story' ||
       i.fields?.issuetype?.name?.includes('故事')
@@ -55,7 +53,6 @@ async function checkCurrentSprint() {
     console.log(`✅ Task: ${tasks.length} 个`)
     console.log(`🔧 Sub-task: ${subtasks.length} 个`)
 
-    // 显示所有Story及其状态
     console.log('\n📋 Story详情:')
     stories.forEach(story => {
       const status = story.fields?.status?.name ?? 'Unknown'
@@ -63,7 +60,6 @@ async function checkCurrentSprint() {
       const subtaskCount = story.fields?.subtasks?.length ?? 0
       console.log(`  - ${story.key}: ${summary.slice(0, 50)}... (${status}) [${subtaskCount} 子任务]`)
 
-      // 显示子任务
       if (story.fields?.subtasks) {
         story.fields.subtasks.forEach(st => {
           console.log(`    └─ ${st.key}: ${st.fields?.summary ?? ''} (${st.fields?.status?.name ?? 'Unknown'})`)
@@ -71,7 +67,6 @@ async function checkCurrentSprint() {
       }
     })
 
-    // 显示未关联的Task
     if (tasks.length > 0) {
       console.log('\n📋 独立Task详情:')
       tasks.forEach(task => {

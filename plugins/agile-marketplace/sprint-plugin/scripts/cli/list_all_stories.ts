@@ -1,5 +1,5 @@
-import { readJiraConfig } from './lib/config'
-import { JiraClient } from './lib/jira'
+import { readJiraConfig } from '../lib/config'
+import { JiraClient } from '../lib/jira'
 
 async function listAllStories() {
   try {
@@ -12,11 +12,9 @@ async function listAllStories() {
       apiToken: config.apiToken
     })
 
-    // 验证连接
     await jira.validateConnection()
     console.log('✅ JIRA连接验证成功')
 
-    // 查询项目中所有状态为"待办"或"待处理"的Story
     const jql = `project = "${config.projectKey}" AND issuetype = Story AND status in ("To Do", "待办", "待处理", "Open", "Open") ORDER BY created DESC`
     console.log(`📡 查询JQL: ${jql}`)
 
@@ -46,7 +44,6 @@ async function listAllStories() {
       return
     }
 
-    // 显示所有待处理Story详情
     console.log('\n📋 待处理Story详情:')
     stories.forEach(story => {
       const status = story.fields?.status?.name ?? 'Unknown'
@@ -54,7 +51,6 @@ async function listAllStories() {
       const subtaskCount = story.fields?.subtasks?.length ?? 0
       console.log(`  - ${story.key}: ${summary.slice(0, 60)}... (${status}) [${subtaskCount} 子任务]`)
 
-      // 显示子任务
       if (story.fields?.subtasks) {
         story.fields.subtasks.forEach(st => {
           const stStatus = st.fields?.status?.name ?? 'Unknown'
@@ -64,7 +60,6 @@ async function listAllStories() {
       }
     })
 
-    // 显示可以使用的Story Keys
     console.log('\n💡 可用的Story Keys:')
     const storyKeys = stories.map(s => s.key).join(', ')
     console.log(`   ${storyKeys}`)

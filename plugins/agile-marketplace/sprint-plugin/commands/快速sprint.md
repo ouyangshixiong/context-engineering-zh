@@ -27,7 +27,7 @@ TERMINATION: 满足完成判定才终止
 
 ## 运行方式
 - Claude：`/sprint-plugin:快速sprint "<输入>"`
-- CLI：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/run_sprint_session.ts --input "<输入>" --sprint-name "<名称>"`
+- CLI：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/cli/run_sprint_session.ts --input "<输入>" --sprint-name "<名称>"`
 
 ## 工作流（简版）
 - 分析输入：解析 `Story Keys` 与可选 `Sprint 名称`
@@ -42,18 +42,18 @@ TERMINATION: 满足完成判定才终止
 
 ## 工作流与脚本映射（禁止临时脚本）
 - 分析输入：`scripts/lib/utils.ts:31`（`parseStoryKeys`）→ `scripts/lib/quickSprintWorkflow.ts:173`（`planQuickSprint`）
-- 读取配置：`scripts/lib/config.ts:117`（`readJiraConfig`）→ 入口：`run_sprint_session.ts`、`rapid_sprint_orchestrator.ts`、`check_current_sprint.ts`
+- 读取配置：`scripts/lib/config.ts:117`（`readJiraConfig`）→ 入口：`scripts/cli/run_sprint_session.ts`、`scripts/cli/rapid_sprint_orchestrator.ts`、`scripts/cli/check_current_sprint.ts`
 - 检查/解析Sprint：`scripts/lib/quickSprintWorkflow.ts:133-163`（`resolveSprint`）→ `scripts/lib/jira.ts:94-100`（`getSprints`）、`scripts/lib/jira.ts:102-116`（`createSprint`）
 - 获取数据：`scripts/lib/jira.ts:130-146`（`getSprintIssues`）
-- 构建计划：`scripts/lib/executionPlan.ts:17-77`（`buildExecutionPlan`）；导出：`scripts/export_sprint_plan.ts`
+- 构建计划：`scripts/lib/executionPlan.ts:17-77`（`buildExecutionPlan`）；导出：`scripts/cli/export_sprint_plan.ts`
 - 执行与应用：`scripts/lib/agentRunner.ts:138-165`（`runExecutionPlan` 并发=2）、`scripts/lib/agentRunner.ts:34-101`（`invokeAgent`）、`scripts/lib/tools/jiraActions.ts:11-14`（`applyActions`）
 - 校验完成：`scripts/lib/agentRunner.ts:193-202`（`verifyMultiAgentExecution`）
-- 同步/关闭：`scripts/rapid_sprint_orchestrator.ts:99-132`（状态同步与关闭）、`scripts/lib/jira.ts:122-128`（`closeSprint`）
-- 报告与列表：`scripts/rapid_sprint_orchestrator.ts:142-156`（交付报告概览）、`scripts/list_all_stories.ts`（Story 列表与可用 Keys）
+- 同步/关闭：`scripts/cli/rapid_sprint_orchestrator.ts:99-132`（状态同步与关闭）、`scripts/lib/jira.ts:122-128`（`closeSprint`）
+- 报告与列表：`scripts/cli/rapid_sprint_orchestrator.ts:142-156`（交付报告概览）、`scripts/cli/list_all_stories.ts`（Story 列表与可用 Keys）
 
 ## 辅助检查
-- 当前 Sprint 检查：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/check_current_sprint.ts`
-- Story 列表：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/list_all_stories.ts`
+- 当前 Sprint 检查：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/cli/check_current_sprint.ts`
+- Story 列表：`npx -y tsx plugins/agile-marketplace/sprint-plugin/scripts/cli/list_all_stories.ts`
 
 ## 约束与配置
 - 目录约束：开发与测试必须在目标项目目录下；不存在则提示并创建

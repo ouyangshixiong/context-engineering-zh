@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { unstable_v2_createSession, tool } from '@anthropic-ai/claude-agent-sdk'
+import { fsTools } from './tools/fsTools'
 import { JiraClient } from './jira'
 import { applyActions, SimpleJiraAction } from './tools/jiraActions'
 import { ExecutionPlanForClaude, ClaudeSubAgentTask } from './executionPlan'
@@ -45,60 +47,70 @@ async function invokeAgent(params: {
     JSON.stringify({ agent: params.agent, issueKey, model: selectedModel })
   )
   const md = loadAgentMarkdown(params.agent)
-  const prompt = `${md}\n\n[INPUT]\n${JSON.stringify(params.input)}\n\n[INSTRUCTION]\n仅输出JSON对象，不要输出多余文本。包含字段: actions[], summary。` 
-  const { unstable_v2_prompt } = (await import('@anthropic-ai/claude-agent-sdk')) as any
-  const result = await unstable_v2_prompt(prompt, {
+  const prompt = `${md}\n\n[INPUT]\n${JSON.stringify(params.input)}\n\n[INSTRUCTION]\nUse the provided tools to execute the task. \nIMPORTANT: You must use the 'submit_result' tool to submit your final output. Do not just output JSON text.` 
+
+  let result: AgentOutput = { actions: [], summary: undefined }
+  let submitted = false
+
+  const submitTool = tool(
+    'submit_result',
+    'Submit the final result of the agent execution.',
+    {
+      actions: z.array(
+        z.object({
+          type: z.enum(['comment', 'transition']),
+          issueKey: z.string(),
+          text: z.string().optional(),
+          to: z.string().optional()
+        })
+      ).default([]),
+      summary: z.string().optional()
+    },
+    async (data: any) => {
+         console.log('[AgentRunner] submit_result tool called', JSON.stringify({ agent: params.agent, issueKey }))
+         result = data as AgentOutput
+         submitted = true
+         return 'Result submitted successfully.'
+     }
+  )
+
+  await using session = await unstable_v2_createSession({
     model: selectedModel,
-    outputFormat: {
-      type: 'json_schema',
-      schema: {
-        $schema: 'https://json-schema.org/draft/2020-12/schema',
-        title: 'AgentOutput',
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          actions: {
-            type: 'array',
-            items: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                type: { type: 'string', enum: ['comment', 'transition'] },
-                issueKey: { type: 'string' },
-                text: { type: 'string' },
-                to: { type: 'string' }
-              },
-              required: ['type', 'issueKey']
-            }
-          },
-          summary: { type: 'string' }
-        },
-        required: []
-      }
-    }
+    tools: [...fsTools, submitTool]
   })
-  const so = (result as any).structured_output
-  if (so) {
+
+  // Log session creation
+  console.log('[AgentRunner] session created', JSON.stringify({ agent: params.agent, issueKey }))
+
+  try {
+    await session.send({
+        type: 'user',
+        message: {
+            role: 'user',
+            content: prompt
+        }
+    })
+    
+    // Log message sent
+    console.log('[AgentRunner] prompt sent to agent', JSON.stringify({ agent: params.agent, issueKey }))
+    
+    if (submitted) {
+        console.log(
+          '[AgentRunner] structured_output received via tool',
+          JSON.stringify({ agent: params.agent, issueKey })
+        )
+        return result
+    }
+    
     console.log(
-      '[AgentRunner] structured_output received',
+      '[AgentRunner] invokeAgent warning: submit_result tool not called.',
       JSON.stringify({ agent: params.agent, issueKey })
     )
-    const parsed = AgentOutputSchema.safeParse(so)
-    if (parsed.success) return parsed.data
+    return { actions: [], summary: 'Agent did not submit result via tool.' }
+  } catch (e: any) {
+    console.error('[AgentRunner] invokeAgent error', e)
+    return { actions: [], summary: `Error: ${e.message}` }
   }
-  try {
-    const raw = (result as any).result
-    if (raw) {
-      const parsedJson = JSON.parse(String(raw))
-      const parsed = AgentOutputSchema.safeParse(parsedJson)
-      if (parsed.success) return parsed.data
-    }
-  } catch {}
-  console.log(
-    '[AgentRunner] invokeAgent fallbackEmpty',
-    JSON.stringify({ agent: params.agent, issueKey })
-  )
-  return { actions: [], summary: undefined }
 }
 
 export async function runExecutionPlan(params: {
